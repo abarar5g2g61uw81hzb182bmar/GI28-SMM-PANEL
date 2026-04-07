@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Contact Admin</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        .contact-form { padding: 25px; margin-bottom: 30px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; display: block; text-transform: uppercase; }
+        textarea.neu-input { resize: vertical; min-height: 120px; font-family: 'Orbitron', 'Audiowide', sans-serif; }
+        
+        .social-list { display: flex; flex-direction: column; gap: 15px; }
+        .social-list-item { display: flex; align-items: center; gap: 15px; padding: 15px; color: var(--primary-color); font-size: 14px; font-weight: 600; text-decoration: none; }
+        .social-list-item svg { stroke: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <h2 class="section-title">Contact Us</h2>
+        <p class="text-muted" style="margin-bottom: 25px;">Need help with an order or have a query? Reach out directly to the admin.</p>
+
+        <div class="neu-card contact-form">
+            <div class="input-group">
+                <label>Name</label>
+                <input type="text" id="contactName" class="neu-input" placeholder="Your full name">
+            </div>
+            <div class="input-group">
+                <label>Reason for Contact</label>
+                <select id="contactReason" class="neu-input" style="appearance: none;">
+                    <option value="Order Issue">Order Issue</option>
+                    <option value="Payment/Funds">Payment / Add Funds Issue</option>
+                    <option value="Bug Report">Bug Report</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Message</label>
+                <textarea id="contactMessage" class="neu-input" placeholder="Describe your issue in detail..."></textarea>
+            </div>
+            <button class="neu-btn" id="submitMsgBtn" style="width: 100%; padding: 15px; font-size: 16px;">Send Message</button>
+        </div>
+
+        <h3 class="section-title">Other ways to connect</h3>
+        <div class="social-list">
+            <a href="https://instagram.com/your_instagram" target="_blank" class="neu-card social-list-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                Instagram Support
+            </a>
+            <a href="https://chat.whatsapp.com/your_group_link" target="_blank" class="neu-card social-list-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                WhatsApp Resellers Group
+            </a>
+            <a href="https://t.me/your_telegram_channel" target="_blank" class="neu-card social-list-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21.5 2L12 11.5"></path><path d="M21.5 2L15 22 12 11.5 1.5 8.5 21.5 2z"></path></svg>
+                Telegram Announcements
+            </a>
+        </div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ 
+    <script src="../assets/js/app.js"></script>
+    <script type="module">
+        import { auth, db, doc, setDoc, getDoc } from "../assets/js/firebase-config.js";
+
+        let currentUser = null;
+
+        // Auto-fill name if logged in
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists() && docSnap.data().username) {
+                        document.getElementById('contactName').value = docSnap.data().username;
+                        document.getElementById('contactName').readOnly = true; // Lock the name if logged in
+                    }
+                } catch (e) { console.error("Error fetching user data:", e); }
+            }
+        });
+
+        document.getElementById('submitMsgBtn').addEventListener('click', async () => {
+            const name = document.getElementById('contactName').value.trim();
+            const reason = document.getElementById('contactReason').value;
+            const message = document.getElementById('contactMessage').value.trim();
+
+            if(!name || !message) {
+                alert("Please fill your name and message.");
+                return;
+            }
+
+            const btn = document.getElementById('submitMsgBtn');
+            btn.innerHTML = "Sending...";
+            btn.disabled = true; // Prevent double clicks
+
+            try {
+                const msgID = "MSG" + Date.now();
+                
+                await setDoc(doc(db, "support_messages", msgID), {
+                    user_uid: currentUser ? currentUser.uid : "Guest",
+                    user_email: currentUser ? currentUser.email : "Unknown",
+                    name: name,
+                    reason: reason,
+                    message: message,
+                    status: "unread",
+                    timestamp: new Date()
+                });
+
+                alert("Message Sent! Admin will check it soon.");
+                document.getElementById('contactMessage').value = "";
+                btn.innerHTML = "Send Message";
+                btn.disabled = false;
+            } catch (error) {
+                alert("Error sending message: " + error.message);
+                btn.innerHTML = "Send Message";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
