@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - My Profile</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        .profile-header { text-align: center; margin: 30px 0; }
+        .avatar-box { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px; position: relative; overflow: hidden; background: var(--bg-color); box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light); }
+        .avatar-box img { width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s; }
+        .edit-overlay { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); font-size: 10px; padding: 6px 0; color: #fff; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .edit-overlay:hover { background: rgba(0,0,0,0.8); color: var(--primary-color); }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 25px 0; }
+        .profile-card { padding: 25px; }
+        .field-group { margin-bottom: 20px; }
+        .field-label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 8px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <div class="profile-header">
+            <div class="avatar-box">
+                <img id="userAvatar" src="" alt="Avatar">
+                <div class="edit-overlay" onclick="updateAvatarLink()">Edit</div>
+            </div>
+            <h2 class="text-primary" id="displayUser">Username</h2>
+            <p class="text-muted" id="displayEmail">email@example.com</p>
+        </div>
+
+        <h3 class="section-title">User Stats</h3>
+        <div class="stats-grid">
+            <div class="neu-card" style="text-align: center;">
+                <span class="text-primary" style="font-size: 20px; font-weight: 700;" id="statOrders">...</span>
+                <span class="field-label">Total Orders</span>
+            </div>
+            <div class="neu-card" style="text-align: center;">
+                <span class="text-primary" style="font-size: 20px; font-weight: 700;" id="statBalance">0.00</span>
+                <span class="field-label">Wallet GI28</span>
+            </div>
+        </div>
+
+        <h3 class="section-title">Profile Settings</h3>
+        <div class="neu-card profile-card">
+            <div class="field-group">
+                <label class="field-label">Username</label>
+                <div class="d-flex gap-10">
+                    <input type="text" id="editUsername" class="neu-input">
+                    <button class="neu-btn" onclick="updateProfileField('username')" style="padding: 0 15px;">Save</button>
+                </div>
+            </div>
+            <div class="field-group">
+                <label class="field-label">Mobile Number</label>
+                <div class="d-flex gap-10">
+                    <input type="number" id="editPhone" class="neu-input">
+                    <button class="neu-btn" onclick="updateProfileField('mobile')" style="padding: 0 15px;">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Security</h3>
+        <div class="neu-card profile-card" style="margin-bottom: 50px;">
+            <div class="field-group">
+                <label class="field-label">New Password</label>
+                <input type="password" id="newPass" class="neu-input" placeholder="Enter new password">
+            </div>
+            <button class="neu-btn" onclick="changePassword()" style="width: 100%; padding: 15px;">Update Password</button>
+        </div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ 
+    <script src="../assets/js/app.js"></script>
+    <script type="module">
+        // Import update: getDocs, collection, query, where added for counting orders
+        import { auth, db, doc, getDoc, setDoc, collection, query, where, getDocs } from "../assets/js/firebase-config.js";
+        import { updatePassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const username = data.username || "User";
+                    
+                    document.getElementById('displayUser').innerText = username;
+                    document.getElementById('displayEmail').innerText = data.email;
+                    document.getElementById('editUsername').value = username;
+                    document.getElementById('editPhone').value = data.mobile || "";
+                    document.getElementById('statBalance').innerText = parseFloat(data.wallet_balance || 0).toFixed(2);
+
+                    // BULLETPROOF AVATAR LOGIC (ui-avatars use kiya)
+                    const avatarImg = document.getElementById('userAvatar');
+                    if (data.photoURL) {
+                        avatarImg.src = data.photoURL; // Show Custom/Google Image
+                        avatarImg.style.filter = "grayscale(100%)"; // B&W theme match
+                    } else {
+                        // Better fallback logic
+                        const initial = username.charAt(0).toUpperCase();
+                        avatarImg.src = `https://ui-avatars.com/api/?name=${initial}&background=121212&color=ffffff&size=100`;
+                        avatarImg.style.filter = "none";
+                    }
+
+                    // FETCH REAL TOTAL ORDERS
+                    try {
+                        const q = query(collection(db, "orders"), where("user_uid", "==", user.uid));
+                        const orderSnap = await getDocs(q);
+                        document.getElementById('statOrders').innerText = orderSnap.size;
+                    } catch (e) {
+                        document.getElementById('statOrders').innerText = "0";
+                    }
+                }
+            } else {
+                window.location.href = "../index.html";
+            }
+        });
+
+        // NAYA FUNCTION: Avatar link update karne ke liye
+        window.updateAvatarLink = async () => {
+            const url = prompt("Paste your direct image link (e.g., from ImgBB):");
+            
+            if(!url) return; // User cancelled
+            
+            if(!url.startsWith("http")) {
+                return alert("Please enter a valid URL starting with http:// or https://");
+            }
+
+            try {
+                // Save to Firestore
+                await setDoc(doc(db, "users", auth.currentUser.uid), {
+                    photoURL: url
+                }, { merge: true });
+                
+                // Update UI immediately
+                document.getElementById('userAvatar').src = url;
+                document.getElementById('userAvatar').style.filter = "grayscale(100%)";
+                alert("Profile Picture Updated Successfully!");
+            } catch (error) {
+                alert("Error updating avatar: " + error.message);
+            }
+        };
+
+        // Update Username/Phone logic
+        window.updateProfileField = async (field) => {
+            const val = field === 'username' ? document.getElementById('editUsername').value : document.getElementById('editPhone').value;
+            if(!val) return alert("Value cannot be empty!");
+
+            try {
+                await setDoc(doc(db, "users", auth.currentUser.uid), {
+                    [field]: val
+                }, { merge: true });
+                alert(`${field.toUpperCase()} Updated!`);
+                location.reload();
+            } catch (error) {
+                alert(error.message);
+            }
+        };
+
+        // Real-time Password Change
+        window.changePassword = async () => {
+            const pass = document.getElementById('newPass').value;
+            if(pass.length < 6) return alert("Password must be 6+ chars");
+
+            try {
+                await updatePassword(auth.currentUser, pass);
+                alert("Password Changed Successfully!");
+                document.getElementById('newPass').value = "";
+            } catch (error) {
+                alert("Error: " + error.message + " (You might need to re-login to change password)");
+            }
+        };
+    </script>
+</body>
+</html>
