@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Services</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Services Page Specific Styles */
+        .controls-bar { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; align-items: center; justify-content: space-between; }
+        .filter-group, .sort-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 15px; font-size: 12px; border-radius: 20px; color: var(--text-muted); background: var(--bg-color); border: 1px solid var(--border-color); cursor: pointer; transition: 0.3s; }
+        .filter-btn.active { background: var(--primary-color); color: var(--bg-color); border-color: var(--primary-color); }
+        .sort-select { padding: 8px 15px; font-size: 12px; border-radius: 10px; background: var(--bg-color); color: var(--primary-color); border: 1px solid var(--border-color); outline: none; cursor: pointer; }
+        
+        .service-card { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; margin-bottom: 15px; }
+        .service-info { flex: 1; margin-left: 15px; }
+        .service-id { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; }
+        .service-title { font-size: 15px; font-weight: 600; color: var(--primary-color); margin: 5px 0; }
+        .service-price { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+        .service-price span { color: var(--primary-color); font-size: 16px; }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 300; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.3s; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-box { width: 90%; max-width: 450px; padding: 30px; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 15px; cursor: pointer; }
+        
+        .modal-details { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .modal-details p { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+        .modal-details h3 { font-size: 16px; color: var(--primary-color); margin-bottom: 10px; }
+        
+        .calc-box { padding: 15px; border-radius: 10px; background: var(--status-bg); margin-top: 20px; text-align: center; }
+        .calc-box span { font-size: 24px; font-weight: 700; color: var(--primary-color); }
+
+        /* Receipt Template (Hidden from view) */
+        #receiptContainer { position: absolute; left: -9999px; top: -9999px; width: 400px; padding: 30px; background: #121212; color: #fff; border-radius: 15px; font-family: 'Poppins', sans-serif; }
+        .receipt-header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #333; padding-bottom: 20px; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; }
+        .receipt-row span:last-child { font-weight: 600; text-align: right; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <div class="section-header">
+            <h2 class="section-title" style="margin: 0;">Our Services</h2>
+            <button class="neu-btn" style="padding: 8px 15px; font-size: 12px;" onclick="downloadServicesTXT()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" style="margin-right: 5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Save TXT
+            </button>
+        </div>
+
+        <div class="controls-bar">
+            <div class="filter-group" id="filterGroup">
+                <button class="filter-btn active" onclick="filterServices('All')">All</button>
+                <button class="filter-btn" onclick="filterServices('Instagram')">Instagram</button>
+                <button class="filter-btn" onclick="filterServices('Facebook')">Facebook</button>
+                <button class="filter-btn" onclick="filterServices('YouTube')">YouTube</button>
+            </div>
+            <div class="sort-group">
+                <select class="sort-select" id="sortSelect" onchange="sortServices()">
+                    <option value="default">Sort By</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="a-z">Name: A-Z</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="servicesList">
+            </div>
+    </div>
+
+    <div class="modal-overlay" id="orderModal">
+        <div class="neu-card modal-box">
+            <div class="close-modal" onclick="closeModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </div>
+            
+            <div class="modal-details">
+                <p id="modalServiceID">ID: GI0000</p>
+                <h3 id="modalServiceTitle">Service Title</h3>
+                <p id="modalServiceDesc">Description of the service goes here.</p>
+                <p style="margin-top: 10px;">Min: <span id="modalMin" class="text-primary">100</span> | Max: <span id="modalMax" class="text-primary">10000</span></p>
+                <p>Price: <span id="modalPrice" class="text-primary">0</span> GI28 / 1k</p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label class="text-muted" style="font-size: 12px; margin-bottom: 5px; display: block;">Target Link</label>
+                <input type="url" id="orderLink" class="neu-input" placeholder="https://...">
+            </div>
+            <div>
+                <label class="text-muted" style="font-size: 12px; margin-bottom: 5px; display: block;">Quantity</label>
+                <input type="number" id="orderQuantity" class="neu-input" placeholder="1000" oninput="calculateOrderPrice()">
+            </div>
+
+            <div class="calc-box">
+                <p class="text-muted" style="font-size: 11px; margin-bottom: 5px;">Total Charge</p>
+                <span id="calculatedPrice">0.00</span> <span style="font-size: 14px;">GI28</span>
+            </div>
+
+            <button class="neu-btn" style="width: 100%; padding: 15px; margin-top: 20px;" id="placeOrderBtn">Place Order</button>
+        </div>
+    </div>
+
+    <div id="receiptContainer">
+        <div class="receipt-header">
+            <h1 style="font-family: 'Orbitron', sans-serif; letter-spacing: 3px; font-size: 28px; margin-bottom: 5px;">GI28</h1>
+            <p style="font-size: 10px; color: #888; text-transform: uppercase;">Premium SMM Panel</p>
+            <p style="font-size: 12px; margin-top: 15px; color: #00ff00;">Order Completed Successfully</p>
+        </div>
+        <div class="receipt-row"><span>Order ID:</span> <span id="rcptOrderID">#GI...</span></div>
+        <div class="receipt-row"><span>Date:</span> <span id="rcptDate">...</span></div>
+        <div class="receipt-row"><span>User UUID:</span> <span id="rcptUUID">...</span></div>
+        <div class="receipt-row"><span>Email:</span> <span id="rcptEmail">...</span></div>
+        <hr style="border: 0; border-bottom: 1px solid #333; margin: 15px 0;">
+        <div class="receipt-row"><span>Service:</span> <span id="rcptService">...</span></div>
+        <div class="receipt-row"><span>Link:</span> <span id="rcptLink" style="word-break: break-all;">...</span></div>
+        <div class="receipt-row"><span>Quantity:</span> <span id="rcptQty">...</span></div>
+        <hr style="border: 0; border-bottom: 1px solid #333; margin: 15px 0;">
+        <div class="receipt-row" style="font-size: 16px;"><span>Total Charge:</span> <span id="rcptPrice">0 GI28</span></div>
+        <div class="receipt-header" style="border: none; margin-top: 30px; padding-bottom: 0;">
+            <p style="font-size: 10px; color: #555;">Support: Admin Panel | Dev: Constant Abrar</p>
+            <p style="font-size: 10px; color: #555; margin-top: 5px;">"Convert your passion into Earning machines"</p>
+        </div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ 
+    <script src="../assets/js/app.js"></script>
+    <script type="module">
+              import { auth, db, doc, getDoc, setDoc, collection, getDocs } from "../assets/js/firebase-config.js";
+
+        let servicesDB = []; // Ab ye khali hai, DB se bharegi
+        let currentServices = [];
+        let selectedService = null;
+        let currentUserData = null;
+
+        // Fetch User Wallet on Load
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                    currentUserData.uid = user.uid;
+                    setTimeout(() => {
+                        const balanceEl = document.getElementById("liveBalance");
+                        if (balanceEl) balanceEl.innerText = parseFloat(currentUserData.wallet_balance || 0).toFixed(2);
+                    }, 500);
+                }
+            }
+        });
+
+        // --- FETCH SERVICES FROM FIREBASE ---
+        async function fetchLiveServices() {
+            const container = document.getElementById('servicesList');
+            container.innerHTML = '<p class="text-muted" style="text-align:center;">Loading services...</p>';
+            try {
+                const snap = await getDocs(collection(db, "services"));
+                servicesDB = [];
+                snap.forEach(doc => {
+                    servicesDB.push(doc.data());
+                });
+                currentServices = [...servicesDB];
+                
+                // Default sorting by ID
+                currentServices.sort((a,b) => a.id.localeCompare(b.id));
+                renderServices(currentServices);
+            } catch (error) {
+                container.innerHTML = '<p class="text-muted" style="color: #ff4444; text-align:center;">Failed to load services.</p>';
+                console.error(error);
+            }
+        }
+        
+        // Initial call
+        fetchLiveServices();
+
+        // --- UI Rendering ---
+        window.renderServices = function(data) {
+            const container = document.getElementById('servicesList');
+            container.innerHTML = '';
+            
+            data.forEach(srv => {
+                const card = document.createElement('div');
+                card.className = 'neu-card service-card';
+                card.innerHTML = `
+                    <div style="display:flex; align-items:center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <div class="service-info">
+                            <span class="service-id">ID: ${srv.id} | ${srv.platform}</span>
+                            <h3 class="service-title">${srv.title}</h3>
+                            <span class="service-price"><span>${parseFloat(srv.price).toFixed(2)}</span> GI28 / 1k</span>
+                        </div>
+                    </div>
+                    <button class="neu-btn" style="padding: 10px 20px;" onclick="openModal('${srv.id}')">Get It</button>
+                `;
+                container.appendChild(card);
+            });
+            if(data.length === 0) container.innerHTML = '<p class="text-muted" style="text-align:center;">No services found for this category.</p>';
+        }
+
+        // --- Filtering & Sorting ---
+        window.filterServices = function(platform) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if(platform === 'All') currentServices = [...servicesDB];
+            else currentServices = servicesDB.filter(s => s.platform === platform);
+            
+            window.sortServices(); 
+        };
+
+        window.sortServices = function() {
+            const sortVal = document.getElementById('sortSelect').value;
+            if(sortVal === 'price-low') currentServices.sort((a,b) => a.price - b.price);
+            else if(sortVal === 'price-high') currentServices.sort((a,b) => b.price - a.price);
+            else if(sortVal === 'a-z') currentServices.sort((a,b) => a.title.localeCompare(b.title));
+            else currentServices.sort((a,b) => a.id.localeCompare(b.id)); // Default
+            
+            renderServices(currentServices);
+        };
+
+        // --- Save TXT Function ---
+        window.downloadServicesTXT = function() {
+            let content = "GI28 PANEL - PREMIUM SMM SERVICES\n\n";
+            currentServices.forEach(s => {
+                content += `ID: ${s.id} | Platform: ${s.platform}\nName: ${s.title}\nPrice: ${parseFloat(s.price).toFixed(2)} GI28 / 1k\nMin: ${s.min} | Max: ${s.max}\nDesc: ${s.desc}\n---------------------------\n`;
+            });
+            const blob = new Blob([content], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `GI28_Services_${new Date().getTime()}.txt`;
+            link.click();
+        };
+
+        // --- Modal & Calculation ---
+        window.openModal = function(id) {
+            if(!currentUserData) return alert("Please login to place an order.");
+            selectedService = servicesDB.find(s => s.id === id);
+            
+            document.getElementById('modalServiceID').innerText = `ID: ${selectedService.id}`;
+            document.getElementById('modalServiceTitle').innerText = selectedService.title;
+            document.getElementById('modalServiceDesc').innerText = selectedService.desc;
+            document.getElementById('modalMin').innerText = selectedService.min;
+            document.getElementById('modalMax').innerText = selectedService.max;
+            document.getElementById('modalPrice').innerText = parseFloat(selectedService.price).toFixed(2);
+            
+            document.getElementById('orderLink').value = '';
+            document.getElementById('orderQuantity').value = '';
+            document.getElementById('calculatedPrice').innerText = '0.00';
+            
+            document.getElementById('orderModal').classList.add('active');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('orderModal').classList.remove('active');
+        };
+
+        window.calculateOrderPrice = function() {
+            const qty = document.getElementById('orderQuantity').value;
+            if(qty > 0 && selectedService) {
+                const total = (qty / 1000) * selectedService.price;
+                document.getElementById('calculatedPrice').innerText = total.toFixed(3);
+            } else {
+                document.getElementById('calculatedPrice').innerText = '0.00';
+            }
+        };
+
+        // --- ORDER PLACEMENT & RECEIPT ---
+        document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+            const link = document.getElementById('orderLink').value;
+            const qty = Number(document.getElementById('orderQuantity').value);
+            const totalCharge = Number(document.getElementById('calculatedPrice').innerText);
+
+            if(!link || qty < selectedService.min || qty > selectedService.max) {
+                return alert(`Invalid Link or Quantity. Must be between ${selectedService.min} and ${selectedService.max}`);
+            }
+
+            const currentBalance = parseFloat(currentUserData.wallet_balance || 0);
+
+            if(currentBalance < totalCharge) {
+                return alert("Insufficient GI28 Tokens. Please Add Funds!");
+            }
+
+            const btn = document.getElementById('placeOrderBtn');
+            btn.innerHTML = "Processing...";
+
+            try {
+                const orderID = "ORD" + Date.now();
+                const newBalance = currentBalance - totalCharge;
+
+                // 1. Save Order to Firestore
+                await setDoc(doc(db, "orders", orderID), {
+                    user_uid: currentUserData.uid,
+                    service_id: selectedService.id,
+                    service_name: selectedService.title,
+                    link: link,
+                    quantity: qty,
+                    price_tokens: totalCharge,
+                    status: "pending",
+                    timestamp: new Date()
+                });
+
+                // 2. Deduct Balance from User
+                await setDoc(doc(db, "users", currentUserData.uid), {
+                    wallet_balance: newBalance
+                }, { merge: true });
+
+                // Update Local Data
+                currentUserData.wallet_balance = newBalance;
+                document.getElementById("liveBalance").innerText = newBalance.toFixed(2);
+
+                // 3. Generate Receipt
+                generateReceipt(orderID, link, qty, totalCharge);
+
+                alert("Order Placed Successfully! Your receipt is downloading.");
+                closeModal();
+                btn.innerHTML = "Place Order";
+                
+            } catch (error) {
+                alert("Error placing order: " + error.message);
+                btn.innerHTML = "Place Order";
+            }
+        });
+
+        // --- Html2Canvas Receipt Generator ---
+        function generateReceipt(orderID, link, qty, totalCharge) {
+            document.getElementById('rcptOrderID').innerText = orderID;
+            document.getElementById('rcptDate').innerText = new Date().toLocaleString();
+            document.getElementById('rcptUUID').innerText = currentUserData.uid.substring(0, 8) + "...";
+            document.getElementById('rcptEmail').innerText = currentUserData.email;
+            document.getElementById('rcptService').innerText = selectedService.title;
+            document.getElementById('rcptLink').innerText = link;
+            document.getElementById('rcptQty').innerText = qty;
+            document.getElementById('rcptPrice').innerText = `${totalCharge.toFixed(2)} GI28`;
+
+            const receiptNode = document.getElementById('receiptContainer');
+            receiptNode.style.left = "0";
+            receiptNode.style.top = "0";
+            receiptNode.style.zIndex = "-100";
+
+            html2canvas(receiptNode, { backgroundColor: "#121212" }).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                const a = document.createElement("a");
+                a.href = imgData;
+                a.download = `GI28_Receipt_${orderID}.png`;
+                a.click();
+                
+                receiptNode.style.left = "-9999px";
+                receiptNode.style.top = "-9999px";
+            });
+        }
+
+    </script>
+</body>
+</html>
