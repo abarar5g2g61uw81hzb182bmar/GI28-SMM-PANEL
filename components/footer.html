@@ -1,0 +1,179 @@
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<footer class="fneu-bw-footer">
+    
+    <svg class="ffast-liquid-wave" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+        <defs>
+            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+        </defs>
+        <g class="fwave-parallax">
+            <use xlink:href="#gentle-wave" x="48" y="0" class="w-layer-1" />
+            <use xlink:href="#gentle-wave" x="48" y="3" class="w-layer-2" />
+            <use xlink:href="#gentle-wave" x="48" y="5" class="w-layer-3" />
+            <use xlink:href="#gentle-wave" x="48" y="7" class="w-layer-4" />
+        </g>
+    </svg>
+
+    <div class="ffooter-inner">
+        <div class="ffooter-brand-section">
+            <h2 class="fbrand-logo-neu">GI28</h2>
+            <p class="fbrand-tagline">Premium SMM Panel</p>
+        </div>
+
+        <div class="ffooter-nav">
+            <a href="{{BASE}}dashboard/" class="fneu-btn"> Dashboard</a>
+            <a href="{{BASE}}profile/" class="fneu-btn">Profile</a>
+            <a href="{{BASE}}contact/" class="fneu-btn">Contact</a>
+            <a href="{{BASE}}add-funds/" class="fneu-btn">Add Funds</a>
+            <a href="{{BASE}}services/" class="fneu-btn">Services</a>
+            <a href="{{BASE}}about-abrar/" class="fneu-btn">About Abrar</a>
+            <a href="{{BASE}}terms-conditions/" class="fneu-btn">Terms & Conditions</a>
+            <a href="{{BASE}}orders/" class="fneu-btn">Order History</a>
+        </div>
+
+        <div class="ffooter-bottom-bar">
+
+            <p class="fcopyright-text">© 2026 GI28. All Rights Reserved.<br> By CONSTANT ABRAR</p>
+        </div>
+    </div>
+</footer>
+
+<style>
+/* =========================================
+   GI28 NEUMORPHIC B&W FOOTER (Fast Wave)
+   ========================================= */
+
+:root {
+    --neu-bg: #121212; /* Deep Black Background */
+    --neu-light: #1f1f1f; /* Light Shadow for depth */
+    --neu-dark: #000000; /* Dark Shadow */
+    --text-pure-white: #ffffff;
+    --text-dim-white: #888888;
+}
+
+.fneu-bw-footer {
+    position: relative;
+    width: 100%;
+    background: var(--neu-bg);
+    margin-top: 100px;
+    padding-bottom: 20px;
+}
+
+/* 🌊 High Speed Wave Styling */
+.ffast-liquid-wave {
+    position: absolute;
+    top: -60px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+}
+
+.fwave-parallax > use {
+    /* Fast base animation speed */
+    animation: move-fast 4s cubic-bezier(.55,.5,.45,.5) infinite;
+}
+
+/* Random speed and opacity for B&W layers */
+.fw-layer-1 { animation-duration: 3s; fill: #ffffff; opacity: 0.1; }
+.fw-layer-2 { animation-duration: 5s; animation-delay: -2s; fill: #ffffff; opacity: 0.2; }
+.fw-layer-3 { animation-duration: 2s; animation-delay: -1s; fill: #ffffff; opacity: 0.05; } /* Super Fast Layer */
+.fw-layer-4 { animation-duration: 7s; fill: var(--neu-bg); } /* Connects with footer body */
+
+@keyframes move-fast {
+    0% { transform: translate3d(-90px,0,0); }
+    100% { transform: translate3d(85px,0,0); }
+}
+
+/* Content Container */
+.ffooter-inner {
+    padding: 50px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* Branding Neumorphism */
+.fbrand-logo-neu {
+    font-size: 35px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    color: var(--text-pure-white);
+    letter-spacing: 5px;
+    text-shadow: 2px 2px 5px var(--neu-dark), -1px -1px 2px var(--neu-light);
+}
+
+.fbrand-tagline {
+    color: var(--text-dim-white);
+    font-size: 11px;
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+}
+
+/* 🔘 Neumorphic Buttons (Links) */
+
+.ffooter-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    margin-bottom: 50px;
+}
+.fneu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%; /* Full width of grid cell */
+    height: 45px; /* Same height for all */
+
+    text-decoration: none;
+    color: var(--text-dim-white);
+    font-size: 13px;
+    font-weight: 600;
+
+    border-radius: 12px;
+    background: var(--neu-bg);
+
+    transition: all 0.2s ease;
+
+    /* Neumorphic "Raised" */
+    box-shadow: 6px 6px 12px var(--neu-dark), 
+               -4px -4px 10px var(--neu-light);
+}
+
+.fneu-btn:hover {
+    color: var(--text-pure-white);
+    /* Neumorphic "Pressed" effect */
+    box-shadow: inset 4px 4px 8px var(--neu-dark), 
+                inset -3px -3px 7px var(--neu-light);
+    transform: scale(0.98);
+}
+
+/* Bottom Bar Status */
+.ffooter-bottom-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    border-top: 1px solid var(--neu-light);
+    padding-top: 30px;
+}
+
+.fcopyright-text {
+    font-size: 11px;
+    color: var(--text-dim-white);
+}
+
+/* Tablet/Desktop */
+@media (min-width: 768px) {
+    .footer-bottom-bar {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+.fneu-btn:hover {
+    color: var(--text-pure-white);
+    box-shadow: inset 4px 4px 8px var(--neu-dark), 
+                inset -3px -3px 7px var(--neu-light),
+                0 0 10px rgba(255,255,255,0.05);
+    transform: scale(0.98);
+}
+</style>
