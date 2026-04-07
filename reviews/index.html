@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Live Proofs</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        /* Modern Proof Cards */
+        .proofs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .proof-item { border-radius: 15px; overflow: hidden; position: relative; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); background: var(--bg-color); padding-bottom: 15px; }
+        .proof-img-box { height: 180px; position: relative; cursor: pointer; }
+        .proof-img-box img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.3s; }
+        .proof-img-box:hover img { filter: grayscale(0%); transform: scale(1.05); }
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.6); border-radius: 50%; padding: 10px; display: none; }
+        .proof-img-box.video .play-icon { display: block; }
+        .proof-details { padding: 15px; }
+        .star-rating { color: #ffbc00; font-size: 14px; margin-top: 5px; }
+
+        /* Modal Overlay for Add Review */
+        .review-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.3s; }
+        .review-modal.active { visibility: visible; opacity: 1; }
+        .review-box { width: 90%; max-width: 450px; padding: 25px; max-height: 90vh; overflow-y: auto; }
+        .close-review { text-align: right; cursor: pointer; color: var(--text-muted); margin-bottom: 15px; }
+        
+        /* Fullscreen Modal */
+        .fs-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.3s; }
+        .fs-modal.active { visibility: visible; opacity: 1; }
+        .fs-close { position: absolute; top: 20px; right: 20px; color: #fff; cursor: pointer; }
+        .fs-content { max-width: 90%; max-height: 80vh; object-fit: contain; border-radius: 10px; }
+        .fs-actions { margin-top: 20px; display: flex; gap: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <div>
+                <h2 class="section-title" style="margin:0;">Live Proofs</h2>
+                <p class="text-muted" style="font-size:12px;">100% Transparent Community Feedback.</p>
+            </div>
+            <button class="neu-btn" style="padding: 10px 15px; font-size: 12px;" onclick="openReviewModal()">+ Add Review</button>
+        </div>
+
+        <div class="proofs-grid" id="proofsContainer">
+            <p class="text-muted text-center" style="grid-column: 1 / -1;">Loading proofs...</p>
+        </div>
+    </div>
+
+    <div class="review-modal" id="reviewModal">
+        <div class="neu-card review-box">
+            <div class="close-review" onclick="closeReviewModal()">✖ Close</div>
+            <h3 class="text-primary" style="font-size: 18px; margin-bottom: 5px;">Submit Proof</h3>
+            <p class="text-muted" style="font-size: 11px; margin-bottom: 20px;">Upload images/videos to <a href="https://imgbb.com/" target="_blank" style="color:var(--primary-color)">ImgBB</a> and paste direct links here. Admin will approve it.</p>
+            
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="font-size: 11px; color: var(--text-muted);">Service ID (e.g. GI001)</label>
+                <input type="text" id="revServiceID" class="neu-input" placeholder="Service ID">
+            </div>
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="font-size: 11px; color: var(--text-muted);">Order Receipt Link (ImgBB)</label>
+                <input type="url" id="revReceipt" class="neu-input" placeholder="https://i.ibb.co/...">
+            </div>
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="font-size: 11px; color: var(--text-muted);">Before & After Link (Optional)</label>
+                <input type="url" id="revBeforeAfter" class="neu-input" placeholder="https://...">
+            </div>
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="font-size: 11px; color: var(--text-muted);">Feedback Message</label>
+                <textarea id="revMessage" class="neu-input" rows="3" placeholder="Super fast delivery..."></textarea>
+            </div>
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label style="font-size: 11px; color: var(--text-muted);">Rating (1 to 5)</label>
+                <input type="number" id="revRating" class="neu-input" min="1" max="5" value="5">
+            </div>
+
+            <button class="neu-btn" id="submitProofBtn" style="width: 100%; padding: 15px;">Submit for Approval</button>
+        </div>
+    </div>
+
+    <div class="fs-modal" id="fsModal">
+        <div class="fs-close" onclick="closeFS()">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </div>
+        <div id="fsMediaContainer"></div>
+        <div class="fs-actions">
+            <button class="neu-btn" style="padding: 10px 20px; background: #222;" id="downloadProofBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="margin-right:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                View Full
+            </button>
+        </div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ 
+    <script src="../assets/js/app.js"></script>
+    <script type="module">
+        import { auth, db, doc, getDoc, setDoc, collection, query, where, orderBy, getDocs } from "../assets/js/firebase-config.js";
+
+        // Fetch ONLY Approved Proofs
+        async function loadProofs() {
+            const container = document.getElementById('proofsContainer');
+            try {
+                // Only show status = 'approved'
+                const q = query(collection(db, "proofs"), where("status", "==", "approved"));
+                const snap = await getDocs(q);
+                
+                container.innerHTML = '';
+                
+                if(snap.empty) {
+                    container.innerHTML = '<p class="text-muted" style="grid-column: 1/-1; text-align:center;">No proofs uploaded yet.</p>';
+                    return;
+                }
+
+                // Temporary array to sort locally since Firebase composite index might be needed
+                let proofsData = [];
+                snap.forEach(d => proofsData.push(d.data()));
+                proofsData.sort((a, b) => b.timestamp - a.timestamp);
+
+                proofsData.forEach(data => {
+                    const isVideo = data.receipt_link.includes('.mp4');
+                    let stars = '★'.repeat(Number(data.rating)) + '☆'.repeat(5 - Number(data.rating));
+                    
+                    const div = document.createElement('div');
+                    div.className = `proof-item`;
+                    
+                    div.innerHTML = `
+                        <div class="proof-img-box ${isVideo ? 'video' : ''}" onclick="openFS('${data.receipt_link}', ${isVideo})">
+                            <img src="${isVideo ? 'https://ui-avatars.com/api/?name=VIDEO&background=121212&color=ffffff&size=150' : data.receipt_link}" onerror="this.src='https://ui-avatars.com/api/?name=LINK+ERROR&background=121212&color=ff4444&size=150'">
+                            <div class="play-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </div>
+                        </div>
+                        <div class="proof-details">
+                            <p style="font-size:12px; font-weight:600; color:var(--primary-color)">${data.username} <span style="color:var(--text-muted); font-size:10px; font-weight:400">(${data.service_id})</span></p>
+                            <p class="star-rating">${stars}</p>
+                            <p style="font-size:11px; color:var(--text-muted); margin-top:5px; line-height:1.4">"${data.message}"</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                container.innerHTML = '<p class="text-muted text-center" style="grid-column:1/-1;">Error loading proofs.</p>';
+            }
+        }
+
+        loadProofs();
+
+        // Modal Controls
+        window.openReviewModal = () => document.getElementById('reviewModal').classList.add('active');
+        window.closeReviewModal = () => document.getElementById('reviewModal').classList.remove('active');
+
+        // Submit Logic (Goes to 'pending' state)
+        document.getElementById('submitProofBtn').addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if(!user) return alert("Please Login to submit proofs.");
+
+            const serviceId = document.getElementById('revServiceID').value;
+            const receipt = document.getElementById('revReceipt').value;
+            const beforeAfter = document.getElementById('revBeforeAfter').value;
+            const message = document.getElementById('revMessage').value;
+            const rating = document.getElementById('revRating').value;
+            
+            if(!serviceId || !receipt || !message) return alert("Service ID, Receipt Link, and Message are required!");
+
+            const btn = document.getElementById('submitProofBtn');
+            btn.innerHTML = "Submitting...";
+
+            try {
+                // Fetch user's username
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                const username = userSnap.exists() ? userSnap.data().username : "Anonymous";
+
+                const proofID = "PRF" + Date.now();
+                await setDoc(doc(db, "proofs", proofID), {
+                    user_uid: user.uid,
+                    username: username,
+                    service_id: serviceId,
+                    receipt_link: receipt,
+                    before_after_link: beforeAfter,
+                    message: message,
+                    rating: rating,
+                    status: "pending", // ADMIN MUST APPROVE
+                    timestamp: new Date()
+                });
+
+                alert("Proof submitted successfully! It will be visible after Admin approval.");
+                closeReviewModal();
+                btn.innerHTML = "Submit for Approval";
+            } catch (error) {
+                alert("Error: " + error.message);
+                btn.innerHTML = "Submit for Approval";
+            }
+        });
+
+        // Fullscreen Viewer Logic
+        window.openFS = function(link, isVideo) {
+            const modal = document.getElementById('fsModal');
+            const container = document.getElementById('fsMediaContainer');
+            
+            if(isVideo) {
+                container.innerHTML = `<video src="${link}" class="fs-content" controls autoplay></video>`;
+            } else {
+                container.innerHTML = `<img src="${link}" class="fs-content">`;
+            }
+            
+            document.getElementById('downloadProofBtn').onclick = () => window.open(link, '_blank');
+            modal.classList.add('active');
+        };
+
+        window.closeFS = function() {
+            document.getElementById('fsModal').classList.remove('active');
+            document.getElementById('fsMediaContainer').innerHTML = ''; 
+        };
+    </script>
+</body>
+</html>
