@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - About Founder</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        .about-header { text-align: center; margin: 40px 0; }
+        
+        /* Glowing Avatar Effect */
+        .glowing-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            padding: 5px;
+            background: var(--bg-color);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 
+                        inset 5px 5px 10px var(--shadow-dark), 
+                        inset -5px -5px 10px var(--shadow-light);
+            transition: box-shadow 0.3s ease;
+        }
+        [data-theme="light"] .glowing-avatar {
+            box-shadow: none, 
+                        inset 5px 5px 10px var(--shadow-dark), 
+                        inset -5px -5px 10px var(--shadow-light);
+        }
+        .glowing-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            transition: 0.3s ease;
+        }
+        [data-theme="light"] .glowing-avatar img {
+            filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.25))
+                    drop-shadow(0 0 12px rgba(0, 0, 0, 0.15));
+        }
+        [data-theme="dark"] .glowing-avatar img {
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.25))
+                    drop-shadow(0 0 12px rgba(255, 255, 255, 0.15));
+        }
+        .glowing-avatar:hover img {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4))
+                    drop-shadow(0 0 20px rgba(255, 255, 255, 0.25));
+        }
+        [data-theme="light"] .glowing-avatar:hover img {
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.35))
+                    drop-shadow(0 0 20px rgba(0, 0, 0, 0.2));
+        }
+        .founder-name { font-size: 24px; font-weight: 700; font-family: 'Orbitron', 'Audiowide', sans-serif; letter-spacing: 2px; margin-bottom: 5px; color: var(--primary-color); }
+        .founder-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        
+        /* Social Icons */
+        .social-links { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .social-btn { width: 45px; height: 45px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; text-decoration: none; color: inherit; }
+        
+        /* Details Grid */
+        .details-card { padding: 25px; margin-bottom: 25px; line-height: 1.6; }
+        .detail-row { display: flex; flex-direction: column; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--shadow-light); }
+        .detail-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .d-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .d-value { font-size: 14px; font-weight: 600; color: var(--primary-color); }
+        
+        .quote-box { font-style: italic; text-align: center; padding: 20px; border-left: 3px solid var(--primary-color); background: var(--status-bg); margin: 20px 0; border-radius: 0 10px 10px 0; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <div class="about-header">
+            <div class="glowing-avatar">
+                <img src="https://gi28.in/assets/Abrarr.png" onerror="this.src='https://ui-avatars.com/api/?name=Constant+Abrar&background=121212&color=ffffff&size=150'" alt="Constant Abrar">
+            </div>
+            <h1 class="founder-name">CONSTANT ABRAR</h1>
+            <p class="founder-title">Founder & Developer of GI28</p>
+            
+            <div class="social-links">
+                <a href="#" class="neu-btn social-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+                <a href="#" class="neu-btn social-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></a>
+                <a href="#" class="neu-btn social-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2L12 11.5"></path><path d="M21.5 2L15 22 12 11.5 1.5 8.5 21.5 2z"></path></svg></a>
+                <a href="https://constantabrar.vercel.app/" target="_blank" class="neu-btn social-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></a>
+            </div>
+        </div>
+
+        <h3 class="section-title">GI28 Overview</h3>
+        <div class="neu-card details-card" style="font-size: 13px; color: var(--text-muted);">GI28 is a platform built by a 16-year-old entrepreneur. It provides Social Media Marketing (SMM) services at highly affordable prices, combined with an ultra-clean user interface and powerful, feature-rich functionality that leaves a strong impression on users. <br><br>At GI28, we maintain a healthy and stress-free work environment. Our team operates without unnecessary pressure, while consistently delivering high-quality services to our clients.</div>
+        
+        <h3 class="section-title">Why it developed?</h3>
+        <div class="neu-card details-card" style="font-size: 13px; color: var(--text-muted);">
+          I am the founder of GI28. There was a time when I was in urgent need of money, but I had no source of income. Everywhere I went, people asked for money in the name of setting up work, training fees, or various other charges. However, a middle-class individual does not always have the financial capacity to invest upfront. Even investing in oneself requires money—something that some people receive from their background, but many do not. <br><br>
+At the age of 16, I not only learned web development but also understood a business strategy. I started this platform from ₹0 and gradually earned money through it, reinvesting to upgrade and grow the platform.<br><br>
+So, do you need to pay others when you can start and build something on your own? <b style="color:var(--primary-color);">NO</b>
+        </div>
+
+        <h3 class="section-title">Founder Details</h3>
+        <div class="neu-card details-card">
+            <div class="detail-row"><span class="d-label">Real Name</span><span class="d-value">Abrar Alli Khan</span></div>
+            <div class="detail-row"><span class="d-label">Location</span><span class="d-value">Kendrapara, Odisha, India</span></div>
+            <div class="detail-row"><span class="d-label">Education</span><span class="d-value">10th Passed @ Modern Public School, Currently in 12th (PCM + IT)</span><span style="font-size: 10px; color: var(--text-muted);">(Self-taught: Never got any tech skills from school/college – That’s why I still criticize the school system but never Compromised with my future!)</span></div>
+            <div class="detail-row"><span class="d-label">Extra Skills</span><span class="d-value">Developer, Graphic Designer, Prompt Engineering, 3D Modeling, Premium UI Designer<span style="font-size: 10px; color: var(--text-muted);"> (May be there’s more to it, but publicly revealing it may not be legally appropriate.)</span></span></div>
+            <div class="detail-row"><span class="d-label">Passion</span><span class="d-value">Coding & Gaming</span>
+            <span style="font-size: 10px; color: var(--text-muted);">Here don't expect to Win, coz I'll win everything!</span></div>
+            <div class="detail-row"><span class="d-label">Health Profile</span><span class="d-value">Skinny (Sacrificing self body improvement time for building the future)</span></div>
+            <div class="detail-row"><span class="d-label">Belief</span><span class="d-value">Trust in ALLAH (Only)</span></div>
+        </div>
+
+        <div class="quote-box">
+            <p class="text-primary" style="font-size: 16px; font-weight: 600;">"The best way to predict the future is to CREATE IT."</p>
+        </div>
+        <div class="quote-box" style="border-left-color: var(--text-muted); background: transparent;">
+            <p class="text-muted" style="font-size: 14px;">Raat raat bhar jag kar yahi karte the bas samjhate nahi the,“Jiska <b style="color:var(--primary-color);">AUKAAT</b> jitna karne ka hoga usko utna hi samajh aaega!”</p>
+        </div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ <script>
+const message = `You know what... 
+
+This is the About Us page... 
+
+Here you can get all information about our website... 
+
+Constant Abrar?
+His Real name is ABRAR ALI KHAN!
+He is the developer and admin of this platform... 
+
+He manages everything here... 
+
+So yeah... take your time... and explore.`;
+
+// 🔥 STRICT MALE VOICE FILTER
+function getMaleVoice() {
+    const voices = speechSynthesis.getVoices();
+
+    return voices.find(v => 
+        v.name.toLowerCase().includes("male") ||
+        v.name.includes("David") ||
+        v.name.includes("Mark") ||
+        v.name.includes("Alex") ||
+        v.name.includes("Google UK English Male")
+    ) 
+    || voices.find(v => !v.name.toLowerCase().includes("female"))
+    || voices[0];
+}
+
+let hasSpoken = false;
+
+function speakPageIntro() {
+    if (hasSpoken) return;
+    hasSpoken = true;
+
+    const speech = new SpeechSynthesisUtterance(message);
+
+    speech.voice = getMaleVoice();
+    speech.lang = "en-US";
+
+    speech.rate = 0.78;   
+    speech.pitch = 0.6;   
+    speech.volume = 1;
+
+    speechSynthesis.cancel(); 
+    speechSynthesis.speak(speech);
+}
+
+speechSynthesis.onvoiceschanged = () => {};
+
+document.addEventListener("click", speakPageIntro, { once: true });
+document.addEventListener("touchstart", speakPageIntro, { once: true });
+</script>
+    <script src="../assets/js/app.js"></script>
+</body>
+</html>
