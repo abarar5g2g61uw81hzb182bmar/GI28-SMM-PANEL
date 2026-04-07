@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Terms & Conditions</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        .tc-container { padding: 30px; margin-bottom: 40px; }
+        .tc-header { margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .tc-section { margin-bottom: 25px; }
+        .tc-section h3 { font-size: 16px; color: var(--primary-color); margin-bottom: 10px; }
+        .tc-section p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+        
+        /* Loading skeleton */
+        .skeleton-text { height: 15px; background: var(--status-bg); margin-bottom: 10px; border-radius: 4px; animation: pulse-bg 1.5s infinite; }
+        @keyframes pulse-bg { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <h2 class="section-title">Terms & Conditions</h2>
+        <p class="text-muted" style="margin-bottom: 25px;">Please read our policies carefully before using GI28 services.</p>
+
+        <div class="neu-card tc-container">
+            <div class="tc-header">
+                <p class="text-primary" style="font-weight: 600; font-size: 14px;">Last Updated: <span id="lastUpdatedDate">Loading...</span></p>
+            </div>
+            
+            <div id="tcContent">
+                <div class="tc-section"><div class="skeleton-text" style="width: 40%;"></div><div class="skeleton-text" style="width: 100%;"></div><div class="skeleton-text" style="width: 80%;"></div></div>
+                <div class="tc-section"><div class="skeleton-text" style="width: 50%;"></div><div class="skeleton-text" style="width: 90%;"></div><div class="skeleton-text" style="width: 100%;"></div></div>
+            </div>
+        </div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ 
+    <script src="../assets/js/app.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const contentDiv = document.getElementById('tcContent');
+            const dateSpan = document.getElementById('lastUpdatedDate');
+            
+            try {
+                // Fetch JSON data dynamically
+                const response = await fetch('../data/terms.json');
+                if (!response.ok) throw new Error("Could not load T&C data.");
+                
+                const data = await response.json();
+                
+                dateSpan.innerText = data.lastUpdated;
+                contentDiv.innerHTML = ''; // Clear skeletons
+                
+                data.sections.forEach(sec => {
+                    const sectionHTML = `
+                        <div class="tc-section">
+                            <h3>${sec.title}</h3>
+                            <p>${sec.content}</p>
+                        </div>
+                    `;
+                    contentDiv.innerHTML += sectionHTML;
+                });
+            } catch (error) {
+                console.error(error);
+                contentDiv.innerHTML = `<p class="text-muted" style="color: #ff4444;">Failed to load Terms & Conditions. Please check back later.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
