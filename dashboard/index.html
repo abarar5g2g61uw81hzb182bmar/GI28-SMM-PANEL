@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    
+    <style>
+        /* Dashboard Specific Layout Styles */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .stat-item { text-align: center; padding: 15px; }
+        .stat-val { font-size: 22px; font-weight: 700; color: var(--primary-color); display: block; }
+        
+        .proof-card { min-width: 140px; height: 90px; border-radius: 12px; overflow: hidden; }
+        .proof-card img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.3s; }
+        .proof-card:hover img { filter: grayscale(0%); }
+
+        .expert-card { min-width: 110px; padding: 15px; text-align: center; border-radius: 12px; }
+        .expert-avatar { width: 45px; height: 45px; border-radius: 50%; margin: 0 auto 10px; background: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); overflow: hidden; }
+        .expert-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .trending-item { padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; }
+        .service-info { flex: 1; }
+        
+        .order-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--shadow-light); }
+        .order-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        
+        <div style="margin-top: 10px; margin-bottom: 25px;">
+            <h2 class="text-primary" style="font-weight: 600;" id="welcomeText">Welcome back, User!</h2>
+            <p class="text-muted">Here's what's happening with your account today.</p>
+        </div>
+
+        <h3 class="section-title">Live Analytics</h3>
+        <div class="neu-card">
+            <div style="height: 200px; width: 100%;">
+                <canvas id="trafficChart"></canvas>
+            </div>
+            <div class="stats-grid">
+                <div class="neu-card stat-item">
+                    <span class="stat-val" id="totalUsersStat">...</span>
+                    <span class="text-muted">Total Users</span>
+                </div>
+                <div class="neu-card stat-item">
+                    <span class="stat-val" id="totalOrdersStat">...</span>
+                    <span class="text-muted">My Orders</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h3 class="section-title" style="margin: 0;">Live Proofs</h3>
+            <a href="../reviews/" class="see-more-link">See All &rarr;</a>
+        </div>
+        <div class="horizontal-scroll" style="padding-bottom: 15px;">
+            <div class="neu-card proof-card"><img src="https://ui-avatars.com/api/?name=Proof+1&background=121212&color=ffffff&size=150" alt="Proof"></div>
+            <div class="neu-card proof-card"><img src="https://ui-avatars.com/api/?name=Proof+2&background=121212&color=ffffff&size=150" alt="Proof"></div>
+            <div class="neu-card proof-card"><img src="https://ui-avatars.com/api/?name=Proof+3&background=121212&color=ffffff&size=150" alt="Proof"></div>
+        </div>
+
+        <div class="section-header">
+            <h3 class="section-title" style="margin: 0;">Community Profiles</h3>
+            <a href="../users/" class="see-more-link">View All &rarr;</a>
+        </div>
+        <div class="horizontal-scroll" style="padding-bottom: 15px;" id="communityContainer">
+            <p class="text-muted" style="font-size: 11px;">Loading community...</p>
+        </div>
+
+        <div class="section-header">
+            <h3 class="section-title" style="margin: 0;">Trending Services</h3>
+            <a href="../services/" class="see-more-link">View All &rarr;</a>
+        </div>
+        <div id="trendingServicesContainer">
+            <p class="text-muted" style="font-size: 11px;">Loading services...</p>
+        </div>
+
+        <div class="section-header" style="margin-top: 40px;">
+            <h3 class="section-title" style="margin: 0;">Recent Orders</h3>
+            <a href="../order-history/" class="see-more-link">See All &rarr;</a>
+        </div>
+        <div class="neu-card" id="recentOrdersContainer">
+            <p class="text-muted" style="font-size: 11px;">Loading orders...</p>
+        </div>
+
+    </div>
+<div id="footer-placeholder"></div>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script type="module">
+        import { auth, db, doc, getDoc, collection, getDocs, query, where, orderBy, limit } from "../assets/js/firebase-config.js";
+
+        // --- 1. FIREBASE: Fetch Data & Make Dashboard Live ---
+        auth.onAuthStateChanged(async (user) => {
+            const guestMode = localStorage.getItem("guestMode");
+            
+            if (user) {
+                try {
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        
+                        // Wait for Navbar to be injected by app.js, then update balance
+                        const checkNavbar = setInterval(() => {
+                            const balanceEl = document.getElementById("liveBalance");
+                            if (balanceEl) {
+                                balanceEl.innerText = `${parseFloat(userData.wallet_balance || 0).toFixed(2)}`;
+                                clearInterval(checkNavbar);
+                            }
+                        }, 200);
+
+                        document.getElementById("welcomeText").innerText = `Welcome back, ${userData.username || "User"}!`;
+
+                        // Fetch Live Stats
+                        fetchLiveStats(user.uid);
+                    }
+                } catch (error) { console.error("Error fetching data:", error); }
+            } else if (!guestMode) {
+                window.location.href = "../index.html";
+            } else {
+                document.getElementById("welcomeText").innerText = `Welcome, Guest!`;
+            }
+        });
+
+        async function fetchLiveStats(uid) {
+            // A. Total Platform Users
+            try {
+                const usersSnap = await getDocs(collection(db, "users"));
+                document.getElementById('totalUsersStat').innerText = usersSnap.size;
+            } catch(e) {}
+
+            // B. My Total Orders
+            try {
+                const q = query(collection(db, "orders"), where("user_uid", "==", uid));
+                const orderSnap = await getDocs(q);
+                document.getElementById('totalOrdersStat').innerText = orderSnap.size;
+            } catch(e) {}
+
+            // C. Recent Orders (Top 2)
+            try {
+                const q = query(collection(db, "orders"), where("user_uid", "==", uid), orderBy("timestamp", "desc"), limit(2));
+                const snap = await getDocs(q);
+                const container = document.getElementById('recentOrdersContainer');
+                container.innerHTML = '';
+                
+                if(snap.empty) { container.innerHTML = '<p class="text-muted" style="font-size: 11px;">No orders placed yet.</p>'; }
+                
+                snap.forEach(d => {
+                    const o = d.data();
+                    const color = o.status === 'shipped' ? '#00ff00' : (o.status === 'cancelled' ? '#ff4444' : '#ffa500');
+                    container.innerHTML += `
+                        <div class="order-row">
+                            <div style="display: flex; flex-direction: column;">
+                                <span class="text-primary" style="font-weight: 600; font-size: 14px;">#${d.id.substring(0,8)}</span>
+                                <span class="text-muted" style="font-size: 12px;">${o.service_name.substring(0,20)}...</span>
+                            </div>
+                            <span class="badge badge-filled" style="color: ${color}; border-color: ${color}; background: transparent; border: 1px solid ${color};">${o.status.toUpperCase()}</span>
+                        </div>
+                    `;
+                });
+            } catch(e) { console.log(e); }
+
+            // D. Trending Services (Top 2)
+            try {
+                const snap = await getDocs(query(collection(db, "services"), limit(2)));
+                const container = document.getElementById('trendingServicesContainer');
+                container.innerHTML = '';
+                snap.forEach(d => {
+                    const s = d.data();
+                    container.innerHTML += `
+                        <div class="neu-card trending-item">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            <div class="service-info">
+                                <span class="text-primary" style="font-weight: 600; font-size: 14px; display: block;">${s.title}</span>
+                                <span class="text-muted" style="font-size: 11px;">${parseFloat(s.price).toFixed(2)} GI28 / 1k</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch(e) {}
+
+                        // E. Community Profiles (Top 3)
+            try {
+                const snap = await getDocs(query(collection(db, "users"), limit(3)));
+                const container = document.getElementById('communityContainer');
+                container.innerHTML = '';
+                snap.forEach(d => {
+                    const u = d.data();
+                    if(d.id !== uid) { // Don't show current user
+                        const initial = (u.username || 'U').charAt(0).toUpperCase();
+                        const dp = u.photoURL ? u.photoURL : `https://ui-avatars.com/api/?name=${initial}&background=121212&color=ffffff`;
+                        
+                        container.innerHTML += `
+                            <div class="neu-card expert-card">
+                                <div class="expert-avatar"><img src="${dp}" style="filter: grayscale(100%);"></div>
+                                <span class="text-primary" style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 10px;">${u.username || 'User'}</span>
+                                <button class="neu-btn" style="padding: 5px 15px; font-size: 10px; width: 100%;" onclick="startChatFromDashboard('${d.id}', '${(u.username || 'User').replace(/'/g, "\\'")}')">Connect</button>
+                            </div>
+                        `;
+                    }
+                });
+            } catch(e) {}
+        }
+
+        // --- 2. B&W MONOCHROME CHART ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            const config = {
+                type: 'line',
+                data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Traffic', data: [150, 230, 180, 320, 290, 450, 400], borderColor: '#ffffff', backgroundColor: 'rgba(128, 128, 128, 0.1)', borderWidth: 2, tension: 0.4, fill: true, pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            };
+
+            const trafficChart = new Chart(ctx, config);
+
+            window.updateChartTheme = function(theme) {
+                trafficChart.data.datasets[0].borderColor = theme === 'light' ? '#000000' : '#ffffff';
+                trafficChart.update();
+            };
+            
+            setTimeout(() => { window.updateChartTheme(document.documentElement.getAttribute('data-theme')); }, 100);
+        });
+    </script>
+    <script>
+        const welcomeSound = new Audio('/assets/sounds/welcome.mp3');
+        welcomeSound.volume = 1;
+        let hasPlayed = false;
+        function playWelcome() {
+            if (hasPlayed) return;
+            hasPlayed = true;
+            welcomeSound.currentTime = 0;
+            welcomeSound.play().catch(()=>{});
+        }
+        document.addEventListener('click', playWelcome);
+        document.addEventListener('touchstart', playWelcome);
+    </script>
+    <script>
+              window.startChatFromDashboard = (targetUID, targetName) => {
+            localStorage.setItem("activeChatUser", JSON.stringify({ uid: targetUID, name: targetName }));
+            window.location.href = "../messages/";
+        };
+
+    </script>
+</body>
+</html>
