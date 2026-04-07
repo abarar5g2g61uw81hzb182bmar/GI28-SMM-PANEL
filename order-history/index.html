@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Order History</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        .order-card { padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .order-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .order-id { font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 1px; }
+        .order-title { font-size: 15px; font-weight: 600; color: var(--primary-color); }
+        .order-meta { font-size: 12px; color: var(--text-muted); }
+        .order-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--shadow-light); }
+        
+        .action-btns { display: flex; gap: 10px; }
+        .cancel-btn { color: #ff4444; border-color: rgba(255, 68, 68, 0.2); }
+
+        /* Receipt Hidden Template */
+        #receiptContainer { position: absolute; left: -9999px; top: -9999px; width: 400px; padding: 30px; background: #121212; color: #fff; border-radius: 15px; font-family: 'Poppins', sans-serif; }
+        .receipt-header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #333; padding-bottom: 20px; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <h2 class="section-title">Order History</h2>
+        <p class="text-muted" style="margin-bottom: 25px;">View and manage your orders from the last 6 months.</p>
+
+        <div id="ordersList">
+            </div>
+    </div>
+
+    <div id="receiptContainer">
+        <div class="receipt-header">
+            <h1 style="font-family: 'Orbitron', sans-serif; letter-spacing: 3px; font-size: 28px; margin-bottom: 5px;">GI28</h1>
+            <p style="font-size: 10px; color: #888; text-transform: uppercase;">Premium SMM Panel</p>
+            <p id="rcptStatusBadge" style="font-size: 12px; margin-top: 15px;"></p>
+        </div>
+        <div class="receipt-row"><span>Order ID:</span> <span id="rcptOrderID"></span></div>
+        <div class="receipt-row"><span>Date:</span> <span id="rcptDate"></span></div>
+        <hr style="border: 0; border-bottom: 1px solid #333; margin: 15px 0;">
+        <div class="receipt-row"><span>Service:</span> <span id="rcptService"></span></div>
+        <div class="receipt-row"><span>Link:</span> <span id="rcptLink" style="word-break: break-all;"></span></div>
+        <div class="receipt-row"><span>Quantity:</span> <span id="rcptQty"></span></div>
+        <hr style="border: 0; border-bottom: 1px solid #333; margin: 15px 0;">
+        <div class="receipt-row" style="font-size: 16px;"><span>Total Charge:</span> <span id="rcptPrice"></span></div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ 
+    <script src="../assets/js/app.js"></script>
+    <script type="module">
+        import { auth, db, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from "../assets/js/firebase-config.js";
+
+        let currentUser = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                loadOrders();
+            } else {
+                window.location.href = "../index.html";
+            }
+        });
+
+        async function loadOrders() {
+            const container = document.getElementById('ordersList');
+            container.innerHTML = '<p class="text-muted text-center">Loading your orders...</p>';
+
+            try {
+                const q = query(
+                    collection(db, "orders"), 
+                    where("user_uid", "==", currentUser.uid),
+                    orderBy("timestamp", "desc")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                container.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<p class="text-muted text-center">No orders found.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const order = doc.data();
+                    const orderID = doc.id;
+                    const date = order.timestamp.toDate().toLocaleString();
+
+                    const card = document.createElement('div');
+                    card.className = 'neu-card order-card';
+                    card.innerHTML = `
+                        <div class="order-header">
+                            <div>
+                                <span class="order-id">#${orderID}</span>
+                                <h3 class="order-title">${order.service_name}</h3>
+                                <p class="order-meta">Quantity: ${order.quantity} | Link: <a href="${order.link}" target="_blank" style="color:var(--primary-color)">Link</a></p>
+                            </div>
+                            <span class="badge ${order.status === 'shipped' ? 'shipped' : 'pending'}">${order.status}</span>
+                        </div>
+                        <div class="order-footer">
+                            <span class="text-primary" style="font-weight:700;">${order.price_tokens.toFixed(2)} GI28</span>
+                            <div class="action-btns">
+                                ${order.status === 'pending' ? `<button class="neu-btn cancel-btn" onclick="cancelOrder('${orderID}', ${order.price_tokens})" style="font-size:10px; padding: 5px 10px;">Cancel (2% Fee)</button>` : ''}
+                                <button class="neu-btn" onclick="downloadReceipt('${orderID}')" style="font-size:10px; padding: 5px 10px;">Receipt</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error loading orders:", error);
+                container.innerHTML = '<p class="text-muted text-center">Error loading data. Admin PIN check needed?</p>';
+            }
+        }
+
+        // --- Cancel Order Logic (2% Deduction) ---
+        window.cancelOrder = async (orderID, price) => {
+            if(!confirm("Are you sure? 2% platform fee will be deducted.")) return;
+
+            try {
+                const refundAmount = price * 0.98;
+                const userRef = doc(db, "users", currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                const currentBalance = userSnap.data().wallet_balance;
+
+                // 1. Refund Balance
+                await setDoc(userRef, {
+                    wallet_balance: currentBalance + refundAmount
+                }, { merge: true });
+
+                // 2. Delete Order
+                await setDoc(doc(db, "orders", orderID), { status: "cancelled" }, { merge: true });
+
+                alert(`Order Cancelled. ${refundAmount.toFixed(2)} Tokens refunded to wallet.`);
+                location.reload();
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        };
+
+        // --- Re-use Receipt Logic ---
+        window.downloadReceipt = async (orderID) => {
+            const docSnap = await getDoc(doc(db, "orders", orderID));
+            const order = docSnap.data();
+
+            document.getElementById('rcptOrderID').innerText = orderID;
+            document.getElementById('rcptDate').innerText = order.timestamp.toDate().toLocaleString();
+            document.getElementById('rcptService').innerText = order.service_name;
+            document.getElementById('rcptLink').innerText = order.link;
+            document.getElementById('rcptQty').innerText = order.quantity;
+            document.getElementById('rcptPrice').innerText = `${order.price_tokens.toFixed(2)} GI28`;
+            
+            const statusBadge = document.getElementById('rcptStatusBadge');
+            statusBadge.innerText = `Order Status: ${order.status.toUpperCase()}`;
+            statusBadge.style.color = order.status === 'shipped' ? '#00ff00' : '#ffa500';
+
+            const receiptNode = document.getElementById('receiptContainer');
+            receiptNode.style.left = "0"; receiptNode.style.top = "0"; receiptNode.style.zIndex = "-100";
+
+            html2canvas(receiptNode, { backgroundColor: "#121212" }).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                const a = document.createElement("a");
+                a.href = imgData;
+                a.download = `GI28_Receipt_${orderID}.png`;
+                a.click();
+                receiptNode.style.left = "-9999px";
+            });
+        };
+    </script>
+</body>
+</html>
