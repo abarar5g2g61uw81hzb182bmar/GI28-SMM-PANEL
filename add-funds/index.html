@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Add Funds</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        .payment-box { max-width: 500px; margin: 20px auto; padding: 30px 20px; }
+        .qr-container { text-align: center; margin: 25px 0; padding: 20px; border-radius: 15px; background: var(--bg-color); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); }
+        .qr-container img { width: 200px; height: 200px; filter: grayscale(100%) invert(var(--qr-invert, 0)); }
+        [data-theme="dark"] { --qr-invert: 1; }
+
+        .instruction-list { font-size: 13px; margin: 20px 0; padding-left: 20px; color: var(--text-muted); }
+        .instruction-list li { margin-bottom: 8px; }
+        
+        .amount-input-wrapper { position: relative; margin-bottom: 25px; }
+        .token-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; }
+        .neu-input.with-icon { padding-left: 45px; font-weight: 600; }
+
+        .pay-options { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 10px; }
+        .pay-btn { width: 100%; padding: 15px; gap: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <h2 class="section-title">Buy GI28 Tokens</h2>
+        <p class="text-muted">Purchase GI28 Tokens via UPI to order services seamlessly.</p>
+
+        <div class="neu-card payment-box">
+            
+            <div class="amount-input-wrapper">
+                <label class="text-muted" style="font-size: 12px; margin-bottom: 8px; display: block;">Enter Tokens to Buy</label>
+                <img src="../assets/svg/token.svg" class="token-icon" alt="Token">
+                <input type="number" id="tokenAmount" class="neu-input with-icon" placeholder="0" oninput="calculateINR()">
+                <p class="text-muted" style="margin-top: 8px; font-size: 11px;">
+                    Exchange Rate: 1 GI28 = ₹<span id="baseRateTxt">70</span> (<span id="inrValue" class="text-primary" style="font-weight:600;">₹0</span>)
+                </p>
+            </div>
+
+
+            <div class="pay-options">
+                <button class="neu-btn pay-btn" id="upiDeepLink" onclick="payViaUPI()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    Pay with UPI App
+                </button>
+            </div>
+
+            <div class="qr-container" id="qrContainer">
+                <p class="text-muted" style="font-size: 11px; margin-bottom: 10px;">Scan QR to Pay</p>
+                <img id="upiQR" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=constantabrar@upi%26pn=GI28%20PANEL%26cu=INR" alt="UPI QR">
+                <p class="text-primary" style="font-size: 12px; font-weight: 600; margin-top: 10px;">constantabrar@upi</p>
+            </div>
+
+            <hr style="border: none; border-bottom: 1px solid var(--border-color); margin: 25px 0;">
+
+            <h4 class="text-primary" style="font-size: 14px; margin-bottom: 15px;">Submit Transaction Details</h4>
+            <div class="input-group">
+                <input type="text" id="utrNumber" class="neu-input" placeholder="Enter Transaction ID / UTR Number">
+            </div>
+            <button class="neu-btn auth-btn" style="width: 100%; margin-top: 15px; padding: 15px;" id="submitRequest">Verify Payment</button>
+
+            <ul class="instruction-list">
+                <li>Minimum purchase is 1 GI28 Token.</li>
+                <li>Tokens will be credited after manual verification.</li>
+                <li>Verification usually takes 5-30 minutes.</li>
+                <li>Fake UTR submission will lead to account BAN.</li>
+            </ul>
+        </div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ 
+    <script src="../assets/js/app.js"></script>
+        <script type="module">
+        import { auth, db, doc, setDoc, getDoc } from "../assets/js/firebase-config.js"; // Yahan getDoc add kiya
+
+        let rateINR = 70; // Default fallback
+        const upiID = "constantabrar@upi";
+
+        // Firebase se live rate fetch karne ka logic
+        async function fetchLiveRate() {
+            try {
+                const settingsSnap = await getDoc(doc(db, "admin", "settings"));
+                if(settingsSnap.exists() && settingsSnap.data().token_rate) {
+                    rateINR = settingsSnap.data().token_rate;
+                    // HTML mein rate update karo
+                    document.getElementById('baseRateTxt').innerText = rateINR;
+                    // Agar user ne rate aane se pehle amount daal diya tha, toh dobara calculate karo
+                    calculateINR(); 
+                }
+            } catch(e) { console.log("Using default rate", e); }
+        }
+        
+        // Page load hone par rate fetch karo
+        fetchLiveRate();
+
+        window.calculateINR = function() {
+            const tokens = document.getElementById('tokenAmount').value;
+            const inr = (tokens * rateINR).toFixed(2);
+            document.getElementById('inrValue').innerText = `₹${inr}`;
+            
+            const qrImg = document.getElementById('upiQR');
+            const qrData = `upi://pay?pa=${upiID}&pn=GI28 PANEL&am=${inr}&cu=INR&tn=GI28 Token Purchase`;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+        };
+
+        window.payViaUPI = function() {
+            const tokens = document.getElementById('tokenAmount').value;
+            if(!tokens || tokens < 1) return alert("Minimum 1 Token required.");
+            const inr = (tokens * rateINR).toFixed(2);
+            const upiUrl = `upi://pay?pa=${upiID}&pn=GI28 PANEL&am=${inr}&cu=INR&tn=GI28 Token Purchase`;
+            window.location.href = upiUrl;
+        };
+
+        document.getElementById('submitRequest').addEventListener('click', async () => {
+            const user = auth.currentUser;
+            const tokens = document.getElementById('tokenAmount').value;
+            const utr = document.getElementById('utrNumber').value;
+
+            if(!user) return alert("Please Login first!");
+            if(!tokens || !utr) return alert("Fill all details!");
+
+            const btn = document.getElementById('submitRequest');
+            btn.innerHTML = "Submitting...";
+
+            try {
+                const requestId = "REQ" + Date.now();
+                
+                await setDoc(doc(db, "fund_requests", requestId), {
+                    user_uid: user.uid,
+                    user_email: user.email,
+                    tokens_requested: Number(tokens),
+                    amount_inr: (tokens * rateINR).toFixed(2),
+                    utr_number: utr,
+                    status: "pending",
+                    timestamp: new Date()
+                });
+
+                alert("Request Submitted! Admin will verify and add tokens soon.");
+                window.location.href = "../dashboard/";
+            } catch (error) {
+                alert("Error: " + error.message);
+                btn.innerHTML = "Verify Payment";
+            }
+        });
+    </script>
+
+</body>
+</html>
