@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Messages</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        .chat-container { display: flex; flex-direction: column; height: 75vh; max-height: 650px; overflow: hidden; position: relative; }
+        .chat-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .chat-header h3 { font-size: 16px; color: var(--primary-color); }
+        .chat-header p { font-size: 11px; color: var(--text-muted); }
+        
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scrollbar-width: none; }
+        .chat-box::-webkit-scrollbar { display: none; }
+        
+        .msg-bubble { max-width: 80%; padding: 12px 15px; font-size: 13px; line-height: 1.4; border-radius: 15px; }
+        .msg-sent { align-self: flex-end; background: var(--bg-color); color: var(--primary-color); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border-bottom-right-radius: 2px; }
+        .msg-received { align-self: flex-start; background: var(--status-bg); color: var(--primary-color); border: 1px solid var(--border-color); border-bottom-left-radius: 2px; }
+        .msg-time { font-size: 9px; color: var(--text-muted); margin-top: 5px; display: block; text-align: right; }
+
+        .chat-input-area { padding: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; background: var(--bg-color); }
+        .chat-input-area input { flex: 1; }
+        .send-btn { width: 50px; height: 50px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; }
+        
+        .limit-warning { text-align: center; font-size: 11px; color: #ff4444; padding: 15px; display: none; background: var(--bg-color); border-top: 1px solid var(--border-color); }
+        
+        /* Select User Overlay */
+        .select-user-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <h2 class="section-title">Direct Messages</h2>
+        <p class="text-muted" style="margin-bottom: 25px;">Messages automatically hide after 72 hours. Max 10 messages per user.</p>
+
+        <div class="neu-card chat-container">
+            
+            <div class="select-user-overlay" id="selectUserScreen">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <p class="text-muted" style="margin-top: 15px; font-size: 13px;">Select a user from Community to start chatting.</p>
+                <button class="neu-btn" style="margin-top: 20px; padding: 10px 20px; font-size: 12px;" onclick="window.location.href='../users/'">Go to Community</button>
+            </div>
+
+            <div id="chatInterface" style="display: none; flex-direction: column; height: 100%;">
+                <div class="chat-header">
+                    <div>
+                        <h3 id="chatUserName">User</h3>
+                        <p id="msgCounter">0/10 Messages Sent</p>
+                    </div>
+                    <button class="neu-btn icon-btn" style="width: 30px; height: 30px; padding:0; display:flex; justify-content:center; align-items:center;" onclick="closeChat()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                <div class="chat-box" id="chatBox">
+                    <p class="text-muted text-center" style="font-size: 12px; margin-top: 20px;">Loading chat...</p>
+                </div>
+
+                <div class="limit-warning" id="limitWarning">
+                    Message limit reached (10/10). Please share your contact info to continue communicating outside the panel.
+                </div>
+
+                <div class="chat-input-area" id="chatInputArea" style="display: flex;">
+                    <input type="text" id="msgInput" class="neu-input" placeholder="Type a message...">
+                    <button class="neu-btn send-btn" id="sendBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div id="footer-placeholder"></div>
+ 
+    <script src="../assets/js/app.js"></script>
+    <script type="module">
+        import { auth, db, collection, addDoc, query, orderBy, onSnapshot } from "../assets/js/firebase-config.js";
+
+        let currentUser = null;
+        let activeChatTarget = null;
+        let unsubscribeChat = null;
+        let myMessageCount = 0;
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                checkActiveChat();
+            } else {
+                window.location.href = "../index.html";
+            }
+        });
+
+        function checkActiveChat() {
+            const savedChat = localStorage.getItem("activeChatUser");
+            if(savedChat) {
+                activeChatTarget = JSON.parse(savedChat);
+                
+                // Toggle UI without using CSS classes to avoid !important conflicts
+                document.getElementById('selectUserScreen').style.display = 'none';
+                document.getElementById('chatInterface').style.display = 'flex';
+                
+                document.getElementById('chatUserName').innerText = activeChatTarget.name || 'User';
+                loadMessages();
+            } else {
+                document.getElementById('selectUserScreen').style.display = 'flex';
+                document.getElementById('chatInterface').style.display = 'none';
+            }
+        }
+
+        window.closeChat = () => {
+            localStorage.removeItem("activeChatUser");
+            if(unsubscribeChat) { unsubscribeChat(); unsubscribeChat = null; }
+            document.getElementById('chatBox').innerHTML = '';
+            
+            document.getElementById('selectUserScreen').style.display = 'flex';
+            document.getElementById('chatInterface').style.display = 'none';
+        };
+
+        function loadMessages() {
+            if(!currentUser || !activeChatTarget) return;
+
+            const chatID = [currentUser.uid, activeChatTarget.uid].sort().join("_");
+            const q = query(collection(db, "chats", chatID, "messages"), orderBy("timestamp", "asc"));
+
+            unsubscribeChat = onSnapshot(q, (snapshot) => {
+                const chatBox = document.getElementById('chatBox');
+                chatBox.innerHTML = '';
+                myMessageCount = 0;
+
+                const cutoffTime = Date.now() - (72 * 60 * 60 * 1000); 
+
+                if(snapshot.empty) {
+                    chatBox.innerHTML = '<p class="text-muted text-center" style="font-size: 12px; margin-top: 20px;">No messages yet. Say hi!</p>';
+                }
+
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    
+                    if(msg.timestamp && msg.timestamp.toMillis() < cutoffTime) return;
+
+                    const isMine = msg.sender_uid === currentUser.uid;
+                    if(isMine) myMessageCount++;
+
+                    const div = document.createElement('div');
+                    div.className = `msg-bubble ${isMine ? 'msg-sent' : 'msg-received'}`;
+                    
+                    let timeString = "";
+                    if(msg.timestamp) {
+                        const date = msg.timestamp.toDate();
+                        timeString = date.getHours() + ":" + String(date.getMinutes()).padStart(2, '0');
+                    }
+
+                    div.innerHTML = `${msg.text} <span class="msg-time">${timeString}</span>`;
+                    chatBox.appendChild(div);
+                });
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                document.getElementById('msgCounter').innerText = `${myMessageCount}/10 Messages Sent`;
+                
+                if(myMessageCount >= 10) {
+                    document.getElementById('chatInputArea').style.display = 'none';
+                    document.getElementById('limitWarning').style.display = 'block';
+                } else {
+                    document.getElementById('chatInputArea').style.display = 'flex';
+                    document.getElementById('limitWarning').style.display = 'none';
+                }
+            });
+        }
+
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+
+            if(!text || myMessageCount >= 10 || !activeChatTarget) return;
+
+            const chatID = [currentUser.uid, activeChatTarget.uid].sort().join("_");
+            input.value = ""; 
+
+            try {
+                await addDoc(collection(db, "chats", chatID, "messages"), {
+                    sender_uid: currentUser.uid,
+                    text: text,
+                    timestamp: new Date()
+                });
+            } catch (error) {
+                alert("Failed to send: " + error.message);
+            }
+        });
+        
+        document.getElementById('msgInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') { document.getElementById('sendBtn').click(); }
+        });
+    </script>
+</body>
+</html>
