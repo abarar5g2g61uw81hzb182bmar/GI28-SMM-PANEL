@@ -2,46 +2,235 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <title>GI28 Partner Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Partner Dashboard</title>
     <link rel="stylesheet" href="../assets/css/global.css">
     <style>
         .partner-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .neu-card { padding: 20px; border-radius: 16px; text-align: center; }
-        .code-box { font-family: monospace; font-size: 20px; color: var(--primary-color); background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; margin: 15px 0; }
+        .neu-card { padding: 25px; border-radius: 16px; text-align: center; background: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+        .code-box { font-family: 'Courier New', monospace; font-size: 24px; font-weight: 800; color: var(--primary-color); background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px; margin: 15px 0; letter-spacing: 2px; box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color); text-align: left; }
     </style>
 </head>
 <body>
-    <div style="padding: 20px; max-width: 800px; margin: auto;">
-        <h2 style="margin-bottom: 20px;">Partner Dashboard</h2>
-        
+
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h2 class="section-title" style="margin-bottom: 5px;">Partner Program 🤝</h2>
+                <p class="text-muted">Refer & Earn Real Cash directly to your UPI.</p>
+            </div>
+            <span class="badge badge-outline" style="color: #00ff88; border-color: #00ff88;">Active</span>
+        </div>
+
         <div class="partner-grid">
             <div class="neu-card">
-                <p class="text-muted" style="font-size: 10px;">TOTAL EARNED</p>
-                <h3 id="totalEarned" style="font-size: 24px;">0 GI28</h3>
+                <p class="text-muted" style="font-size: 11px; font-weight: 700; letter-spacing: 1px;">AVAILABLE COMMISSION</p>
+                <h3 id="availableTokens" style="font-size: 28px; margin: 10px 0;">0.00 GI28</h3>
+                <p class="text-primary" style="font-size: 14px; font-weight: 600;" id="availableInr">~ ₹0.00</p>
             </div>
             <div class="neu-card">
-                <p class="text-muted" style="font-size: 10px;">AVAILABLE WALLET</p>
-                <h3 id="availableBal" style="font-size: 24px;">0 GI28</h3>
-                <p id="inrValue" style="font-size: 12px; color: var(--primary-color);">~ ₹0</p>
+                <p class="text-muted" style="font-size: 11px; font-weight: 700; letter-spacing: 1px;">YOUR REFERRAL CODE</p>
+                <div class="code-box" id="partnerCode">LOADING...</div>
+                <button class="neu-btn" style="padding: 10px 20px; font-size: 12px;" onclick="copyCode()">Copy & Share Code</button>
             </div>
         </div>
 
-        <div class="neu-card" style="margin-bottom: 20px;">
-            <p class="text-muted">YOUR UNIQUE COUPON CODE</p>
-            <div class="code-box" id="partnerCode">Generating...</div>
-            <button class="neu-btn" onclick="copyCode()">Copy Code</button>
+        <div class="neu-card" style="text-align: left; margin-bottom: 30px;">
+            <h3 class="text-primary" style="margin-bottom: 15px;">Withdraw to UPI</h3>
+            <p class="text-muted" style="font-size: 12px; margin-bottom: 20px;">
+                Withdrawal any amount! Withdraw <strong style="color: #00ff88;">₹5000+</strong> and get an extra <strong style="color: #00ff88;">5% BONUS</strong> on your payout! 🎉
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div class="input-group">
+                    <label class="text-muted" style="font-size: 11px;">Tokens to Withdraw</label>
+                    <input type="number" id="withdrawTokens" class="neu-input" placeholder="0.00" oninput="calculateWithdraw()">
+                </div>
+                <div class="input-group">
+                    <label class="text-muted" style="font-size: 11px;">You Will Receive (INR)</label>
+                    <input type="text" id="receiveInr" class="neu-input" placeholder="₹0.00" disabled style="background: rgba(0,255,136,0.05); color: #00ff88; font-weight: 700;">
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label class="text-muted" style="font-size: 11px;">Enter UPI ID</label>
+                <input type="text" id="withdrawUpi" class="neu-input" placeholder="e.g. name@paytm">
+            </div>
+
+            <button class="neu-btn" style="width: 100%; padding: 15px;" id="withdrawBtn">Submit Withdrawal Request</button>
         </div>
 
-        <div class="neu-card">
-            <h3>Withdraw Earnings</h3>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="number" id="withdrawAmt" class="neu-input" placeholder="Tokens to withdraw">
-                <input type="text" id="upiId" class="neu-input" placeholder="Enter your UPI ID">
-                <button class="neu-btn" style="width: 100%; margin-top: 10px;" onclick="requestWithdrawal()">Withdraw Now</button>
+        <div class="neu-card" style="text-align: left;">
+            <h3 class="text-primary" style="margin-bottom: 15px;">Payout History</h3>
+            <div id="payoutHistoryList">
+                <p class="text-muted" style="font-size: 12px;">Loading history...</p>
             </div>
         </div>
     </div>
-    
-    <script type="module" src="../assets/js/partner.js"></script>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/auth-check.js"></script>
+    <script type="module">
+        import { auth, db, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot, orderBy } from "../assets/js/firebase-config.js";
+
+        let tokenRate = 99; // Default
+        let currentWalletBal = 0;
+
+        // Fetch Global Token Rate
+        async function fetchRate() {
+            try {
+                const snap = await getDoc(doc(db, "admin", "settings"));
+                if(snap.exists() && snap.data().token_rate) tokenRate = snap.data().token_rate;
+            } catch(e) {}
+        }
+        fetchRate();
+
+        // 1. REAL-TIME DASHBOARD SYNC
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) return;
+            const userRef = doc(db, "users", user.uid);
+
+            // Listen to User Document
+            onSnapshot(userRef, async (docSnap) => {
+                const data = docSnap.data();
+
+                // Generate Random Code if not exists
+                if (!data.partner_code) {
+                    const randomCode = "REF-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+                    await setDoc(userRef, { partner_code: randomCode }, { merge: true });
+                    document.getElementById('partnerCode').innerText = randomCode;
+                } else {
+                    document.getElementById('partnerCode').innerText = data.partner_code;
+                }
+
+                // Update Balances
+                currentWalletBal = parseFloat(data.reseller_wallet || 0);
+                document.getElementById('availableTokens').innerText = currentWalletBal.toFixed(2) + " GI28";
+                document.getElementById('availableInr').innerText = "~ ₹" + (currentWalletBal * tokenRate).toFixed(2);
+            });
+
+            loadHistory(user.uid);
+        });
+
+        // 2. LIVE MATH CALCULATOR (+ 5% BONUS LOGIC)
+        window.calculateWithdraw = () => {
+            const tokens = parseFloat(document.getElementById('withdrawTokens').value) || 0;
+            let baseInr = tokens * tokenRate;
+            let finalInr = baseInr;
+
+            // The ₹5000+ Hacker Trap (Bonus)
+            if (baseInr >= 5000) {
+                finalInr = baseInr + (baseInr * 0.05); // Add 5% Bonus
+                document.getElementById('receiveInr').value = `₹${finalInr.toFixed(2)} (Inc. 5% Bonus!)`;
+            } else {
+                document.getElementById('receiveInr').value = `₹${finalInr.toFixed(2)}`;
+            }
+        };
+
+        // 3. SUBMIT WITHDRAWAL
+        document.getElementById('withdrawBtn').addEventListener('click', async () => {
+            const user = auth.currentUser;
+            const tokens = parseFloat(document.getElementById('withdrawTokens').value);
+            const upi = document.getElementById('withdrawUpi').value.trim();
+
+            if (!tokens || tokens <= 0) return alert("Enter a valid token amount!");
+            if (tokens > currentWalletBal) return alert(`Insufficient balance! You only have ${currentWalletBal} tokens.`);
+            if (!upi) return alert("Please enter your UPI ID.");
+
+            const btn = document.getElementById('withdrawBtn');
+            btn.innerHTML = "Processing...";
+
+            let baseInr = tokens * tokenRate;
+            let finalInr = baseInr;
+            let bonusApplied = 0;
+
+            if (baseInr >= 5000) {
+                bonusApplied = baseInr * 0.05;
+                finalInr = baseInr + bonusApplied;
+            }
+
+            try {
+                const payoutId = "PAY" + Date.now();
+                
+                // Save to Payouts DB
+                await setDoc(doc(db, "payouts", payoutId), {
+                    user_uid: user.uid,
+                    amount_tokens: tokens,
+                    amount_inr: finalInr.toFixed(2),
+                    bonus_added: bonusApplied.toFixed(2),
+                    upi: upi,
+                    status: "pending",
+                    timestamp: new Date()
+                });
+
+                // Deduct from Reseller Wallet
+                const userRef = doc(db, "users", user.uid);
+                await updateDoc(userRef, {
+                    reseller_wallet: currentWalletBal - tokens
+                });
+
+                alert("Withdrawal Successful! Amount will be transferred to your UPI shortly.");
+                document.getElementById('withdrawTokens').value = "";
+                document.getElementById('withdrawUpi').value = "";
+                btn.innerHTML = "Submit Withdrawal Request";
+                
+                loadHistory(user.uid); // Refresh list
+
+            } catch (error) {
+                alert("Error: " + error.message);
+                btn.innerHTML = "Submit Withdrawal Request";
+            }
+        });
+
+        // 4. LOAD HISTORY
+        async function loadHistory(uid) {
+            const container = document.getElementById('payoutHistoryList');
+            try {
+                // Fetch payouts for this user
+                const q = query(collection(db, "payouts"), where("user_uid", "==", uid));
+                const snap = await getDocs(q);
+                
+                if (snap.empty) {
+                    container.innerHTML = '<p class="text-muted" style="font-size: 12px;">No payouts yet. Start sharing your code!</p>';
+                    return;
+                }
+
+                // Sort by latest locally
+                let records = [];
+                snap.forEach(d => records.push({id: d.id, ...d.data()}));
+                records.sort((a, b) => b.timestamp - a.timestamp);
+
+                container.innerHTML = '';
+                records.forEach(req => {
+                    const color = req.status === 'paid' ? '#00ff88' : '#ffa500';
+                    container.innerHTML += `
+                        <div class="history-item">
+                            <div>
+                                <p style="font-weight: 700; color: var(--primary-color);">₹${req.amount_inr} <span style="font-size: 10px; color: var(--text-muted); font-weight: normal;">to ${req.upi}</span></p>
+                                <p style="font-size: 11px; color: var(--text-muted);">${req.timestamp ? req.timestamp.toDate().toLocaleString() : 'N/A'}</p>
+                            </div>
+                            <span class="badge badge-outline" style="color: ${color}; border-color: ${color};">${req.status.toUpperCase()}</span>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.log(error);
+                container.innerHTML = '<p style="color:#ff4444; font-size:12px;">Error loading history.</p>';
+            }
+        }
+
+        window.copyCode = () => {
+            const code = document.getElementById('partnerCode').innerText;
+            navigator.clipboard.writeText(code);
+            alert("Referral Code Copied: " + code);
+        };
+    </script>
 </body>
 </html>
