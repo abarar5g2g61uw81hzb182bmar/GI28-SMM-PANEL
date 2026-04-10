@@ -275,6 +275,11 @@
             <div class="admin-tab" onclick="switchAdminTab('walletsModule', this)">Wallets & UTR</div>
             <div class="admin-tab" onclick="switchAdminTab('ordersModule', this)">Orders Engine</div>
             <div class="admin-tab" onclick="switchAdminTab('supportModule', this)">Support Inbox</div>
+                        <div class="admin-tab" onclick="switchAdminTab('payoutsModule', this)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Affiliate Payouts
+            </div>
+
                         <div class="admin-tab" onclick="switchAdminTab('servicesManagerModule', this)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                 Manage Services
@@ -284,6 +289,9 @@
                 Live Proofs Approvals
             </div>
             <button class="neu-btn" style="padding: 15px; font-size: 12px;" onclick="toggleAdminTheme()">Switch Theme</button>
+        </div>
+
+            <button class="neu-btn" style="margin-top: auto; padding: 15px; font-size: 12px;" onclick="toggleAdminTheme()">Switch Theme</button>
         </div>
 <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
         <div class="admin-main">
@@ -352,6 +360,15 @@
             </div>
 
             <div id="usersModule" class="admin-module"><p class="text-muted">Loading Users Management...</p></div>
+            <div id="payoutsModule" class="admin-module">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="text-primary" style="font-size: 18px;">Pending Partner Withdrawals</h3>
+                    <button class="neu-btn" style="padding: 5px 15px; font-size: 12px;" onclick="loadAdminPayouts()">Refresh</button>
+                </div>
+                <div id="adminPayoutsList">
+                    <p class="text-muted">Loading pending payouts...</p>
+                </div>
+            </div>
 
             <div id="walletsModule" class="admin-module">
                 <h3 class="text-primary" style="margin-bottom: 20px;">Pending UTR Requests</h3>
@@ -552,6 +569,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
     if(moduleId === 'supportModule') loadAdminSupport();
     if(moduleId === 'servicesManagerModule') loadAdminServices();
         if(moduleId === 'proofsModule') loadAdminProofs();
+    if(moduleId === 'payoutsModule') loadAdminPayouts();
 
     // ✅ MOBILE: auto close sidebar
     if (window.innerWidth <= 768) {
@@ -1024,6 +1042,62 @@ function handleSwipe() {
         overlay.classList.remove('active');
     }
 }
+        // ==========================================
+        // BOSS MODE: AFFILIATE PAYOUTS
+        // ==========================================
+        window.loadAdminPayouts = async () => {
+            const container = document.getElementById('adminPayoutsList');
+            container.innerHTML = '<p class="text-muted">Fetching payouts...</p>';
+            try {
+                // Sirf pending requests layenge
+                const q = query(collection(db, "payouts"), where("status", "==", "pending"));
+                const snap = await getDocs(q);
+                
+                container.innerHTML = '';
+                if(snap.empty) {
+                    container.innerHTML = '<p class="text-muted">No pending withdrawals. Everyone is paid! 🎉</p>';
+                    return;
+                }
+
+                snap.forEach(docSnap => {
+                    const req = docSnap.data();
+                    container.innerHTML += `
+                        <div class="neu-card" style="margin-bottom: 15px; padding: 20px; border-left: 4px solid #ffa500;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div>
+                                    <p style="font-size: 12px; color: var(--text-muted);">Request ID: ${docSnap.id}</p>
+                                    <p style="font-size: 20px; font-weight: 800; color: #00ff88;">Pay: ₹${req.amount_inr}</p>
+                                    <p style="font-size: 12px; color: var(--primary-color);">Tokens Deducted: ${req.amount_tokens} GI28</p>
+                                </div>
+                                <button class="neu-btn" style="padding: 10px 20px; background: rgba(0, 255, 136, 0.1); color: #00ff88; font-weight: 700;" onclick="markPayoutPaid('${docSnap.id}')">
+                                    Mark as Paid ✓
+                                </button>
+                            </div>
+                            <div style="background: var(--bg-color); padding: 10px; border-radius: 8px; box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);">
+                                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 5px;">TRANSFER TO UPI ID:</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <p style="font-size: 16px; font-weight: 600; font-family: monospace;">${req.upi}</p>
+                                    <button class="neu-btn" style="padding: 5px 10px; font-size: 10px;" onclick="navigator.clipboard.writeText('${req.upi}'); alert('UPI Copied!');">Copy UPI</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) { 
+                console.error(error); 
+                container.innerHTML = '<p style="color:#ff4444;">Error loading payouts.</p>'; 
+            }
+        };
+
+        window.markPayoutPaid = async (payoutId) => {
+            if(!confirm("Did you send the money to their UPI? Click OK to mark as PAID.")) return;
+            try {
+                // Status update kar diya taaki partner panel mein success dikhe
+                await updateDoc(doc(db, "payouts", payoutId), { status: "paid" });
+                loadAdminPayouts(); // Refresh the list
+            } catch (error) { alert("Error: " + error.message); }
+        };
+
     </script>
 
 </body>
