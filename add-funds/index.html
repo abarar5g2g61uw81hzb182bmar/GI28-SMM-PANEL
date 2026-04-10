@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="bright">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GI28 PANEL - Add Funds</title>
-    
-    <script src="../assets/js/auth-check.js"></script>
     <link rel="stylesheet" href="../assets/css/global.css">
     <style>
         .payment-box { max-width: 500px; margin: 20px auto; padding: 30px 20px; }
@@ -44,8 +42,9 @@
                     Exchange Rate: 1 GI28 = ₹<span id="baseRateTxt">70</span> (<span id="inrValue" class="text-primary" style="font-weight:600;">₹0</span>)
                 </p>
             </div>
-
-
+<div class="input-group">
+    <input type="text" id="couponCode" class="neu-input" placeholder="Enter Referral Code (Optional)">
+</div>
             <div class="pay-options">
                 <button class="neu-btn pay-btn" id="upiDeepLink" onclick="payViaUPI()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
@@ -79,8 +78,10 @@
 <div id="footer-placeholder"></div>
  
     <script src="../assets/js/app.js"></script>
-        <script type="module">
-        import { auth, db, doc, setDoc, getDoc } from "../assets/js/firebase-config.js"; // Yahan getDoc add kiya
+    <script src="../assets/js/auth-check.js"></script>
+    <script type="module">
+        // IMPORT MEIN NAYE TOOLS ADD KIYE HAIN
+        import { auth, db, doc, setDoc, getDoc, collection, query, where, getDocs } from "../assets/js/firebase-config.js"; 
 
         let rateINR = 70; // Default fallback
         const upiID = "constantabrar@upi";
@@ -91,15 +92,12 @@
                 const settingsSnap = await getDoc(doc(db, "admin", "settings"));
                 if(settingsSnap.exists() && settingsSnap.data().token_rate) {
                     rateINR = settingsSnap.data().token_rate;
-                    // HTML mein rate update karo
                     document.getElementById('baseRateTxt').innerText = rateINR;
-                    // Agar user ne rate aane se pehle amount daal diya tha, toh dobara calculate karo
                     calculateINR(); 
                 }
             } catch(e) { console.log("Using default rate", e); }
         }
         
-        // Page load hone par rate fetch karo
         fetchLiveRate();
 
         window.calculateINR = function() {
@@ -120,31 +118,78 @@
             window.location.href = upiUrl;
         };
 
+        // ==========================================
+        // THE MASTER SUBMIT LOGIC (WITH COUPON ENGINE)
+        // ==========================================
         document.getElementById('submitRequest').addEventListener('click', async () => {
             const user = auth.currentUser;
             const tokens = document.getElementById('tokenAmount').value;
             const utr = document.getElementById('utrNumber').value;
+            const coupon = document.getElementById('couponCode').value.trim().toUpperCase();
 
             if(!user) return alert("Please Login first!");
             if(!tokens || !utr) return alert("Fill all details!");
 
             const btn = document.getElementById('submitRequest');
-            btn.innerHTML = "Submitting...";
+            btn.innerHTML = "Verifying Code...";
+
+            let resellerUid = null;
+            let appliedCoupon = null;
+            const baseTokens = Number(tokens);
 
             try {
+                // 1. Agar Coupon Code daala hai, toh check karo wo database mein hai ya nahi
+                if (coupon) {
+                    const q = query(collection(db, "users"), where("partner_code", "==", coupon));
+                    const snap = await getDocs(q);
+
+                    if (snap.empty) {
+                        alert("Invalid Referral Code! Please check the code and try again.");
+                        btn.innerHTML = "Verify Payment";
+                        return; // Rok do, code galat hai
+                    } else {
+                        // Check karo ki khud ka code toh nahi daal diya!
+                        const rUid = snap.docs[0].id;
+                        if (rUid === user.uid) {
+                            alert("You cannot use your own referral code!");
+                            btn.innerHTML = "Verify Payment";
+                            return;
+                        }
+                        // Code ekdum sahi hai!
+                        resellerUid = rUid;
+                        appliedCoupon = coupon;
+                    }
+                }
+
+                btn.innerHTML = "Submitting...";
+
+                // 2. 5% Bonus Math
+                const bonusTokens = appliedCoupon ? (baseTokens * 0.05) : 0;
+                const commissionTokens = appliedCoupon ? (baseTokens * 0.05) : 0;
+
+                // 3. Database mein Request save karo (With Affiliate details)
                 const requestId = "REQ" + Date.now();
                 
                 await setDoc(doc(db, "fund_requests", requestId), {
                     user_uid: user.uid,
                     user_email: user.email,
-                    tokens_requested: Number(tokens),
+                    tokens_requested: baseTokens,
+                    bonus_tokens: bonusTokens, // Ye user ko milega Admin ke approve karne par
+                    applied_coupon: appliedCoupon || "",
+                    reseller_uid: resellerUid || "",
+                    reseller_commission: commissionTokens, // Ye Reseller ko milega Admin ke approve karne par
                     amount_inr: (tokens * rateINR).toFixed(2),
                     utr_number: utr,
                     status: "pending",
                     timestamp: new Date()
                 });
 
-                alert("Request Submitted! Admin will verify and add tokens soon.");
+                if(appliedCoupon) {
+                    alert(`Request Submitted! You will get +5% Extra Tokens (${bonusTokens} GI28) once admin verifies!`);
+                } else {
+                    alert("Request Submitted! Admin will verify and add tokens soon.");
+                }
+                
                 window.location.href = "../dashboard/";
             } catch (error) {
                 alert("Error: " + error.message);
@@ -152,6 +197,7 @@
             }
         });
     </script>
+
 
 </body>
 </html>
