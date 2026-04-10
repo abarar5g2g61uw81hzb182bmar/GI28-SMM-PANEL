@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <title>GI28 Partner Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        .partner-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .neu-card { padding: 20px; border-radius: 16px; text-align: center; }
+        .code-box { font-family: monospace; font-size: 20px; color: var(--primary-color); background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div style="padding: 20px; max-width: 800px; margin: auto;">
+        <h2 style="margin-bottom: 20px;">Partner Dashboard</h2>
+        
+        <div class="partner-grid">
+            <div class="neu-card">
+                <p class="text-muted" style="font-size: 10px;">TOTAL EARNED</p>
+                <h3 id="totalEarned" style="font-size: 24px;">0 GI28</h3>
+            </div>
+            <div class="neu-card">
+                <p class="text-muted" style="font-size: 10px;">AVAILABLE WALLET</p>
+                <h3 id="availableBal" style="font-size: 24px;">0 GI28</h3>
+                <p id="inrValue" style="font-size: 12px; color: var(--primary-color);">~ ₹0</p>
+            </div>
+        </div>
+
+        <div class="neu-card" style="margin-bottom: 20px;">
+            <p class="text-muted">YOUR UNIQUE COUPON CODE</p>
+            <div class="code-box" id="partnerCode">Generating...</div>
+            <button class="neu-btn" onclick="copyCode()">Copy Code</button>
+        </div>
+
+        <div class="neu-card">
+            <h3>Withdraw Earnings</h3>
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="number" id="withdrawAmt" class="neu-input" placeholder="Tokens to withdraw">
+                <input type="text" id="upiId" class="neu-input" placeholder="Enter your UPI ID">
+                <button class="neu-btn" style="width: 100%; margin-top: 10px;" onclick="requestWithdrawal()">Withdraw Now</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="../assets/js/partner.js"></script>
+</body>
+</html>
