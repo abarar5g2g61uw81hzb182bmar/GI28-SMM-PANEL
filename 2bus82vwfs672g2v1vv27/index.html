@@ -275,6 +275,9 @@
                         <div class="admin-tab" onclick="switchAdminTab('payoutsModule', this)">
                 Affiliate Payouts
             </div>
+            <div class="admin-tab" onclick="switchAdminTab('trialOrdersModule', this)">
+                Bhuke Nange log
+            </div>
 
                         <div class="admin-tab" onclick="switchAdminTab('servicesManagerModule', this)">
                 Manage Services
@@ -357,6 +360,15 @@
                 </div>
                 <div id="adminPayoutsList">
                     <p class="text-muted">Loading pending payouts...</p>
+                </div>
+            </div>
+            <div id="trialOrdersModule" class="admin-module">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="text-primary" style="font-size: 18px;">Pending ₹1 Trial Requests</h3>
+                    <button class="neu-btn" style="padding: 5px 15px; font-size: 12px;" onclick="loadAdminTrialOrders()">Refresh</button>
+                </div>
+                <div id="adminTrialOrdersList">
+                    <p class="text-muted">Loading trial requests...</p>
                 </div>
             </div>
 
@@ -563,8 +575,9 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
     if(moduleId === 'servicesManagerModule') loadAdminServices();
         if(moduleId === 'proofsModule') loadAdminProofs();
     if(moduleId === 'payoutsModule') loadAdminPayouts();
-
-    // ✅ MOBILE: auto close sidebar
+    if(moduleId === 'trialOrdersModule') loadAdminTrialOrders();
+    
+    
     if (window.innerWidth <= 768) {
     document.querySelector('.admin-sidebar').classList.remove('active');
     document.getElementById('sidebarOverlay').classList.remove('active');
@@ -1126,6 +1139,72 @@ function handleSwipe() {
                 // Status update kar diya taaki partner panel mein success dikhe
                 await updateDoc(doc(db, "payouts", payoutId), { status: "paid" });
                 loadAdminPayouts(); // Refresh the list
+            } catch (error) { alert("Error: " + error.message); }
+        };
+        // ==========================================
+        // BOSS MODE: ₹1 TRIAL ORDERS
+        // ==========================================
+        window.loadAdminTrialOrders = async () => {
+            const container = document.getElementById('adminTrialOrdersList');
+            container.innerHTML = '<p class="text-muted">Fetching trial requests...</p>';
+            try {
+                const q = query(collection(db, "trial_orders"), where("status", "==", "pending"));
+                const snap = await getDocs(q);
+
+                container.innerHTML = '';
+                if(snap.empty) {
+                    container.innerHTML = '<p class="text-muted">No pending trial requests. Sab clear hai! 🎉</p>';
+                    return;
+                }
+
+                snap.forEach(docSnap => {
+                    const req = docSnap.data();
+                    container.innerHTML += `
+                        <div class="neu-card" style="margin-bottom: 15px; padding: 20px; border-left: 4px solid #00ff88;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                                <div>
+                                    <p style="font-size: 14px; font-weight: 700; color: var(--primary-color);">${req.user_email || 'No Email'}</p>
+                                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">Service: <strong style="color:var(--text-color);">${req.service_id}</strong></p>
+                                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">Link: <a href="${req.target_url}" target="_blank" style="color: #00ff88; text-decoration: none;">View Link</a></p>
+                                </div>
+                                <div style="text-align: right; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px;">
+                                    <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px;">UTR / TXN ID:</p>
+                                    <p style="font-size: 16px; font-weight: 800; font-family: monospace;">${req.transaction_id}</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="neu-btn" style="flex: 1; padding: 10px; background: rgba(0, 255, 136, 0.1); color: #00ff88; font-weight: 700;" onclick="approveTrialOrder('${docSnap.id}')">Approve & Send Order</button>
+                                <button class="neu-btn" style="padding: 10px 15px; color: #ff4444;" onclick="rejectTrialOrder('${docSnap.id}', '${req.user_uid}')">Reject Fake UTR</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = '<p style="color:#ff4444;">Error loading trial orders.</p>';
+            }
+        };
+
+        window.approveTrialOrder = async (orderId) => {
+            if(!confirm("Is the ₹1 UTR valid? Click OK to Approve.")) return;
+            try {
+                await updateDoc(doc(db, "trial_orders", orderId), { status: "approved" });
+                alert("Trial Approved! (Remember to manually place this order on your main provider panel for now)");
+                loadAdminTrialOrders();
+            } catch (error) { alert("Error: " + error.message); }
+        };
+
+        window.rejectTrialOrder = async (orderId, userUid) => {
+            if(!confirm("Reject this fake ₹1 request? This will let the user try again if it was a genuine mistake.")) return;
+            try {
+                // Reject the order
+                await updateDoc(doc(db, "trial_orders", orderId), { status: "rejected" });
+                
+                // SMARTHACK: Unblock the user's trial limit so they can retry with correct UTR
+                await updateDoc(doc(db, "users", userUid), { has_used_trial: false });
+                
+                alert("Rejected! The user's trial block has been removed so they can try again.");
+                loadAdminTrialOrders();
             } catch (error) { alert("Error: " + error.message); }
         };
 
