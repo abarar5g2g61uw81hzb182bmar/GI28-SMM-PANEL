@@ -9,7 +9,7 @@ import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, quer
 // Teri exact Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyC2t1TDj9OGoqnZVQfhoP_PCI0xhgf8ePE",
-    authDomain: "gi28-smm-panel.firebaseapp.com",
+    authDomain: "gi28.in",
     projectId: "gi28-smm-panel",
     storageBucket: "gi28-smm-panel.firebasestorage.app",
     messagingSenderId: "431905380300",
