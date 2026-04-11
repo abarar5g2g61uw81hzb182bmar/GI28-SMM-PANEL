@@ -42,9 +42,75 @@
         .modal-box { width: 90%; max-width: 400px; padding: 30px; text-align: center; }
         
     </style>
+    <style>
+#entryGate {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+}
+
+.glass-card {
+  width: 280px;
+  padding: 25px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.2),
+    inset 0 1px rgba(255,255,255,0.3);
+  text-align: center;
+  color: #fff;
+  font-family: Poppins, sans-serif;
+}
+
+.glass-card h2 {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.glass-card p {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+#enterBtn {
+  padding: 10px 20px;
+  border-radius: 30px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#enterBtn:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.05);
+}
+</style>
 </head>
 <body>
+<div id="entryGate">
+  <div class="glass-card">
+    <h2>⚠ Attention</h2>
+    <p>I just added a funny voice effect! Just for Fun! 🥲😅</p>
+    <button id="enterBtn">OK</button>
+  </div>
+</div>
 
+<audio id="whooshSound" preload="auto">
+  <!-- lightweight whoosh / faah sound -->
+  <source src="data:audio/mp3;base64,//uQxAAAAA..." type="audio/mpeg">
+</audio>
     <h1 class="brand-logo" style="font-size: 36px; margin-bottom: 10px;">GI28</h1>
     <p class="text-muted" style="letter-spacing: 1px; text-transform: uppercase;">Premium SMM Panel</p>
 
@@ -268,5 +334,26 @@
             }
         });
     </script>
+    <script>
+const gate = document.getElementById("entryGate");
+const btn = document.getElementById("enterBtn");
+const sound = document.getElementById("whooshSound");
+
+sound.volume = 0.4;
+
+btn.addEventListener("click", () => {
+  // play FAH / whoosh sound
+  sound.currentTime = 0;
+  sound.play().catch(()=>{});
+
+  // smooth fade out
+  gate.style.transition = "opacity 0.5s ease";
+  gate.style.opacity = "0";
+
+  setTimeout(() => {
+    gate.style.display = "none";
+  }, 500);
+});
+</script>
 </body>
 </html>
