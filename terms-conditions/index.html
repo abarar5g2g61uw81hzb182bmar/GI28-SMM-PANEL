@@ -279,7 +279,144 @@
             .legal-section { padding: 20px 16px; }
             .legal-header { padding: 28px 18px; }
         }
-    </style>
+         /* ── EXPANDABLE NEUMORPHIC SEARCH (PRO VERSION) ── */
+        .neu-search-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        .neu-search-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 280px; 
+            background: var(--bg-color);
+            border-radius: 30px;
+            padding: 6px 8px; 
+            box-sizing: border-box; 
+            box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+            transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
+            overflow: hidden; 
+        }
+
+        .neu-search-wrapper.active .neu-search-container {
+            max-width: 100%; 
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+        }
+
+        .neu-search-input {
+            flex: 1;
+            min-width: 0; 
+            border: none;
+            background: transparent;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--text-color);
+            outline: none;
+            font-family: inherit;
+        }
+
+        .neu-search-input::placeholder { color: var(--text-muted); }
+
+        /* Navigator Buttons Container */
+        .neu-search-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 4px;
+        }
+
+        .neu-nav-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: var(--bg-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            box-shadow: 2px 2px 5px var(--shadow-dark), -2px -2px 5px var(--shadow-light);
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+
+        .neu-nav-btn:hover { color: var(--primary-color); }
+        .neu-nav-btn:active { box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light); }
+
+        /* Main Search Button */
+        .neu-search-btn {
+            width: 0;
+            height: 36px;
+            opacity: 0;
+            border: none;
+            background: var(--bg-color);
+            border-radius: 50%; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--primary-color);
+            box-shadow: none; 
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            padding: 0;
+            margin-left: 0;
+            flex-shrink: 0; 
+        }
+
+        .neu-search-wrapper.active .neu-search-btn {
+            width: 36px;
+            opacity: 1;
+            margin-left: 4px;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+        }
+
+        .neu-search-btn:active {
+            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+        }
+
+        /* Result Counter */
+        .neu-search-results {
+            margin-top: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary-color);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        .neu-search-results.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Normal Match Highlight */
+        mark.neu-highlight {
+            background-color: transparent;
+            color: var(--text-color);
+            font-weight: 800;
+            border-radius: 6px;
+            padding: 2px 4px;
+            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        /* Active/Focused Match Highlight */
+        mark.neu-highlight.active-match {
+            color: var(--bg-color);
+            background-color: var(--primary-color);
+            box-shadow: 0 0 8px var(--primary-color);
+        }
+
+</style>
 </head>
 <body>
 
@@ -295,6 +432,26 @@
             <h1>Terms &amp; Privacy Policy</h1>
             <p>Last Updated: 11 April 2026 &nbsp;·&nbsp; Version 3.0 &nbsp;·&nbsp; 100% Transparency Guaranteed</p>
         </div>
+                <div class="neu-search-wrapper" id="searchWrapper">
+            <div class="neu-search-container">
+                <input type="text" id="policySearch" class="neu-search-input" placeholder="Search §1.1d, privacy, etc...">
+                
+                <div class="neu-search-nav" id="searchNav" style="display: none;">
+                    <button class="neu-nav-btn" id="prevBtn" title="Previous (Shift+Enter)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
+                    <button class="neu-nav-btn" id="nextBtn" title="Next (Enter)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                </div>
+
+                <button class="neu-search-btn" id="searchBtn" title="Search">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+            <div class="neu-search-results" id="searchResultsCount"></div>
+        </div>
+
 
         <!-- ══ QUICK NAVIGATION ══════════════════════════════════ -->
         <div class="toc-card">
@@ -457,7 +614,7 @@
                 <li><strong>§2.2b — Support Interaction:</strong> When you open a support ticket, your name allows our agents to address you respectfully and identify your account quickly.</li>
                 <li><strong>§2.2c — Billing Records:</strong> For UPI/bank transactions above ₹10,000, your name may appear on payment gateway receipts as required by financial regulations.</li>
                 <li><strong>§2.2d — Affiliate Identity:</strong> Your first name may be referenced in payout confirmation emails sent to you.</li>
-                <li><strong>§2.2e — No Public Display:</strong> Your full name is NEVER displayed publicly on the platform. It is not shown to other users or indexed by search engines.</li>
+                <li><strong>§2.2e — Public Display:</strong> Your full name is displayed publicly on this platform. It is not shown to other users or indexed by search engines.</li>
                 <li><strong>§2.2f — Review Consent Exception:</strong> If you voluntarily submit a "Verified Reseller Review" with explicit checkbox consent, only your first name and panel tier are shown.</li>
                 <li><strong>§2.2g — Name Update Right:</strong> You can update your display name at any time from your Profile Settings.</li>
             </ul>
@@ -1235,7 +1392,7 @@
                 <li><strong>§11.1d — Limitation of Liability:</strong> GI28's maximum aggregate liability to any user for any claim arising from these terms shall not exceed the total amount deposited by that user in the 90 days preceding the claim.</li>
                 <li><strong>§11.1e — Force Majeure:</strong> GI28 shall not be liable for delays or failures resulting from causes beyond our reasonable control, including acts of God, government actions, internet infrastructure failures, social media platform outages, or third-party API provider failures.</li>
                 <li><strong>§11.1f — Severability:</strong> If any provision of these terms is held invalid or unenforceable, the remaining provisions shall continue in full force and effect.</li>
-                <li><strong>§11.1g — Contact for Legal Matters:</strong> All formal legal correspondence should be directed to <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> with the subject "Legal Notice – [Your Name]."</li>
+                <li><strong>§11.1g — Contact for Legal Matters:</strong> All formal legal correspondence should be directed to <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> with the subject "Legal Notice – Constant Abrar (Abrar Alli Khan)."</li>
             </ul>
         </div>
 
@@ -1258,6 +1415,8 @@
 
     </div><!-- /.legal-container -->
 
+<div id="footer-placeholder"></div>
+ 
     <script src="../assets/js/app.js"></script>
     <script>
         // Smooth highlight on anchor jump
@@ -1275,6 +1434,134 @@
                 setTimeout(() => { target.style.boxShadow = orig; }, 1600);
             });
         });
+        // Search, Highlight & Navigate Logic
+        const searchInput = document.getElementById('policySearch');
+        const searchWrapper = document.getElementById('searchWrapper');
+        const resultsCount = document.getElementById('searchResultsCount');
+        const searchNav = document.getElementById('searchNav');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        const searchableSections = document.querySelectorAll('.legal-section, .chapter-divider h2');
+        
+        let highlights = []; // Store all highlighted elements
+        let currentIndex = -1; // Keep track of active highlight
+
+        // UI Interactions
+        searchInput.addEventListener('focus', () => searchWrapper.classList.add('active'));
+        searchInput.addEventListener('blur', () => {
+            if (!searchInput.value.trim()) searchWrapper.classList.remove('active');
+        });
+
+        // Function to scroll and focus on current match
+        function updateFocus() {
+            if (highlights.length === 0) return;
+
+            // Remove active class from all
+            highlights.forEach(h => h.classList.remove('active-match'));
+            
+            // Add active class to current
+            const currentMark = highlights[currentIndex];
+            currentMark.classList.add('active-match');
+            
+            // Smooth scroll to the active match
+            currentMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Update counter text (e.g., 1 of 15)
+            resultsCount.textContent = `${currentIndex + 1} of ${highlights.length} matches`;
+        }
+
+        // Real-time text search
+        searchInput.addEventListener('input', function() {
+            const term = this.value.trim();
+            highlights = [];
+            currentIndex = -1;
+
+            // Clear old highlights
+            document.querySelectorAll('mark.neu-highlight').forEach(mark => {
+                const parent = mark.parentNode;
+                parent.replaceChild(document.createTextNode(mark.textContent), mark);
+                parent.normalize();
+            });
+
+            if (!term) {
+                resultsCount.classList.remove('show');
+                searchNav.style.display = 'none';
+                return;
+            }
+
+            const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+
+            searchableSections.forEach(section => {
+                const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT, null, false);
+                let node;
+                const nodesToReplace = [];
+
+                while ((node = walker.nextNode())) {
+                    if (node.nodeValue.match(regex)) nodesToReplace.push(node);
+                }
+
+                nodesToReplace.forEach(n => {
+                    const fragment = document.createDocumentFragment();
+                    let lastIdx = 0;
+                    n.nodeValue.replace(regex, (match, p1, offset) => {
+                        const before = n.nodeValue.slice(lastIdx, offset);
+                        if (before) fragment.appendChild(document.createTextNode(before));
+
+                        const mark = document.createElement('mark');
+                        mark.className = 'neu-highlight';
+                        mark.textContent = match;
+                        fragment.appendChild(mark);
+                        highlights.push(mark); // Array me store karo
+
+                        lastIdx = offset + match.length;
+                    });
+                    const after = n.nodeValue.slice(lastIdx);
+                    if (after) fragment.appendChild(document.createTextNode(after));
+
+                    n.parentNode.replaceChild(fragment, n);
+                });
+            });
+
+            if (highlights.length > 0) {
+                searchNav.style.display = 'flex';
+                currentIndex = 0;
+                updateFocus(); // Pehle result par scroll karo
+                resultsCount.classList.add('show');
+            } else {
+                searchNav.style.display = 'none';
+                resultsCount.textContent = "No results found";
+                resultsCount.classList.add('show');
+            }
+        });
+
+        // Navigator Button Clicks
+        nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (highlights.length === 0) return;
+            currentIndex = (currentIndex + 1) % highlights.length; // Loop around
+            updateFocus();
+        });
+
+        prevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (highlights.length === 0) return;
+            currentIndex = (currentIndex - 1 + highlights.length) % highlights.length; // Loop backwards
+            updateFocus();
+        });
+
+        // Enter key shortcut for Next/Prev
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    prevBtn.click();
+                } else {
+                    nextBtn.click();
+                }
+            }
+        });
+
     </script>
 </body>
 </html>
