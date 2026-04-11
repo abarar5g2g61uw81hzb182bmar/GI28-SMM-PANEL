@@ -49,61 +49,78 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(10px);
+
+  /* VERY LIGHT overlay (almost transparent) */
+  background: rgba(0,0,0,0.08);
+
+  backdrop-filter: blur(4px); /* low blur */
+  -webkit-backdrop-filter: blur(4px);
+
   z-index: 9999;
 }
 
 .glass-card {
   width: 280px;
-  padding: 25px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.2);
+  padding: 26px;
+  border-radius: 22px;
+
+  /* HIGH transparency */
+  background: rgba(255,255,255,0.04);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  /* SHARP GLASS EDGE */
+  border: 1px solid rgba(255,255,255,0.35);
+
+  /* subtle inner highlight (glass shine) */
   box-shadow: 
-    0 8px 32px rgba(0,0,0,0.2),
-    inset 0 1px rgba(255,255,255,0.3);
+    inset 0 1px 1px rgba(255,255,255,0.4),
+    0 10px 30px rgba(0,0,0,0.15);
+
   text-align: center;
-  color: #fff;
+  color: black;
   font-family: Poppins, sans-serif;
+
+  /* smooth entrance */
+  animation: glassPop 0.5s ease;
+}
+
+@keyframes glassPop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .glass-card h2 {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .glass-card p {
-  font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 20px;
+  font-size: 13px;
+  opacity: 0.75;
+  margin-bottom: 18px;
 }
 
-#enterBtn {
-  padding: 10px 20px;
-  border-radius: 30px;
-  border: none;
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  font-weight: 500;
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-#enterBtn:hover {
-  background: rgba(255,255,255,0.3);
-  transform: scale(1.05);
+#entryGate:active .glass-card {
+  transform: scale(0.98);
 }
 </style>
+    
 </head>
 <body>
 <div id="entryGate">
   <div class="glass-card">
     <h2>⚠ Attention</h2>
     <p>I just added a funny voice effect! Just for Fun! 🥲😅</p>
-    <button id="enterBtn">OK</button>
+    <p>Tap anywhere to <b>CONTINUE</b></p>
   </div>
 </div>
 
@@ -336,24 +353,38 @@
     </script>
     <script>
 const gate = document.getElementById("entryGate");
-const btn = document.getElementById("enterBtn");
+const card = document.querySelector(".glass-card");
 const sound = document.getElementById("whooshSound");
 
-sound.volume = 0.4;
+sound.volume = 0.35;
 
-btn.addEventListener("click", () => {
-  // play FAH / whoosh sound
+// prevent double trigger
+let opened = false;
+
+function enterSite() {
+  if (opened) return;
+  opened = true;
+
+  // play FAAAah sound
   sound.currentTime = 0;
   sound.play().catch(()=>{});
 
-  // smooth fade out
-  gate.style.transition = "opacity 0.5s ease";
+  // smooth fade + slight scale
+  gate.style.transition = "opacity 0.45s ease";
+  card.style.transition = "transform 0.45s ease, opacity 0.45s ease";
+
   gate.style.opacity = "0";
+  card.style.transform = "scale(1.05)";
+  card.style.opacity = "0";
 
   setTimeout(() => {
     gate.style.display = "none";
-  }, 500);
-});
+  }, 450);
+}
+
+// tap anywhere (mobile + desktop)
+gate.addEventListener("click", enterSite);
+gate.addEventListener("touchstart", enterSite);
 </script>
 </body>
 </html>
