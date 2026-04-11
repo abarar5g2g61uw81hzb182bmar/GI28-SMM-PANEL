@@ -113,7 +113,7 @@ function logoutUser() {
 }
 
 
-const clickSound = new Audio('/assets/sounds/mixkit-fast-double-click-on-mouse-275.wav');
+const clickSound = new Audio('/assets/sounds/Faah.mp3');
 clickSound.volume = 1;
 clickSound.load();
 
