@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/__/auth/(.*)",
+      "destination": "https://gi28-smm-panel.firebaseapp.com/__/auth/$1"
+    }
+  ]
+}
