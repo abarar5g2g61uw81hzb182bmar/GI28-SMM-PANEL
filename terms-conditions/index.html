@@ -1,20 +1,284 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="bright">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GI28 PANEL - Terms & Conditions</title>
+    <title>GI28 - Terms & Privacy Policy</title>
     <link rel="stylesheet" href="../assets/css/global.css">
     <style>
-        .tc-container { padding: 30px; margin-bottom: 40px; }
-        .tc-header { margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        .tc-section { margin-bottom: 25px; }
-        .tc-section h3 { font-size: 16px; color: var(--primary-color); margin-bottom: 10px; }
-        .tc-section p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
-        
-        /* Loading skeleton */
-        .skeleton-text { height: 15px; background: var(--status-bg); margin-bottom: 10px; border-radius: 4px; animation: pulse-bg 1.5s infinite; }
-        @keyframes pulse-bg { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        html { scroll-behavior: smooth; }
+
+        .legal-container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        /* ── HEADER CARD ── */
+        .legal-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 36px 30px;
+            border-radius: 20px;
+            background: var(--bg-color);
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+        }
+        .legal-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+        .legal-header p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .header-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* ── CHAPTER DIVIDER ── */
+        .chapter-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 36px 0 16px;
+        }
+        .ch-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: var(--bg-color);
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+            letter-spacing: 0;
+        }
+        .chapter-divider h2 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-color);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .ch-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        /* ── TOC CARD ── */
+        .toc-card {
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 28px;
+            background: var(--bg-color);
+            box-shadow: inset 3px 3px 7px var(--shadow-dark), inset -3px -3px 7px var(--shadow-light);
+        }
+        .toc-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .toc-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .toc-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 8px;
+            background: var(--bg-color);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            transition: all 0.2s ease;
+        }
+        .toc-link:hover {
+            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+            color: var(--primary-color);
+        }
+        .toc-link svg {
+            width: 11px;
+            height: 11px;
+            flex-shrink: 0;
+            stroke: var(--text-muted);
+        }
+
+        /* ── LEGAL SECTION ── */
+        .legal-section {
+            padding: 28px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            background: var(--bg-color);
+            box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+            scroll-margin-top: 90px;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .legal-section:hover {
+            box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
+            transform: translateY(-2px);
+        }
+
+        /* Section heading */
+        .legal-section h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-color);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+        }
+        .section-icon svg {
+            width: 15px;
+            height: 15px;
+            stroke: var(--primary-color);
+        }
+
+        .legal-section p {
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.85;
+            margin-bottom: 13px;
+        }
+        .legal-section ul,
+        .legal-section ol {
+            margin-left: 18px;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.85;
+            margin-bottom: 13px;
+        }
+        .legal-section li { margin-bottom: 8px; }
+        .legal-section strong { color: var(--text-color); }
+        .legal-section a { color: var(--primary-color); }
+
+        /* ── HIGHLIGHT BOXES ── */
+        .highlight-box {
+            padding: 14px 16px;
+            border-left: 3px solid var(--primary-color);
+            border-radius: 0 10px 10px 0;
+            background: var(--status-bg);
+            font-size: 12px;
+            color: var(--text-color);
+            margin: 16px 0;
+            line-height: 1.8;
+        }
+        .highlight-box.danger {
+            border-color: #ff4d4d;
+        }
+        .highlight-box.warning {
+            border-color: #f0a500;
+        }
+        .highlight-box.info {
+            border-color: #4d9fff;
+        }
+
+        /* ── PILL ROW ── */
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 14px 0;
+        }
+        .pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-color);
+            background: var(--bg-color);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+        }
+
+        /* ── CODE ── */
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 5px;
+            background: var(--status-bg);
+            color: var(--primary-color);
+        }
+
+        /* ── FOOTER ── */
+        .legal-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 28px;
+            border-radius: 16px;
+            background: var(--bg-color);
+            box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+        }
+        .legal-footer p {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.9;
+        }
+
+        /* ── BACK TO TOP ── */
+        .back-top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: fit-content;
+            margin: 28px auto 0;
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+            background: var(--bg-color);
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+            transition: all 0.2s ease;
+        }
+        .back-top:hover {
+            box-shadow: inset 3px 3px 7px var(--shadow-dark), inset -3px -3px 7px var(--shadow-light);
+        }
+        .back-top svg { width: 14px; height: 14px; }
+
+        @media (max-width: 600px) {
+            .legal-section { padding: 20px 16px; }
+            .legal-header { padding: 28px 18px; }
+        }
     </style>
 </head>
 <body>
@@ -23,53 +287,993 @@
     <div id="sidebar-placeholder"></div>
     <div id="navbar-placeholder"></div>
 
-    <div class="main-content">
-        <h2 class="section-title">Terms & Conditions</h2>
-        <p class="text-muted" style="margin-bottom: 25px;">Please read our policies carefully before using GI28 services.</p>
+    <div class="main-content legal-container">
 
-        <div class="neu-card tc-container">
-            <div class="tc-header">
-                <p class="text-primary" style="font-weight: 600; font-size: 14px;">Last Updated: <span id="lastUpdatedDate">Loading...</span></p>
-            </div>
-            
-            <div id="tcContent">
-                <div class="tc-section"><div class="skeleton-text" style="width: 40%;"></div><div class="skeleton-text" style="width: 100%;"></div><div class="skeleton-text" style="width: 80%;"></div></div>
-                <div class="tc-section"><div class="skeleton-text" style="width: 50%;"></div><div class="skeleton-text" style="width: 90%;"></div><div class="skeleton-text" style="width: 100%;"></div></div>
+        <!-- ══ HEADER ══════════════════════════════════════════════ -->
+        <div class="legal-header">
+            <div class="header-badge">gi28.in &nbsp;·&nbsp; Legal Document</div>
+            <h1>Terms &amp; Privacy Policy</h1>
+            <p>Last Updated: 11 April 2026 &nbsp;·&nbsp; Version 3.0 &nbsp;·&nbsp; 100% Transparency Guaranteed</p>
+        </div>
+
+        <!-- ══ QUICK NAVIGATION ══════════════════════════════════ -->
+        <div class="toc-card">
+            <div class="toc-label">Quick Navigation</div>
+            <div class="toc-grid">
+                <!-- SVG: chevron-right used as bullet for all TOC links -->
+                <a href="#acceptance" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Acceptance</a>
+                <a href="#age" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Age Policy</a>
+                <a href="#modifications" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Modifications</a>
+                <a href="#userdata" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>User Data</a>
+                <a href="#name" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Name</a>
+                <a href="#email" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Email</a>
+                <a href="#phone" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Phone</a>
+                <a href="#cookies" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Cookies</a>
+                <a href="#thirdparty" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>No Data Selling</a>
+                <a href="#wallet" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Wallet</a>
+                <a href="#utr" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>UTR Verification</a>
+                <a href="#refundpolicy" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Refund Policy</a>
+                <a href="#orderrefunds" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Order Refunds</a>
+                <a href="#disputes" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Disputes</a>
+                <a href="#privateaccounts" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Private Accounts</a>
+                <a href="#deliverytime" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Delivery Time</a>
+                <a href="#drops" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Drops &amp; Refill</a>
+                <a href="#fairuse" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Fair Use</a>
+                <a href="#affiliate" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Affiliate</a>
+                <a href="#commissions" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Commissions</a>
+                <a href="#payouts" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Payouts</a>
+                <a href="#affiliatefraud" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Affiliate Fraud</a>
+                <a href="#datadeletion" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Data Deletion</a>
+                <a href="#dataretention" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Data Retention</a>
+                <a href="#providers" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Providers</a>
+                <a href="#qualitycheck" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Quality Check</a>
+                <a href="#apirouting" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>API Routing</a>
+                <a href="#whatsappsupport" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>WhatsApp Support</a>
+                <a href="#resellercommunity" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Reseller Community</a>
+                <a href="#telegramprivacy" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Telegram</a>
+                <a href="#mandatorychannel" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Announcements</a>
+                <a href="#communityrules" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Community Rules</a>
+                <a href="#mandatoryphone" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Mandatory Phone</a>
+                <a href="#googlelogin" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Google Login</a>
+                <a href="#unreachableliability" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Liability</a>
+                <a href="#firebaseauth" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Firebase Auth</a>
+                <a href="#passwordsecurity" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Password Security</a>
+                <a href="#databaseencryption" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>DB Encryption</a>
+                <a href="#sessionmanagement" class="toc-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>Sessions</a>
             </div>
         </div>
-    </div>
 
-<div id="footer-placeholder"></div>
- 
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 1 — GENERAL & ACCEPTANCE
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">01</div>
+            <h2>General &amp; Acceptance of Terms</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="acceptance" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- check-circle -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+                §1.1 — Agreement &amp; Acceptance
+            </h3>
+            <p>Welcome to <strong>GI28</strong> — India's trusted Social Media Marketing Panel at <strong>gi28.in</strong>. By registering an account, browsing the platform, depositing funds, or placing even a single order, you irrevocably agree to be bound by this entire Terms of Service &amp; Privacy Policy document in its most recent version.</p>
+            <p>This agreement constitutes a legally binding contract between you (the "User," "Reseller," or "Customer") and <strong>GI28 Digital Services</strong>. If you do not agree with any provision, your only lawful remedy is to immediately cease using the platform and close your account.</p>
+            <div class="highlight-box">
+                <strong>Plain English:</strong> By signing up or using GI28, you are saying "I have read this, I understand it, and I agree." We have written this clearly on purpose — because we respect you.
+            </div>
+            <ul>
+                <li><strong>§1.1a — Implicit Consent:</strong> Continued use of the platform after any policy update constitutes implicit acceptance of the revised terms.</li>
+                <li><strong>§1.1b — Scope:</strong> These terms apply to all GI28 properties including gi28.in, any subdomains, mobile interfaces, and official API endpoints.</li>
+                <li><strong>§1.1c — Language of Binding:</strong> The English version of this document is the primary, authoritative version in all disputes. Translated versions are for convenience only.</li>
+                <li><strong>§1.1d — Entire Agreement:</strong> This document supersedes all prior understandings between you and GI28.</li>
+                <li><strong>§1.1e — No Waiver:</strong> GI28's failure to enforce any provision shall not constitute a waiver of that provision.</li>
+            </ul>
+        </div>
+
+        <div id="age" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- user -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                §1.2 — Age Restrictions &amp; Eligibility
+            </h3>
+            <ul>
+                <li><strong>§1.2a — Minimum Age to Browse:</strong> You must be at least <strong>13 years old</strong> to create a free account. Users under 13 are strictly prohibited from registering.</li>
+                <li><strong>§1.2b — Minimum Age for Transactions:</strong> To add funds, initiate UPI/bank transfers, or participate in the Affiliate Payout Programme, you must be at least <strong>18 years old</strong>.</li>
+                <li><strong>§1.2c — Parental Responsibility:</strong> Users aged 13–17 may only explore the platform under direct parental supervision. Any financial activity by a minor is a violation and will result in immediate account suspension.</li>
+                <li><strong>§1.2d — Age Verification Right:</strong> GI28 reserves the right to request government-issued age proof (Aadhaar, PAN) at any time. Failure to provide verification within 72 hours may result in account suspension.</li>
+                <li><strong>§1.2e — False Age Declaration:</strong> Providing a false date of birth constitutes fraud and will result in a permanent ban and forfeiture of all wallet balances.</li>
+            </ul>
+            <div class="highlight-box warning">
+                <strong>Parents &amp; Guardians:</strong> If you believe your child has registered on GI28 without authorization, contact us immediately at <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>. We prioritize the immediate removal of minors' data.
+            </div>
+        </div>
+
+        <div id="modifications" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- refresh-cw -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                </span>
+                §1.3 — Policy Modifications
+            </h3>
+            <p>GI28 may update this policy at any time to reflect changes in law, new features, or improved transparency. Here is exactly how we handle updates:</p>
+            <ul>
+                <li><strong>§1.3a — Notification:</strong> All material changes will be announced via our Official Announcement Channel. A dashboard banner will also appear for 7 days post-update.</li>
+                <li><strong>§1.3b — Effective Date:</strong> Unless stated otherwise, updates take effect <strong>48 hours</strong> after the "Last Updated" date shown at the top of this document.</li>
+                <li><strong>§1.3c — Version Archive:</strong> Previous versions are archived and available on request at <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>.</li>
+                <li><strong>§1.3d — Your Right to Reject:</strong> If you disagree with a modification, you have the right to close your account before the update takes effect.</li>
+                <li><strong>§1.3e — Minor vs. Material Changes:</strong> Typographical corrections are minor changes. Structural changes to financial, data, or liability clauses are material changes and will always be announced.</li>
+                <li><strong>§1.3f — No Retroactive Harm:</strong> No modification will retroactively penalize any legitimate transaction made under a previous version of this policy.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 2 — DATA COLLECTION
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">02</div>
+            <h2>Data Collection — Privacy Policy</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="userdata" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- shield -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </span>
+                §2.1 — Data Minimalism Philosophy
+            </h3>
+            <p>At GI28, we are fiercely loyal to one philosophy: <strong>"Collect only what is necessary, protect it like it is our own, and delete it the moment you ask."</strong> Your personal data is not a product for us — it is a responsibility.</p>
+            <ul>
+                <li><strong>§2.1a — Purpose Limitation:</strong> Every data point we collect has a specific, documented reason. We do not collect "just in case" data.</li>
+                <li><strong>§2.1b — Data Inventory:</strong> We collect Name, Email, Phone/WhatsApp, UTR transaction IDs, order history, wallet balance, and session tokens. Nothing more.</li>
+                <li><strong>§2.1c — No Shadow Profiling:</strong> We do not build behavioural profiles, interest graphs, or psychographic data on users for advertising.</li>
+                <li><strong>§2.1d — No Third-Party Data Sales:</strong> GI28 has never, and will never, sell your personal data to any advertiser, data broker, or marketing company.</li>
+                <li><strong>§2.1e — Data Residency:</strong> All primary user data is stored on Google Firebase/Firestore servers via Google Cloud's Asia-South infrastructure.</li>
+                <li><strong>§2.1f — Regulatory Compliance:</strong> Our data practices are aligned with India's <em>Digital Personal Data Protection Act, 2023 (DPDPA)</em> and applicable GDPR provisions for international users.</li>
+                <li><strong>§2.1g — Data Export:</strong> You may request a full export of all data GI28 holds on you by emailing <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> with subject "Data Export Request." We respond within 5 business days.</li>
+            </ul>
+        </div>
+
+        <div id="name" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- user-check -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                </span>
+                §2.2 — Your Name — Why We Need It
+            </h3>
+            <ul>
+                <li><strong>§2.2a — Personalization:</strong> Your name appears on your dashboard header, giving the platform a personal, non-robotic feel.</li>
+                <li><strong>§2.2b — Support Interaction:</strong> When you open a support ticket, your name allows our agents to address you respectfully and identify your account quickly.</li>
+                <li><strong>§2.2c — Billing Records:</strong> For UPI/bank transactions above ₹10,000, your name may appear on payment gateway receipts as required by financial regulations.</li>
+                <li><strong>§2.2d — Affiliate Identity:</strong> Your first name may be referenced in payout confirmation emails sent to you.</li>
+                <li><strong>§2.2e — No Public Display:</strong> Your full name is NEVER displayed publicly on the platform. It is not shown to other users or indexed by search engines.</li>
+                <li><strong>§2.2f — Review Consent Exception:</strong> If you voluntarily submit a "Verified Reseller Review" with explicit checkbox consent, only your first name and panel tier are shown.</li>
+                <li><strong>§2.2g — Name Update Right:</strong> You can update your display name at any time from your Profile Settings.</li>
+            </ul>
+        </div>
+
+        <div id="email" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- mail -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </span>
+                §2.3 — Your Email — Core Account Security
+            </h3>
+            <ul>
+                <li><strong>§2.3a — Primary Authentication:</strong> Email + Password (or Google OAuth) is the foundation of your login.</li>
+                <li><strong>§2.3b — Account Recovery:</strong> A time-limited, single-use password reset link is sent exclusively to your registered email. We never reset passwords via WhatsApp or phone calls.</li>
+                <li><strong>§2.3c — Order Confirmations:</strong> When you add funds above ₹500 or place a bulk order, an automatic confirmation email is dispatched as your digital receipt.</li>
+                <li><strong>§2.3d — Security Alerts:</strong> If our system detects a login from a new device or suspicious IP, you receive an automatic "New Login Detected" security alert email.</li>
+                <li><strong>§2.3e — Critical Account Notices:</strong> Suspension warnings, policy violation notices, or mandatory verification requests are delivered exclusively to your registered email.</li>
+                <li><strong>§2.3f — Anti-Spam Pledge:</strong> We will NEVER send promotional newsletters or third-party marketing to your email. Every email from GI28 is transactional or security-critical.</li>
+                <li><strong>§2.3g — Email Sharing:</strong> Your email is never shared with any third party except Google Firebase (authentication) and our payment gateway (transaction verification only).</li>
+                <li><strong>§2.3h — Email Change Policy:</strong> Changing your email requires a verification link clicked on both the old AND new address as a dual-confirmation security measure.</li>
+            </ul>
+        </div>
+
+        <div id="phone" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- phone -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.45 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </span>
+                §2.4 — Your Phone Number — Emergency Contact
+            </h3>
+            <ul>
+                <li><strong>§2.4a — Fund Issue Resolution:</strong> If there is a UTR discrepancy, our support team will WhatsApp you directly for the fastest possible resolution.</li>
+                <li><strong>§2.4b — Order Emergency Alerts:</strong> For high-value orders (above ₹2,000) that fail or get stuck, we may send a single WhatsApp notification to inform you and offer an immediate fix.</li>
+                <li><strong>§2.4c — Future 2FA:</strong> Your phone number may be used for optional Two-Factor Authentication via SMS OTP in future platform updates.</li>
+                <li><strong>§2.4d — No Marketing Messages:</strong> GI28 will NEVER send promotional messages or unsolicited content to your WhatsApp number. Period.</li>
+                <li><strong>§2.4e — No Sharing:</strong> Your phone number is never shared with other users, resellers, or third parties under any circumstances.</li>
+                <li><strong>§2.4f — Mandatory Requirement:</strong> Providing a valid WhatsApp number is MANDATORY (see §9.1). Accounts without a phone number have limited liability coverage from GI28.</li>
+                <li><strong>§2.4g — Storage:</strong> Phone numbers are stored as encrypted strings in Firebase Firestore. Never in plain text.</li>
+            </ul>
+            <div class="highlight-box danger">
+                <strong>Important:</strong> GI28 support will NEVER call you asking for your password, OTP, or wallet funds. Any such call is a scam. Report it immediately to <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>.
+            </div>
+        </div>
+
+        <div id="cookies" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- cpu / layers for cookies -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </span>
+                §2.5 — Cookies &amp; Session Storage
+            </h3>
+            <ul>
+                <li><strong>§2.5a — Session Cookies:</strong> A secure, <code>HttpOnly</code>, <code>SameSite=Strict</code> session cookie is set on login. It expires when you close the browser or after 7 days of inactivity.</li>
+                <li><strong>§2.5b — Firebase Auth Tokens:</strong> Google Firebase stores a cryptographically signed JWT in your browser's local storage to maintain your authenticated state across page refreshes.</li>
+                <li><strong>§2.5c — Preference Storage:</strong> Your UI preferences (dark/light mode) are stored in <code>localStorage</code> as non-personal key-value pairs.</li>
+                <li><strong>§2.5d — No Third-Party Tracking Cookies:</strong> We do not use Google Analytics cookies, Facebook Pixel, Hotjar, or any other third-party behavioral tracking scripts on the GI28 platform.</li>
+                <li><strong>§2.5e — Cookie Deletion:</strong> You may clear all GI28 cookies at any time via your browser settings. This will log you out of your session; your account on our servers is unaffected.</li>
+                <li><strong>§2.5f — Essential Only:</strong> All cookies used by GI28 are strictly "essential." They are necessary for the platform to function.</li>
+            </ul>
+        </div>
+
+        <div id="thirdparty" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- slash / block -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </span>
+                §2.6 — No Data Selling Policy
+            </h3>
+            <p>Let us be unambiguous: <strong>GI28 does not, has not, and will never sell your personal data to any advertiser, data broker, or third party for commercial profit.</strong></p>
+            <ul>
+                <li><strong>§2.6a — Business Model Clarity:</strong> GI28's revenue comes exclusively from the margin on SMM services sold on the platform. We have zero financial incentive to monetize user data.</li>
+                <li><strong>§2.6b — Permitted Data Processors:</strong> We share limited data with: Google Firebase (authentication &amp; database), our UPI payment gateway (payment processing only), and backend SMM API providers (order data only — never personal data).</li>
+                <li><strong>§2.6c — Order Data &amp; Providers:</strong> When you place an order, only your order details (service ID, target URL, quantity) are sent to providers. Your name, email, phone, and wallet balance are NEVER transmitted.</li>
+                <li><strong>§2.6d — Legal Disclosure Exception:</strong> GI28 may disclose user data to law enforcement if legally compelled by a valid court order under Indian law. We will always attempt to notify affected users unless legally prohibited.</li>
+                <li><strong>§2.6e — Processor Agreements:</strong> All third-party services we use are bound by confidentiality clauses that prohibit them from using GI28 user data for their own purposes.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 3 — FINANCIALS, WALLET & PAYMENTS
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">03</div>
+            <h2>Financials, Wallet &amp; Payments</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="wallet" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- credit-card -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                </span>
+                §3.1 — The GI28 Token Wallet System
+            </h3>
+            <ul>
+                <li><strong>§3.1a — Token Exchange Rate:</strong> <code>1 GI28 Token = ₹1 Indian Rupee</code>. The rate is fixed at 1:1.</li>
+                <li><strong>§3.1b — Minimum Add Funds:</strong> The minimum top-up is <strong>₹10</strong>. Large deposits above ₹50,000 may trigger a mandatory UTR verification review.</li>
+                <li><strong>§3.1c — Wallet Expiry:</strong> GI28 Tokens do not expire as long as your account remains active. Tokens in banned accounts may be subject to forfeiture.</li>
+                <li><strong>§3.1d — Non-Transferability:</strong> Tokens cannot be transferred to another user's wallet. They are exclusively bound to your account.</li>
+                <li><strong>§3.1e — Wallet Cap:</strong> There is currently no maximum cap. GI28 may introduce a ₹5,00,000 cap in future to comply with RBI prepaid payment instrument regulations, with prior notice.</li>
+                <li><strong>§3.1f — Tax Implications:</strong> Users are solely responsible for any GST or income tax liabilities arising from their use of GI28 services and affiliate earnings.</li>
+                <li><strong>§3.1g — Wallet Statement:</strong> Your complete transaction history is available in real-time on your dashboard's "Wallet" section and available for CSV export.</li>
+            </ul>
+        </div>
+
+        <div id="utr" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- search -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                §3.2 — UTR Verification &amp; Anti-Fraud Protocol
+            </h3>
+            <ul>
+                <li><strong>§3.2a — What is a UTR?</strong> A UTR is a 12-character unique code generated by the NPCI/banking system for every UPI and IMPS transaction in India. It is your proof of payment.</li>
+                <li><strong>§3.2b — Submission:</strong> After transferring funds to GI28's official UPI ID, submit your UTR number via the "Add Funds" page within <strong>24 hours</strong> of making the transfer.</li>
+                <li><strong>§3.2c — Verification Timeline:</strong> Standard verification is completed within <strong>15 minutes to 4 hours</strong> during business hours (9 AM – 10 PM IST).</li>
+                <li><strong>§3.2d — Automated vs. Manual:</strong> Our system cross-references submitted UTRs against our payment gateway records. If the automated check passes, funds are credited instantly. If flagged, a manual review is triggered.</li>
+                <li><strong>§3.2e — Anti-Fraud Checks:</strong> Every UTR is checked against: (i) previously used UTR numbers — reusing a UTR is fraud, (ii) transaction amounts that must match, (iii) sender bank account details, (iv) timestamp validation.</li>
+                <li><strong>§3.2f — Fake UTR Submission:</strong> Submitting a fake, fabricated, or stolen UTR number is a serious criminal offence under the IT Act, 2000 and will result in an immediate permanent ban and potential legal action.</li>
+                <li><strong>§3.2g — UTR Disputes:</strong> If your legitimate UTR is pending for more than 6 hours, contact us immediately at <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> or WhatsApp support.</li>
+                <li><strong>§3.2h — UTR Record Retention:</strong> All verified UTR records are retained for a minimum of 5 years for tax and legal compliance, even after account deletion.</li>
+            </ul>
+            <div class="highlight-box warning">
+                <strong>Always send funds from YOUR OWN bank account / UPI ID.</strong> Payments from third-party accounts are flagged for extra review and may take 48+ hours to verify.
+            </div>
+        </div>
+
+        <div id="refundpolicy" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- x-circle -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                </span>
+                §3.3 — Refund Policy — Added Funds (Non-Refundable)
+            </h3>
+            <div class="highlight-box danger">
+                <strong>Core Policy:</strong> Once funds are successfully verified and credited to your GI28 Wallet, they are <strong>NON-REFUNDABLE to your original bank account, UPI ID, or any external payment method.</strong> Deposited tokens can ONLY be used to purchase services on the GI28 platform.
+            </div>
+            <ul>
+                <li><strong>§3.3a — Why No Bank Refunds?</strong> GI28 is a prepaid digital services panel. Our backend API providers require upfront payment. We cannot reverse committed API resources once funds enter our ecosystem. This is industry-standard across all SMM panels globally.</li>
+                <li><strong>§3.3b — Accidental Deposits:</strong> If you accidentally deposited more than intended, the excess remains safely in your wallet for future orders. We are unable to reverse it to your bank.</li>
+                <li><strong>§3.3c — Wrong UPI Transfer:</strong> If you sent money to the wrong UPI ID (not GI28's official ID), GI28 cannot take responsibility. Contact your bank immediately. Always double-check the UPI ID before transferring.</li>
+                <li><strong>§3.3d — Exceptional Circumstances:</strong> In rare, documented cases of platform-side technical error, GI28 will initiate a wallet credit adjustment. Bank refunds are only considered for amounts above ₹5,000 after a formal written request and internal audit, at GI28's sole discretion.</li>
+                <li><strong>§3.3e — Account Closure Balance:</strong> Any remaining wallet balance at the time of account deletion is permanently forfeited. Spend your balance before submitting a deletion request.</li>
+            </ul>
+        </div>
+
+        <div id="orderrefunds" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- rotate-ccw -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+                </span>
+                §3.4 — Order Refunds — Automatic Wallet Credit
+            </h3>
+            <div class="highlight-box">
+                <strong>Our Commitment:</strong> You will NEVER lose tokens to a genuinely failed order. If we cannot deliver the service, you get every token back — no questions asked.
+            </div>
+            <ul>
+                <li><strong>§3.4a — Automatic Refund Trigger:</strong> If an order fails to start, is rejected by our API provider, or is cancelled by our system, the exact token amount is automatically refunded to your GI28 Wallet within <strong>1–24 hours</strong>.</li>
+                <li><strong>§3.4b — Partial Delivery Refunds:</strong> If an order is partially delivered, the cost of the undelivered portion will be automatically refunded to your wallet.</li>
+                <li><strong>§3.4c — Refund Verification:</strong> All refunds are logged in your wallet transaction history with the original Order ID as reference.</li>
+                <li><strong>§3.4d — Refund to Wallet Only:</strong> All order refunds go to your GI28 Wallet. They cannot be redirected to your bank account per §3.3.</li>
+                <li><strong>§3.4e — Timeframe:</strong> Refunds for failed orders are processed within 24 hours. Partial refund calculations may take up to 48 hours.</li>
+                <li><strong>§3.4f — No Manual Intervention Needed:</strong> Our automated system handles most refunds without you needing to contact support. If your wallet is not credited within 24 hours, open a ticket immediately.</li>
+            </ul>
+        </div>
+
+        <div id="disputes" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- alert-triangle -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                §3.5 — Chargebacks, Disputes &amp; Fraudulent Claims
+            </h3>
+            <ul>
+                <li><strong>§3.5a — Chargeback Definition:</strong> A "chargeback" occurs when a user initiates a payment reversal with their bank after successfully receiving services from GI28, effectively attempting to receive services for free.</li>
+                <li><strong>§3.5b — Consequence — Immediate Permanent Ban:</strong> Any user who initiates a chargeback or fraudulent payment dispute against GI28 will be <strong>permanently banned</strong> from the platform immediately upon detection.</li>
+                <li><strong>§3.5c — Forfeiture:</strong> Upon a chargeback-related ban, all remaining wallet balance, active orders, and affiliate commissions are immediately frozen and forfeited without recourse.</li>
+                <li><strong>§3.5d — Legal Action:</strong> GI28 reserves the right to pursue legal action against users who engage in chargeback fraud. All transaction logs, IP addresses, UTR records, and usage history will be submitted as evidence.</li>
+                <li><strong>§3.5e — Legitimate Resolution:</strong> If you have a genuine grievance (e.g., funds deducted but not credited), the correct process is to open a support ticket at <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> — NOT to file a bank dispute. We resolve legitimate issues within 24 hours.</li>
+                <li><strong>§3.5f — False Reports:</strong> Filing a false complaint with NPCI, RBI, or any consumer forum with fabricated evidence against GI28 is a criminal act under the IPC. GI28 will defend itself vigorously in all such cases.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 4 — SERVICE USAGE & RULES
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">04</div>
+            <h2>Service Usage &amp; Rules</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="privateaccounts" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- lock -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                §4.1 — Private Accounts — No Refund Policy
+            </h3>
+            <div class="highlight-box danger">
+                <strong>Critical Rule:</strong> If you place an order on a <strong>private social media account</strong>, the order will be marked "Completed" by our API and <strong>NO REFUND WILL BE ISSUED</strong> — even if zero engagement was delivered.
+            </div>
+            <ul>
+                <li><strong>§4.1a — Why Private Accounts Fail:</strong> Our API providers send real accounts to engage with your profile/post. A private account blocks these accounts before they can interact, causing the order to register as "attempted and complete" while delivering nothing.</li>
+                <li><strong>§4.1b — Your Responsibility:</strong> Before placing any order, ensure your target account or post is <strong>PUBLIC</strong>. For followers: your profile must be public. For likes/views: the individual post must be publicly accessible.</li>
+                <li><strong>§4.1c — Keep it Public During Delivery:</strong> Do NOT switch your account to private after placing an order. If your account becomes private mid-delivery, the order may be partially delivered and non-refundable for the undelivered portion.</li>
+                <li><strong>§4.1d — Platform Responsibility:</strong> GI28 is not responsible for users' account privacy settings. We provide clear warnings at the order placement stage. Proceeding past these warnings constitutes acceptance of this policy.</li>
+            </ul>
+        </div>
+
+        <div id="deliverytime" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- clock -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </span>
+                §4.2 — Delivery Time — Estimates vs. Actual
+            </h3>
+            <ul>
+                <li><strong>§4.2a — Estimate Accuracy:</strong> Start Time and Speed information is sourced from our API providers. Real-world delivery may vary by ±20–40% depending on global demand, social media algorithm changes, and provider queue loads.</li>
+                <li><strong>§4.2b — High-Demand Periods:</strong> During peak hours or major social media events, delivery times may be significantly slower. GI28 is not liable for delays during these periods.</li>
+                <li><strong>§4.2c — Order Status:</strong> Track your order status in real-time on your dashboard: Pending → Processing → In Progress → Completed / Partial / Cancelled.</li>
+                <li><strong>§4.2d — When to Raise a Concern:</strong> If your order has been in "Pending" status for more than 3× the stated start time, contact support. We will investigate and either provide an ETA or cancel and refund.</li>
+                <li><strong>§4.2e — No SLA Guarantee:</strong> GI28 does not guarantee a Service Level Agreement on delivery times for social media engagement services.</li>
+            </ul>
+        </div>
+
+        <div id="drops" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- trending-down -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                </span>
+                §4.3 — Drops &amp; Refill Policy
+            </h3>
+            <ul>
+                <li><strong>§4.3a — Drop Definition:</strong> A "drop" occurs when the quantity delivered by GI28 decreases after successful completion due to platform algorithm cleanups or fake account purges.</li>
+                <li><strong>§4.3b — Refill-Eligible Services:</strong> Services marked with the <strong>"Refill"</strong> badge come with a complimentary refill guarantee for the specified period (typically 30–90 days).</li>
+                <li><strong>§4.3c — Non-Refill Services:</strong> Services NOT marked with the Refill badge are delivered on a "best effort" basis. Drops on these services do not qualify for refills or refunds.</li>
+                <li><strong>§4.3d — Refill Request Process:</strong> Navigate to Dashboard → My Orders → find the order → click "Request Refill." Processing takes 24–72 hours.</li>
+                <li><strong>§4.3e — Refill Limits:</strong> Each order is eligible for a maximum of <strong>one (1) refill</strong> during the guarantee period, unless explicitly stated otherwise.</li>
+                <li><strong>§4.3f — After Guarantee Period:</strong> After the stated refill period expires, GI28 cannot be held responsible for natural drops. Social media attrition is outside our control.</li>
+                <li><strong>§4.3g — Platform Algorithm Changes:</strong> Major platform updates causing mass drops are considered "force majeure" events. GI28 will communicate such events via our announcement channel and handle refills case-by-case.</li>
+            </ul>
+        </div>
+
+        <div id="fairuse" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- zap -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </span>
+                §4.4 — Fair Use Policy
+            </h3>
+            <ul>
+                <li><strong>§4.4a — API Flooding:</strong> Sending more than 200 order API requests per minute is prohibited and will trigger automatic rate limiting and potential API key suspension.</li>
+                <li><strong>§4.4b — Bot-Driven Activity:</strong> Using automated scripts, bots, or headless browsers to place orders, check balances, or scrape service data without explicit written permission is prohibited.</li>
+                <li><strong>§4.4c — Bug Exploitation:</strong> If you discover a bug allowing free or discounted services, you are <strong>legally obligated</strong> to report it to <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>. Exploiting any bug is fraud and will result in a permanent ban and legal action.</li>
+                <li><strong>§4.4d — Responsible Disclosure Reward:</strong> Users who responsibly disclose genuine security vulnerabilities may receive wallet credits or public acknowledgment at GI28's discretion.</li>
+                <li><strong>§4.4e — System Overloading:</strong> Placing thousands of small orders simultaneously to test system limits is prohibited and will result in immediate account suspension.</li>
+                <li><strong>§4.4f — Reverse Engineering:</strong> Attempting to reverse engineer, decompile, or extract source code from the GI28 platform is a violation of intellectual property law and these terms.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 5 — AFFILIATE PROGRAMME
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">05</div>
+            <h2>Partner &amp; Affiliate Programme</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="affiliate" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- link -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                </span>
+                §5.1 — Affiliate Programme — How Referral Codes Work
+            </h3>
+            <ul>
+                <li><strong>§5.1a — Referral Code Generation:</strong> Every GI28 user automatically receives a unique referral code upon account creation, visible in Dashboard → Affiliate section.</li>
+                <li><strong>§5.1b — How to Share:</strong> Share your unique referral link (e.g., <code>gi28.in/register?ref=YOURCODE</code>). When referrals register and add funds, you earn commissions automatically.</li>
+                <li><strong>§5.1c — Attribution Window:</strong> The referral cookie persists for <strong>30 days</strong>. If a user clicks your link but registers within 30 days, the referral is still credited to you.</li>
+                <li><strong>§5.1d — Commission Trigger:</strong> Commissions are earned on every successful fund addition by your referrals — not just their first deposit. You earn repeatedly as long as your referrals remain active.</li>
+                <li><strong>§5.1e — Structure:</strong> GI28 currently operates a 1-level affiliate structure (direct referrals only). Multi-level commissions may be introduced in future upgrades.</li>
+                <li><strong>§5.1f — Referral Dashboard:</strong> Your affiliate dashboard displays real-time data: total referrals, total earnings, pending vs. cleared commissions, and referral link performance analytics.</li>
+            </ul>
+        </div>
+
+        <div id="commissions" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- bar-chart-2 -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </span>
+                §5.2 — Commission Rates &amp; Bonus Tiers
+            </h3>
+            <ul>
+                <li><strong>§5.2a — Base Rate:</strong> All affiliates start at a <strong>3% commission</strong> on every fund addition made by their referrals.</li>
+                <li><strong>§5.2b — Silver Tier (₹5,000+ monthly referral funds):</strong> Elevated to <strong>5% commission</strong> rate for that month.</li>
+                <li><strong>§5.2c — Gold Tier (₹25,000+ monthly referral funds):</strong> <strong>7% commission</strong> + a one-time ₹500 bonus credit to your wallet.</li>
+                <li><strong>§5.2d — Platinum Tier (₹1,00,000+ monthly referral funds):</strong> <strong>10% commission</strong> + a dedicated Relationship Manager + priority order processing.</li>
+                <li><strong>§5.2e — Withdrawal Bonus:</strong> When you withdraw ₹5,000 or more in a single payout request, GI28 adds a <strong>5% bonus</strong> on top of the payout as a loyalty incentive.</li>
+                <li><strong>§5.2f — Commission Clawback:</strong> If a referral's fund addition is reversed due to a chargeback or fraud, the corresponding commission is deducted from your affiliate wallet.</li>
+            </ul>
+            <div class="pill-row">
+                <span class="pill">Starter: 3%</span>
+                <span class="pill">Silver: 5%</span>
+                <span class="pill">Gold: 7% + ₹500</span>
+                <span class="pill">Platinum: 10% + RM</span>
+                <span class="pill">₹5k+ Withdrawal: +5%</span>
+            </div>
+        </div>
+
+        <div id="payouts" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- dollar-sign -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </span>
+                §5.3 — Payouts — Withdrawal &amp; Timeframes
+            </h3>
+            <ul>
+                <li><strong>§5.3a — Minimum Withdrawal:</strong> The minimum affiliate payout is <strong>₹500</strong>. Requests below this threshold will not be processed.</li>
+                <li><strong>§5.3b — Withdrawal Method:</strong> Payouts are processed exclusively via UPI to your registered UPI ID. Bank transfers (NEFT/IMPS) may be accommodated for amounts above ₹10,000 at our discretion.</li>
+                <li><strong>§5.3c — Withdrawal Request Window:</strong> Withdrawal requests can be submitted on Mondays and Thursdays. Requests submitted on other days are queued for the next processing window.</li>
+                <li><strong>§5.3d — Processing Timeframe:</strong> Once approved, UPI payouts are credited within <strong>24–72 hours</strong>. Delays may occur during banking holidays.</li>
+                <li><strong>§5.3e — KYC for Large Payouts:</strong> Requests above ₹25,000 may require PAN card details for TDS compliance under Indian income tax rules.</li>
+                <li><strong>§5.3f — Cooling Period:</strong> Newly earned commissions have a 7-day cooling period before they become withdrawable. This protects against commission fraud via returned orders.</li>
+            </ul>
+        </div>
+
+        <div id="affiliatefraud" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- shield-off -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.69 14a6.9 6.9 0 0 0 .31-2V5l-8-3-3.16 1.18"/><path d="M4.73 4.73L4 5v7c0 6 8 10 8 10a20.29 20.29 0 0 0 5.62-4.38"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </span>
+                §5.4 — Affiliate Fraud — Zero Tolerance
+            </h3>
+            <ul>
+                <li><strong>§5.4a — Self-Referrals:</strong> Creating multiple accounts to refer yourself — your own secondary, family member, or associate accounts — to earn commission on your own fund additions is strictly prohibited.</li>
+                <li><strong>§5.4b — Fake Account Farming:</strong> Creating fake user accounts solely to generate referral commissions is fraud. GI28's detection system flags accounts with identical device fingerprints, IP addresses, or payment sources.</li>
+                <li><strong>§5.4c — Coordinated Fraud Rings:</strong> Organizing groups of people to create accounts with the sole intent of generating affiliate commissions constitutes coordinated fraud and will be reported to relevant authorities.</li>
+                <li><strong>§5.4d — Punishment:</strong> Confirmed affiliate fraud results in: (i) immediate permanent ban for all associated accounts, (ii) forfeiture of all affiliate earnings and wallet balance, (iii) potential criminal complaint under the IT Act, 2000 (IPC §420).</li>
+                <li><strong>§5.4e — Reporting Fraud:</strong> If you suspect another user is committing affiliate fraud, report it confidentially to <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>. Verified fraud reports may earn you a goodwill wallet credit.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 6 — USER RIGHTS & DATA DELETION
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">06</div>
+            <h2>User Rights &amp; Data Deletion</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="datadeletion" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- trash-2 -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </span>
+                §6.1 — Right to be Forgotten — Complete Data Deletion
+            </h3>
+            <p>Your data belongs to you. GI28 is unequivocally committed to every user's absolute right to have their personal information permanently erased from our systems — no questions asked, no penalties applied.</p>
+            <ul>
+                <li><strong>§6.1a — How to Request Deletion:</strong>
+                    <ol style="margin-top:8px; margin-left:16px;">
+                        <li>Open a Support Ticket from your Dashboard with subject: <strong>"Data Deletion Request – [Your Registered Email]"</strong></li>
+                        <li>Alternatively, email <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> from your registered email address with the same subject line.</li>
+                    </ol>
+                </li>
+                <li><strong>§6.1b — What Gets Deleted:</strong> Within 48 business hours: your full name, email, phone number, profile photo, account preferences, complete order history, affiliate referral data, commission history, active session tokens, login history, and your Firebase Authentication account.</li>
+                <li><strong>§6.1c — Wallet Balance Notice:</strong> Any remaining wallet balance at the time of deletion is permanently forfeited. Spend your full balance before requesting deletion.</li>
+                <li><strong>§6.1d — Deletion Confirmation:</strong> You will receive an email confirmation once your data has been fully wiped from our active systems.</li>
+                <li><strong>§6.1e — Irreversibility:</strong> Data deletion is permanent and irreversible. GI28 cannot restore a deleted account under any circumstances.</li>
+                <li><strong>§6.1f — Financial Log Exception:</strong> See §6.2 for limited financial data retained for legal compliance even after a deletion request.</li>
+            </ul>
+        </div>
+
+        <div id="dataretention" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- archive -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                </span>
+                §6.2 — Data Retention — Financial Logs &amp; Legal Compliance
+            </h3>
+            <ul>
+                <li><strong>§6.2a — Retained Data:
+                </strong>
+                    <ul style="margin-top:8px;">
+                        <li><strong>UTR Records:</strong> Retained for <strong>7 years</strong> per the Income Tax Act, 1961.</li>
+                        <li><strong>Payment Gateway Records:</strong> Retained for <strong>5 years</strong> per RBI guidelines.</li>
+                        <li><strong>Fraud Investigation Logs:</strong> Retained for <strong>3 years</strong>.</li>
+                    </ul>
+                </li>
+                <li><strong>§6.2b — Anonymization:</strong> Where legally permissible, retained financial logs are anonymized — your name and email are replaced with a hash ID.</li>
+                <li><strong>§6.2c — No Active Use:</strong> Retained compliance data is archived in a separate, restricted-access database. It is never used for marketing, profiling, or platform operations.</li>
+                <li><strong>§6.2d — Access to Retained Data:</strong> You may request a copy of financial records retained about you even after account deletion by emailing <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>.</li>
+                <li><strong>§6.2e — Deletion After Retention Period:</strong> Once the mandatory retention period expires, all retained data is permanently deleted through our scheduled data purging process.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 7 — MULTI-PROVIDER ENGINE
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">07</div>
+            <h2>Multi-Provider Engine &amp; Quality of Service</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="providers" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- globe -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </span>
+                §7.1 — Our Multi-Provider Architecture
+            </h3>
+            <p>GI28 is not a single-source SMM panel. We operate a sophisticated <strong>multi-provider aggregation engine</strong> that connects to dozens of premium global SMM API providers simultaneously.</p>
+            <ul>
+                <li><strong>§7.1a — Provider Diversity:</strong> GI28 maintains active API integrations with SMM providers across multiple countries and specializations. We leverage each for what they do best.</li>
+                <li><strong>§7.1b — User-Facing Abstraction:</strong> You interact with one unified catalogue. The complexity of selecting, routing, and managing multiple providers happens entirely in our backend.</li>
+                <li><strong>§7.1c — Provider Vetting:</strong> New providers are subjected to a <strong>72-hour test period</strong> with small internal test orders before being made available to real users. We check delivery speed, drop rates, and support responsiveness.</li>
+                <li><strong>§7.1d — Provider Confidentiality:</strong> GI28 does not publicly disclose the names of its API providers. This confidentiality protects our competitive advantage.</li>
+                <li><strong>§7.1e — Provider Failures:</strong> If a provider experiences downtime, GI28's routing system automatically detects this and either routes to a backup provider or cancels and refunds the order to your wallet.</li>
+            </ul>
+        </div>
+
+        <div id="qualitycheck" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- activity -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </span>
+                §7.2 — Continuous Quality Monitoring
+            </h3>
+            <ul>
+                <li><strong>§7.2a — Real-Time Monitoring:</strong> GI28's operations team monitors provider performance metrics in real-time. Tracked metrics include: average start time, delivery completion rate, drop rate (30-day), and support response time.</li>
+                <li><strong>§7.2b — Quality Threshold System:</strong> Providers must maintain a minimum 90% completion rate and a sub-5% 30-day drop rate to remain active in our catalogue. Providers falling below these thresholds are automatically quarantined and reviewed.</li>
+                <li><strong>§7.2c — User-Reported Quality Issues:</strong> If multiple users report consistent quality issues with a specific service, our quality team launches an investigation within 24 hours. Services may be temporarily suspended during investigations.</li>
+                <li><strong>§7.2d — Proactive Switching:</strong> We proactively switch providers when we identify a better alternative, even if the current provider has not explicitly failed.</li>
+                <li><strong>§7.2e — Service Updates:</strong> When a service's provider is switched, the listing is updated with new speed, quality, and description information. Major changes are announced on our announcement channel.</li>
+            </ul>
+        </div>
+
+        <div id="apirouting" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- shuffle -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                </span>
+                §7.3 — Intelligent API Order Routing
+            </h3>
+            <ul>
+                <li><strong>§7.3a — Routing Algorithm:</strong> When you place an order, GI28's routing engine evaluates all available providers based on: current queue load, historical completion rate, real-time provider status, and cost efficiency.</li>
+                <li><strong>§7.3b — Fallback System:</strong> If the primary provider fails to acknowledge the order within 60 seconds, the system automatically attempts the next best provider. This cascading fallback continues up to 3 providers before triggering a wallet refund.</li>
+                <li><strong>§7.3c — Load Balancing:</strong> During high-demand periods, our engine distributes orders across multiple providers simultaneously to maintain consistent delivery speeds.</li>
+                <li><strong>§7.3d — Provider API Health Checks:</strong> Our system pings provider APIs every 5 minutes. Providers showing response times above 10 seconds are temporarily removed from the routing pool.</li>
+                <li><strong>§7.3e — Order Status Transparency:</strong> Your order dashboard shows the current status from the provider's API in real-time. "In Progress" means the provider has accepted and is actively delivering your order.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 8 — COMMUNITY, SUPPORT & PLATFORMS
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">08</div>
+            <h2>Community, Support &amp; Communication</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="whatsappsupport" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- message-circle -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                </span>
+                §8.1 — WhatsApp Support — Availability &amp; Response Times
+            </h3>
+            <ul>
+                <li><strong>§8.1a — Availability Hours:</strong> WhatsApp support is available <strong>Monday to Saturday, 9:00 AM – 10:00 PM IST</strong>. Sunday support is available for critical issues from 11 AM – 6 PM IST.</li>
+                <li><strong>§8.1b — Response Time SLA:</strong> Our target response time is <strong>under 30 minutes</strong> during business hours. Complex issues involving order investigations may require 2–4 hours of additional analysis time.</li>
+                <li><strong>§8.1c — WhatsApp Support Number:</strong> The official GI28 WhatsApp support number is listed on the "Contact Us" page of your dashboard. Do not trust any other number claiming to be GI28 support.</li>
+                <li><strong>§8.1d — Supported Issues:</strong> UTR verification delays, order status queries, account access issues, and affiliate payout inquiries are all handled via WhatsApp.</li>
+                <li><strong>§8.1e — Formal Complaints:</strong> Complex disputes, data deletion requests, and formal complaints should be submitted via email at <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> for a documented paper trail.</li>
+                <li><strong>§8.1f — Language:</strong> Support is primarily provided in <strong>English and Hindi</strong>.</li>
+                <li><strong>§8.1g — No Impersonation:</strong> GI28 support agents will never ask for your password, OTP, or request payment to any personal UPI ID. Such requests are scams — report and block immediately.</li>
+            </ul>
+        </div>
+
+        <div id="resellercommunity" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- users -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                §8.2 — Official WhatsApp Reseller Community Group
+            </h3>
+            <p>GI28's Official WhatsApp Reseller Community is one of the most vibrant, active, and inclusive SMM networking spaces in India — designed to be a genuine business networking community, not just an announcement group.</p>
+            <ul>
+                <li><strong>§8.2a — Community Purpose:</strong> A dynamic space for resellers and panel users to network, share marketing strategies, discuss social media trends, and support each other's growth.</li>
+                <li><strong>§8.2b — Open Communication Rights:</strong> Every member has full, equal rights to communicate, ask questions, share insights, and network with any other member in the group — regardless of gender, background, city, or business size.</li>
+                <li><strong>§8.2c — Networking Freedom:</strong> Members are free to connect with each other for legitimate business collaborations, including reseller partnerships, agency tie-ups, and knowledge sharing.</li>
+                <li><strong>§8.2d — Weekly Community Meetings:</strong> GI28 hosts a <strong>weekly community voice chat session</strong> (typically Sundays at 8 PM IST) where members discuss platform updates, new service launches, industry news, and share success stories.</li>
+                <li><strong>§8.2e — Fun Culture:</strong> The group maintains a healthy, fun culture. Memes, congratulations on wins, and casual conversations are welcomed — as long as they remain respectful and within our community rules (§8.5).</li>
+                <li><strong>§8.2f — Eligibility:</strong> Open to all registered GI28 users with a verified account. The group invite link is available on your dashboard after email verification.</li>
+                <li><strong>§8.2g — Admin Presence:</strong> GI28 admins are active participants — not silent moderators. They are available within the group for quick queries during business hours.</li>
+            </ul>
+        </div>
+
+        <div id="telegramprivacy" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- send -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </span>
+                §8.3 — Telegram Group — Privacy-First Alternative
+            </h3>
+            <ul>
+                <li><strong>§8.3a — Privacy Advantage:</strong> On Telegram, you can participate fully using only your chosen username. Your real phone number is <strong>never visible</strong> to other group members.</li>
+                <li><strong>§8.3b — Same Benefits:</strong> The GI28 Telegram group provides all the same community benefits as the WhatsApp group: networking, announcements, admin support, weekly discussion threads, and resource sharing.</li>
+                <li><strong>§8.3c — Telegram-Exclusive Features:</strong> Searchable message history, pinned resource libraries (rate cards, order guides, tutorial videos), and bot-powered order status checks.</li>
+                <li><strong>§8.3d — Joining Instructions:</strong> The official GI28 Telegram group link is available on your dashboard's "Community" section. Only join via the official link to avoid fake groups.</li>
+                <li><strong>§8.3e — Dual Membership:</strong> You are welcome to be a member of both the WhatsApp and Telegram communities simultaneously.</li>
+            </ul>
+        </div>
+
+        <div id="mandatorychannel" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- bell -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </span>
+                §8.4 — Official Announcement Channel — Mandatory
+            </h3>
+            <div class="highlight-box warning">
+                <strong>Mandatory for All Users:</strong> Joining the GI28 Official Announcement Channel (Telegram/WhatsApp) is <strong>mandatory</strong> for all registered GI28 users and resellers. It is the only channel through which critical platform updates are communicated.
+            </div>
+            <ul>
+                <li><strong>§8.4a — Why Mandatory?</strong> Critical communications — including service downtime, pricing changes, policy updates, payment gateway maintenance, and security alerts — are announced exclusively via this channel.</li>
+                <li><strong>§8.4b — Phone Number Privacy:</strong> The Official Announcement Channel is a <strong>broadcast-only</strong> channel. Members cannot see each other's phone numbers, names, or any personal information. Your privacy is completely protected.</li>
+                <li><strong>§8.4c — Content Frequency:</strong> Announcements are sent only when there is something genuinely important to communicate. We target no more than 1–2 messages per day — never spam.</li>
+                <li><strong>§8.4d — No Replies:</strong> The announcement channel does not allow member replies. For questions, use the Community Group (§8.2) or WhatsApp Support (§8.1).</li>
+                <li><strong>§8.4e — Liability for Not Joining:</strong> If you miss a critical announcement because you have not joined the channel, GI28 cannot be held liable for any resulting issues with your orders or funds.</li>
+            </ul>
+        </div>
+
+        <div id="communityrules" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- clipboard -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                </span>
+                §8.5 — Community Rules — Zero Tolerance
+            </h3>
+            <ul>
+                <li><strong>§8.5a — Zero Tolerance for Harassment:</strong> Any form of personal harassment, bullying, body shaming, gender-based discrimination, caste-based slurs, or targeted verbal abuse against any member will result in <strong>immediate and permanent removal</strong> from all GI28 communities — and potentially from the platform itself.</li>
+                <li><strong>§8.5b — No Spam:</strong> Promotional messages for non-GI28 services, competitor panel advertisements, cryptocurrency schemes, loan services, or any irrelevant commercial content are strictly prohibited.</li>
+                <li><strong>§8.5c — No Fake News:</strong> Spreading misinformation about GI28's services, pricing, or policies within the community groups is prohibited.</li>
+                <li><strong>§8.5d — No Explicit Content:</strong> Sharing sexually explicit, violent, politically inflammatory, or religiously offensive content will result in immediate expulsion and potential account review.</li>
+                <li><strong>§8.5e — Inclusive Environment:</strong> GI28's community is welcoming to users of all genders, religions, backgrounds, and experience levels. Newcomers are especially welcome.</li>
+                <li><strong>§8.5f — Admin Authority:</strong> GI28 admins have final authority on community moderation decisions. Private appeals can be submitted to <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>.</li>
+                <li><strong>§8.5g — Reporting:</strong> If you witness a community rule violation, report it directly to an admin or email <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>. Reports are handled confidentially.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 9 — CONTACT INFO & LIABILITY
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">09</div>
+            <h2>Contact Information &amp; Liability</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="mandatoryphone" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- phone-call -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.45 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </span>
+                §9.1 — Mandatory Phone Number Requirement
+            </h3>
+            <p>Adding a valid WhatsApp-enabled phone number to your GI28 profile is <strong>strictly mandatory</strong> for all users.</p>
+            <ul>
+                <li><strong>§9.1a — Why Mandatory?</strong> In critical situations — UTR disputes, high-value order failures, security alerts — email response cycles (24–48 hours) are too slow. WhatsApp enables our team to resolve your issue in minutes.</li>
+                <li><strong>§9.1b — Where to Add It:</strong> Dashboard → Profile Settings → "Phone / WhatsApp Number" field → Enter your active 10-digit Indian mobile number → Save.</li>
+                <li><strong>§9.1c — Format Requirement:</strong> Enter your number in format: <code>+91XXXXXXXXXX</code> (with country code). WhatsApp must be active on this number.</li>
+                <li><strong>§9.1d — Verification:</strong> GI28 may send a WhatsApp verification message to confirm the number is active and reachable.</li>
+                <li><strong>§9.1e — Update Responsibility:</strong> If you change your phone number, update it on your GI28 profile immediately. An outdated number is treated the same as having no number on file.</li>
+            </ul>
+            <div class="highlight-box danger">
+                <strong>Critical:</strong> Accounts without a valid phone number on file receive <strong>reduced liability coverage</strong> from GI28. Our ability to resolve issues is severely limited without direct communication capability.
+            </div>
+        </div>
+
+        <div id="googlelogin" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- log-in -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                </span>
+                §9.2 — Google Login Users — Phone Number Gap
+            </h3>
+            <p>If you registered on GI28 using <strong>Google Sign-In ("Sign in with Google")</strong>, your phone number is <strong>NOT automatically captured</strong> from your Google account — even if your Google account has a phone number associated with it.</p>
+            <ul>
+                <li><strong>§9.2a — Why the Gap Exists:</strong> Google's OAuth protocol, by design, only shares your name and email address with third-party apps during sign-in. Your phone number stays private within Google's system and is never passed to us.</li>
+                <li><strong>§9.2b — Your Mandatory Action:</strong> If you signed up via Google, you <strong>MUST manually add your phone number</strong> to your GI28 profile. Go to: Dashboard → Profile → Phone/WhatsApp → Enter number → Save.</li>
+                <li><strong>§9.2c — How to Know If You Are Affected:</strong> Check your Profile Settings. If the "Phone Number" field is blank, fill it in — regardless of how you registered.</li>
+                <li><strong>§9.2d — Dashboard Reminder:</strong> GI28's dashboard displays a persistent "Action Required: Add Phone Number" banner for accounts with missing phone numbers. This banner cannot be permanently dismissed until the phone number is added.</li>
+                <li><strong>§9.2e — Data Privacy Note:</strong> The phone number you add is stored separately from your Google account data, on GI28's Firebase Firestore, and is governed by the same strict privacy rules outlined in §2.4.</li>
+            </ul>
+        </div>
+
+        <div id="unreachableliability" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- alert-octagon -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </span>
+                §9.3 — Unreachable User Liability Policy
+            </h3>
+            <ul>
+                <li><strong>§9.3a — Primary Contact Attempt:</strong> If an urgent issue arises, our team's first contact attempt will always be via <strong>WhatsApp</strong> to your registered phone number.</li>
+                <li><strong>§9.3b — Email Fallback:</strong> If the WhatsApp message is unanswered for <strong>6 hours</strong> during business hours, we will send a follow-up email to your registered email address.</li>
+                <li><strong>§9.3c — 48-Hour Resolution Window:</strong> If we receive no response via WhatsApp OR email within <strong>48 hours</strong> of our first outreach, our team will attempt to resolve the issue using the best available information and close the case.</li>
+                <li><strong>§9.3d — Zero Liability for No Phone Number:</strong> If your profile has no phone number on file and an urgent issue occurs that requires immediate clarification, GI28 will attempt to contact you by email only. <strong>If the issue cannot be resolved due to lack of a reachable phone number, GI28 holds zero liability for any resulting financial loss or unresolved order.</strong></li>
+                <li><strong>§9.3e — Your Risk Acceptance:</strong> By continuing to use GI28 without a valid phone number in your profile, you explicitly acknowledge and accept the risk of reduced support capability and limited liability coverage.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 10 — SECURITY & AUTHENTICATION
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">10</div>
+            <h2>Advanced Security &amp; Authentication</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div id="firebaseauth" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- server -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                </span>
+                §10.1 — Firebase Authentication — Enterprise-Grade Security
+            </h3>
+            <p>GI28's authentication infrastructure is powered by <strong>Google Firebase Authentication</strong> — the same enterprise-grade identity platform trusted by millions of apps globally, including major Fortune 500 products.</p>
+            <ul>
+                <li><strong>§10.1a — What Firebase Auth Provides:</strong> Firebase Authentication is a Google Cloud service that handles identity verification, session management, and token generation. It holds SOC 2, ISO 27001, and PCI DSS certifications.</li>
+                <li><strong>§10.1b — Google OAuth Integration:</strong> The "Sign in with Google" feature uses Firebase's OAuth 2.0 integration. Your Google credentials are verified directly by Google — GI28 never sees your Google password.</li>
+                <li><strong>§10.1c — Email/Password Authentication:</strong> Firebase handles the full authentication pipeline, including email verification, rate limiting on failed attempts, and automated lockout after repeated failures.</li>
+                <li><strong>§10.1d — Uptime:</strong> Firebase Authentication operates on Google's global infrastructure with a 99.95% uptime SLA, ensuring GI28 login is available virtually 24/7.</li>
+                <li><strong>§10.1e — Future Authentication Features:</strong> GI28 plans to enable SMS OTP (two-factor authentication), biometric login, and phone number auth in future platform updates.</li>
+            </ul>
+        </div>
+
+        <div id="passwordsecurity" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- key -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                </span>
+                §10.2 — Password Security
+            </h3>
+            <div class="highlight-box">
+                <strong>Bottom Line:</strong> If anyone claiming to be GI28 asks you for your password, they are lying. We will NEVER ask for your password. Not in support chat, not on WhatsApp, not ever.
+            </div>
+            <ul>
+                <li><strong>§10.2a — No Plaintext Storage:</strong> <strong>GI28 never stores your password in plaintext.</strong> Not our developers, not our admins, not anyone can see it.</li>
+                <li><strong>§10.2b — Cryptographic Hashing:</strong> Passwords are processed using <strong>bcrypt</strong> hashing with high cost factors — an irreversible cryptographic function. Even if our database were compromised, password reversal is computationally infeasible.</li>
+                <li><strong>§10.2c — Salting:</strong> Each password hash is generated with a unique cryptographic salt, preventing "rainbow table" attacks.</li>
+                <li><strong>§10.2d — Password Reset:</strong> Firebase generates a single-use, time-limited (1 hour) secure reset link sent exclusively to your registered email. Old passwords are invalidated immediately upon reset.</li>
+                <li><strong>§10.2e — Strong Password Requirements:</strong> Minimum 8 characters, including uppercase, lowercase, and a number or special character.</li>
+                <li><strong>§10.2f — Breach Monitoring:</strong> GI28 monitors Firebase security advisories and Google's Known Breached Credentials database. If your credentials appear in a known breach from another service, you will be notified and prompted to change your GI28 password.</li>
+            </ul>
+        </div>
+
+        <div id="databaseencryption" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- database -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                </span>
+                §10.3 — Firestore Database Encryption
+            </h3>
+            <ul>
+                <li><strong>§10.3a — Encryption at Rest:</strong> All data stored in Firestore is automatically encrypted at rest using <strong>AES-256 encryption</strong> — the same standard used by banks and government agencies. This encryption is always on and managed by Google.</li>
+                <li><strong>§10.3b — Encryption in Transit:</strong> All data transmitted between your browser and our Firestore database is encrypted using <strong>TLS 1.3</strong> — the latest and most secure transport layer encryption standard.</li>
+                <li><strong>§10.3c — Database Access Control:</strong> GI28's Firestore is secured with strict Firebase Security Rules. A user can only read/write their own data. Admin functions require elevated authentication tokens. All writes are validated against schema rules before being accepted.</li>
+                <li><strong>§10.3d — Wallet Balance Security:</strong> Wallet balance fields are protected by server-side Firestore Security Rules that prevent any client-side manipulation. All balance changes are processed through authenticated server functions — never directly from the browser.</li>
+                <li><strong>§10.3e — UTR Log Integrity:</strong> UTR records are stored with write-once semantics in a restricted subcollection. Once a UTR is logged, it cannot be modified or deleted by client code, creating a tamper-evident financial audit trail.</li>
+                <li><strong>§10.3f — Backup &amp; Recovery:</strong> Firestore data is automatically backed up daily. GI28 maintains a 30-day point-in-time recovery capability for critical data.</li>
+            </ul>
+        </div>
+
+        <div id="sessionmanagement" class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- lock (different variant for session) -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </span>
+                §10.4 — Session Management &amp; Account Protection
+            </h3>
+            <ul>
+                <li><strong>§10.4a — Session Tokens:</strong> Upon login, Firebase generates a cryptographically signed <strong>JWT (JSON Web Token)</strong> with a defined expiry that authorizes your session.</li>
+                <li><strong>§10.4b — Token Refresh:</strong> Firebase ID tokens expire after <strong>1 hour</strong> by default. Our platform automatically refreshes these tokens silently in the background as long as you remain active.</li>
+                <li><strong>§10.4c — Inactivity Auto-Logout:</strong> If your GI28 session is idle for <strong>7 consecutive days</strong>, your session is automatically terminated. This prevents unauthorized access on shared devices.</li>
+                <li><strong>§10.4d — Remote Session Revocation:</strong> If you believe your account has been compromised, changing your password immediately invalidates all active sessions globally within minutes.</li>
+                <li><strong>§10.4e — Concurrent Session Policy:</strong> GI28 currently allows multiple concurrent sessions (mobile and desktop simultaneously). Single-session enforcement may be introduced as an optional security setting in future updates.</li>
+                <li><strong>§10.4f — Login Anomaly Detection:</strong> Firebase's built-in abuse protection detects and flags unusual login patterns — such as logins from new geographies, unrecognized devices, or rapid credential cycling — and triggers automatic security alerts.</li>
+                <li><strong>§10.4g — Your Security Checklist:</strong>
+                    <ul style="margin-top:8px;">
+                        <li>Always log out from GI28 on shared or public computers.</li>
+                        <li>Do not save your GI28 password in unencrypted plain text files.</li>
+                        <li>If you receive a "New Login Detected" alert from an unrecognized device, change your password immediately.</li>
+                        <li>Enable 2FA when it becomes available on the platform.</li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="highlight-box info">
+                <strong>Security Alert?</strong> If you suspect unauthorized access to your GI28 account, contact us immediately at <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> with subject "URGENT: Account Security." We prioritize security incidents above all other support requests.
+            </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CHAPTER 11 — GOVERNING LAW
+        ═════════════════════════════════════════════════════════════ -->
+        <div class="chapter-divider">
+            <div class="ch-num">11</div>
+            <h2>Governing Law &amp; Jurisdiction</h2>
+            <div class="ch-line"></div>
+        </div>
+
+        <div class="legal-section">
+            <h3>
+                <span class="section-icon">
+                    <!-- book-open -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </span>
+                §11.1 — Governing Law, Jurisdiction &amp; Final Clauses
+            </h3>
+            <ul>
+                <li><strong>§11.1a — Governing Law:</strong> This Terms of Service &amp; Privacy Policy and all disputes arising from it shall be governed by and construed in accordance with the laws of the <strong>Republic of India</strong>.</li>
+                <li><strong>§11.1b — Jurisdiction:</strong> Any dispute, controversy, or claim arising from or related to these terms shall be subject to the exclusive jurisdiction of the competent courts located in India.</li>
+                <li><strong>§11.1c — Arbitration:</strong> Before initiating any legal proceedings, both parties agree to attempt good-faith resolution through GI28's formal dispute process (email to <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a>) for a minimum of 30 days.</li>
+                <li><strong>§11.1d — Limitation of Liability:</strong> GI28's maximum aggregate liability to any user for any claim arising from these terms shall not exceed the total amount deposited by that user in the 90 days preceding the claim.</li>
+                <li><strong>§11.1e — Force Majeure:</strong> GI28 shall not be liable for delays or failures resulting from causes beyond our reasonable control, including acts of God, government actions, internet infrastructure failures, social media platform outages, or third-party API provider failures.</li>
+                <li><strong>§11.1f — Severability:</strong> If any provision of these terms is held invalid or unenforceable, the remaining provisions shall continue in full force and effect.</li>
+                <li><strong>§11.1g — Contact for Legal Matters:</strong> All formal legal correspondence should be directed to <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a> with the subject "Legal Notice – [Your Name]."</li>
+            </ul>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="legal-footer">
+            <p style="font-weight: 700; font-size: 16px; color: var(--primary-color); margin-bottom: 10px; font-family: 'Orbitron', sans-serif; letter-spacing: 3px;">GI28</p>
+            <p>
+                Last Updated: <strong>11 April 2026</strong> &nbsp;·&nbsp; Version 3.0<br>
+                This document supersedes all previous versions.<br>
+                Questions, concerns, or data requests: <a href="mailto:support.gi28@proton.me">support.gi28@proton.me</a><br><br>
+                <em>"Built with loyalty to our users. Not to advertisers. Not to data brokers. To you."</em>
+            </p>
+            <p style="margin-top: 14px; font-size: 11px;">© 2026 GI28 Digital Services &nbsp;·&nbsp; All Rights Reserved</p>
+        </div>
+
+        <a href="#" class="back-top">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            Back to Top
+        </a>
+
+    </div><!-- /.legal-container -->
+
     <script src="../assets/js/app.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            const contentDiv = document.getElementById('tcContent');
-            const dateSpan = document.getElementById('lastUpdatedDate');
-            
-            try {
-                // Fetch JSON data dynamically
-                const response = await fetch('../data/terms.json');
-                if (!response.ok) throw new Error("Could not load T&C data.");
-                
-                const data = await response.json();
-                
-                dateSpan.innerText = data.lastUpdated;
-                contentDiv.innerHTML = ''; // Clear skeletons
-                
-                data.sections.forEach(sec => {
-                    const sectionHTML = `
-                        <div class="tc-section">
-                            <h3>${sec.title}</h3>
-                            <p>${sec.content}</p>
-                        </div>
-                    `;
-                    contentDiv.innerHTML += sectionHTML;
-                });
-            } catch (error) {
-                console.error(error);
-                contentDiv.innerHTML = `<p class="text-muted" style="color: #ff4444;">Failed to load Terms & Conditions. Please check back later.</p>`;
-            }
+        // Smooth highlight on anchor jump
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', e => {
+                const id = link.getAttribute('href').slice(1);
+                if (!id) return;
+                const target = document.getElementById(id);
+                if (!target) return;
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                target.style.transition = 'box-shadow 0.4s';
+                const orig = target.style.boxShadow;
+                target.style.boxShadow = '0 0 0 2px var(--primary-color)';
+                setTimeout(() => { target.style.boxShadow = orig; }, 1600);
+            });
         });
     </script>
 </body>
