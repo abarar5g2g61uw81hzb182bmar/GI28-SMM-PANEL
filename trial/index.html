@@ -67,22 +67,34 @@
         import { auth, db, doc, getDoc, setDoc, collection } from "../assets/js/firebase-config.js";
         import { serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 1. Fetch JSON and Populate Dropdown
-        async function loadTrialServices() {
-            try {
-                const response = await fetch('./services.json');
-                const services = await response.json();
-                const select = document.getElementById('trialServiceSelect');
-                select.innerHTML = '<option value="" disabled selected>-- Choose a Service --</option>';
-                
-                services.forEach(srv => {
-                    select.innerHTML += `<option value="${srv.id}">${srv.title} (${srv.qty})</option>`;
-                });
-            } catch (error) {
-                console.error("Error loading JSON:", error);
-                document.getElementById('trialServiceSelect').innerHTML = '<option value="">Error loading services</option>';
-            }
+     // 1. Load Services Directly (No external JSON needed)
+        function loadTrialServices() {
+            const services = [
+                {
+                    "id": "TRIAL_IG_LIKES",
+                    "title": "Instagram Real Likes - Trial",
+                    "qty": "50+ Likes"
+                },
+                {
+                    "id": "TRIAL_IG_VIEWS",
+                    "title": "Instagram High-Speed Views - Trial",
+                    "qty": "500+ Views"
+                },
+                {
+                    "id": "TRIAL_YT_LIKES",
+                    "title": "YouTube Videos and Shorts Likes - Trial",
+                    "qty": "100+ Likes"
+                }
+            ];
+            
+            const select = document.getElementById('trialServiceSelect');
+            select.innerHTML = '<option value="" disabled selected>-- Choose a Service --</option>';
+            
+            services.forEach(srv => {
+                select.innerHTML += `<option value="${srv.id}">${srv.title} (${srv.qty})</option>`;
+            });
         }
+
 
         // 2. Security Check: Has User Claimed Before?
         auth.onAuthStateChanged(async (user) => {
