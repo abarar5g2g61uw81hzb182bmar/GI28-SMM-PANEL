@@ -4,48 +4,59 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(200).send('OK');
+    // 🚨 TRACKER 1: Pata chalega ki Telegram ne hit kiya ya nahi
+    console.log("🔥 WEBHOOK HIT DETECTED! Method:", req.method);
+    
+    if (req.method !== 'POST') {
+        console.log("⚠️ Not a POST request.");
+        return res.status(200).send('OK');
+    }
 
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const body = req.body;
+    if (!botToken) console.error("❌ ERROR: BOT TOKEN MISSING IN VERCEL!");
 
-    if (!body.callback_query) return res.status(200).send('OK');
+    const body = req.body;
+    // 🚨 TRACKER 2: Telegram ne kya data bheja, wo log me print hoga
+    console.log("📦 TELEGRAM PAYLOAD:", JSON.stringify(body));
+
+    if (!body || !body.callback_query) {
+        console.log("⚠️ Callback query nahi mili, ignoring...");
+        return res.status(200).send('OK');
+    }
 
     const callbackId = body.callback_query.id;
     const chatId = body.callback_query.message.chat.id;
     const messageId = body.callback_query.message.message_id;
     const data = body.callback_query.data; // e.g., "approve_utr_REQ123"
 
-    // 1. BUTTON LOADING ROKNE KA COMMAND
-    await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ callback_query_id: callbackId, text: "Processing your request..." })
-    });
+    console.log(`🔘 BUTTON CLICKED: ${data}`);
 
-    // Error dikhane wala helper function
-    const sendErrorToTelegram = async (errMsg) => {
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    try {
+        // Button ki loading rokne ka code
+        await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text: `🚨 *SYSTEM ERROR:*\n${errMsg}`, parse_mode: 'Markdown' })
+            body: JSON.stringify({ callback_query_id: callbackId, text: "Processing..." })
         });
-    };
+        console.log("✅ Button loading stopped.");
+    } catch (e) {
+        console.error("❌ Failed to stop button loading:", e);
+    }
 
     let db;
     try {
-        // Firebase Admin setup
         if (getApps().length === 0) {
             if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-                await sendErrorToTelegram("Bhai, Vercel me `FIREBASE_SERVICE_ACCOUNT` naam ka Environment Variable nahi mila!");
+                console.error("❌ FIREBASE_SERVICE_ACCOUNT is missing in Vercel!");
                 return res.status(200).send('OK');
             }
             const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
             initializeApp({ credential: cert(serviceAccount) });
+            console.log("✅ Firebase initialized successfully.");
         }
         db = getFirestore();
     } catch (error) {
-        await sendErrorToTelegram("Firebase Start nahi hua! JSON key check kar.\nError: " + error.message);
+        console.error("❌ Firebase Init Error:", error.message);
         return res.status(200).send('OK');
     }
 
@@ -60,14 +71,15 @@ export default async function handler(req, res) {
             const reqDoc = await reqRef.get();
 
             if (!reqDoc.exists) {
-                await sendErrorToTelegram("Ye request database me nahi mili: " + reqId);
+                console.error("❌ Request ID not found in DB: " + reqId);
                 return res.status(200).send('OK');
             }
             
             const reqData = reqDoc.data();
+            console.log("✅ Request Data found in DB for user:", reqData.user_uid);
 
             if (reqData.status !== 'pending') {
-                await sendErrorToTelegram("⚠️ Bhai, isko pehle hi Approve/Reject kar diya gaya hai!");
+                console.log("⚠️ Request already processed.");
                 return res.status(200).send('OK');
             }
 
@@ -84,32 +96,31 @@ export default async function handler(req, res) {
 
                 const totalForUser = reqData.tokens_requested + bonusTokens;
 
-                // User Wallet Update
                 const userRef = db.collection('users').doc(reqData.user_uid);
                 const userDoc = await userRef.get();
                 if(userDoc.exists) {
                     const currentBal = userDoc.data().wallet_balance || 0;
                     await userRef.update({ wallet_balance: currentBal + totalForUser });
+                    console.log("✅ User balance updated.");
                 }
 
-                // Partner Wallet Update
                 if (reqData.reseller_uid && commissionTokens > 0) {
                     const partnerRef = db.collection('users').doc(reqData.reseller_uid);
                     const partnerDoc = await partnerRef.get();
                     if (partnerDoc.exists) {
                         const currentPartnerBal = partnerDoc.data().reseller_wallet || 0;
                         await partnerRef.update({ reseller_wallet: currentPartnerBal + commissionTokens });
+                        console.log("✅ Partner commission added.");
                     }
                 }
 
-                // Update Status
                 await reqRef.update({ 
                     status: 'approved',
                     bonus_given: bonusTokens,
                     bonus_percent: bonusPercent.toFixed(2)
                 });
+                console.log("✅ DB status marked as approved.");
 
-                // Update Telegram Message
                 await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -120,6 +131,7 @@ export default async function handler(req, res) {
                         parse_mode: 'Markdown'
                     })
                 });
+                console.log("✅ Telegram message updated.");
             } else if (action === 'reject') {
                 await reqRef.update({ status: 'rejected' });
                 await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
@@ -132,10 +144,11 @@ export default async function handler(req, res) {
                         parse_mode: 'Markdown'
                     })
                 });
+                console.log("✅ DB and Telegram marked as rejected.");
             }
         }
     } catch (error) {
-        await sendErrorToTelegram("Database Logic Error: " + error.message);
+        console.error("❌ Logic Error:", error.message);
     }
 
     return res.status(200).send('OK');
