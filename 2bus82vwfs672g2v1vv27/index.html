@@ -639,46 +639,62 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             } catch (error) { console.log(error); }
         };
 
-        window.approveUtr = async (reqId, uid, tokens) => {
-            if(!confirm(`Approve and add ${tokens} GI28?`)) return;
+        window.approveUtr = async (reqId, uid, tokensRequested) => {
+            if(!confirm(`Approve this UTR and process tokens?`)) return;
 
             try {
-                // 1. Pehle Request ka saara data nikalo (Bonus aur Commission check karne ke liye)
                 const reqRef = doc(db, "fund_requests", reqId);
                 const reqSnap = await getDoc(reqRef);
                 
                 if (!reqSnap.exists()) return alert("Request not found!");
                 const reqData = reqSnap.data();
 
-                // 2. User ka wallet update karo (Base Tokens + Bonus)
-                const totalForUser = Number(reqData.tokens_requested) + (Number(reqData.bonus_tokens) || 0);
-                const userRef = doc(db, "users", uid);
+                // Check if already processed
+                if(reqData.status !== 'pending') return alert("Already processed!");
+
+                // Random Bonus Logic (Same as Telegram)
+                let bonusPercent = 0;
+                let commissionTokens = 0;
+                let bonusTokens = 0;
+                const baseTokens = Number(reqData.tokens_requested);
+
+                if (reqData.applied_coupon && reqData.applied_coupon !== "") {
+                     bonusPercent = (Math.random() * 5); 
+                     bonusTokens = (baseTokens * (bonusPercent / 100));
+                     commissionTokens = (baseTokens * 0.05); 
+                }
+
+                const totalForUser = baseTokens + bonusTokens;
+
+                // Update User Wallet
+                const userRef = doc(db, "users", reqData.user_uid);
                 const userSnap = await getDoc(userRef);
-                
                 const currentUserBalance = parseFloat(userSnap.data().wallet_balance || 0);
                 await updateDoc(userRef, { 
                     wallet_balance: currentUserBalance + totalForUser 
                 });
 
-                // 3. AGAR Referral use hua hai, toh Reseller ko commission do
-                if (reqData.reseller_uid && reqData.reseller_commission > 0) {
+                // Update Partner Wallet
+                if (reqData.reseller_uid && commissionTokens > 0) {
                     const resellerRef = doc(db, "users", reqData.reseller_uid);
                     const resellerSnap = await getDoc(resellerRef);
-                    
                     if (resellerSnap.exists()) {
-                        const currentResellerBalance = parseFloat(resellerSnap.data().wallet_balance || 0);
+                        const currentResellerBalance = parseFloat(resellerSnap.data().reseller_wallet || 0);
                         await updateDoc(resellerRef, { 
-                            wallet_balance: currentResellerBalance + Number(reqData.reseller_commission)
+                            reseller_wallet: currentResellerBalance + commissionTokens
                         });
-                        console.log("Commission sent to Reseller:", reqData.reseller_uid);
                     }
                 }
 
-                // 4. Request ko "approved" mark karo
-                await updateDoc(reqRef, { status: "approved" });
+                // Mark Approved
+                await updateDoc(reqRef, { 
+                    status: "approved",
+                    bonus_given: bonusTokens,
+                    bonus_percent: bonusPercent.toFixed(2)
+                });
 
-                alert(`Success! User got ${totalForUser} tokens (incl. bonus).`);
-                loadAdminWallets(); // List refresh karo
+                alert(`Success! User got ${totalForUser.toFixed(2)} tokens (incl. ${bonusPercent.toFixed(2)}% bonus).`);
+                loadAdminWallets(); 
             } catch (error) {
                 console.error("Approval Error:", error);
                 alert("Error approving request: " + error.message);
