@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="bright">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -118,60 +118,8 @@
             window.location.href = upiUrl;
         };
 
-        // ==========================================
-        // THE MASTER SUBMIT LOGIC (WITH COUPON ENGINE)
-        // ==========================================
-        document.getElementById('submitRequest').addEventListener('click', async () => {
-            const user = auth.currentUser;
-            const tokens = document.getElementById('tokenAmount').value;
-            const utr = document.getElementById('utrNumber').value;
-            const coupon = document.getElementById('couponCode').value.trim().toUpperCase();
-
-            if(!user) return alert("Please Login first!");
-            if(!tokens || !utr) return alert("Fill all details!");
-
-            const btn = document.getElementById('submitRequest');
-            btn.innerHTML = "Verifying Code...";
-
-            let resellerUid = null;
-            let appliedCoupon = null;
-            const baseTokens = Number(tokens);
-
-            try {
-                // 1. Agar Coupon Code daala hai, toh check karo wo database mein hai ya nahi
-                if (coupon) {
-                    const q = query(collection(db, "users"), where("partner_code", "==", coupon));
-                    const snap = await getDocs(q);
-
-                    if (snap.empty) {
-                        alert("Invalid Referral Code! Please check the code and try again.");
-                        btn.innerHTML = "Verify Payment";
-                        return; // Rok do, code galat hai
-                    } else {
-                        // Check karo ki khud ka code toh nahi daal diya!
-                        const rUid = snap.docs[0].id;
-                        if (rUid === user.uid) {
-                            alert("You cannot use your own referral code!");
-                            btn.innerHTML = "Verify Payment";
-                            return;
-                        }
-                        // Code ekdum sahi hai!
-                        resellerUid = rUid;
-                        appliedCoupon = coupon;
-                    }
-                }
-
-                btn.innerHTML = "Submitting...";
-
-                // 2. 5% Bonus Math
-                const bonusTokens = appliedCoupon ? (baseTokens * 0.05) : 0;
-                const commissionTokens = appliedCoupon ? (baseTokens * 0.05) : 0;
-
-                // 3. Database mein Request save karo (With Affiliate details)
-                const requestId = "REQ" + Date.now();
-                
-              // ==========================================
-        // THE MASTER SUBMIT LOGIC (WITH NOTIFY)
+                // ==========================================
+        // DEBUG VERSION: SUBMIT LOGIC
         // ==========================================
         document.getElementById('submitRequest').addEventListener('click', async () => {
             const user = auth.currentUser;
@@ -183,29 +131,32 @@
             if(!tokens || !utr) return alert("Fill all details!");
 
             const btn = document.getElementById('submitRequest');
-            btn.innerHTML = "Verifying Code...";
+            btn.innerHTML = "Processing...";
             btn.disabled = true;
 
             let resellerUid = null;
             let appliedCoupon = null;
             const baseTokens = Number(tokens);
-            const inrAmount = (tokens * rateINR).toFixed(2);
+            // Check if rateINR exists, otherwise fallback to 70
+            const currentRate = typeof rateINR !== 'undefined' ? rateINR : 70; 
+            const inrAmount = (baseTokens * currentRate).toFixed(2);
 
             try {
-                // 1. Agar Coupon Code daala hai, check karo
+                // STEP 1: COUPON CHECK
                 if (coupon) {
+                    btn.innerHTML = "Checking Coupon...";
                     const q = query(collection(db, "users"), where("partner_code", "==", coupon));
                     const snap = await getDocs(q);
 
                     if (snap.empty) {
-                        alert("Invalid Referral Code! Please check the code and try again.");
+                        alert("Invalid Referral Code!");
                         btn.innerHTML = "Verify Payment";
                         btn.disabled = false;
                         return;
                     } else {
                         const rUid = snap.docs[0].id;
                         if (rUid === user.uid) {
-                            alert("You cannot use your own referral code!");
+                            alert("You cannot use your own code!");
                             btn.innerHTML = "Verify Payment";
                             btn.disabled = false;
                             return;
@@ -215,14 +166,13 @@
                     }
                 }
 
-                btn.innerHTML = "Submitting to Admin...";
+                btn.innerHTML = "Saving to Database...";
 
-                // 2. Database mein Request save karo
+                // STEP 2: FIREBASE SAVE
                 const requestId = "REQ" + Date.now();
-                
                 await setDoc(doc(db, "fund_requests", requestId), {
                     user_uid: user.uid,
-                    user_email: user.email,
+                    user_email: user.email || "No Email",
                     tokens_requested: baseTokens,
                     applied_coupon: appliedCoupon || "",
                     reseller_uid: resellerUid || "",
@@ -232,53 +182,44 @@
                     timestamp: new Date()
                 });
 
-                // 3. TELEGRAM BOT KO NOTIFY KARO VERCEL API KE THROUGH
+                btn.innerHTML = "Sending Telegram Alert...";
+
+                // STEP 3: TELEGRAM API CALL
                 try {
-                    await fetch('https://gi28.in/api/notify-admin.js', {
+                    const notifyRes = await fetch('/api/notify-admin', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             type: 'utr',
                             reqId: requestId,
                             uid: user.uid,
-                            email: user.email,
+                            email: user.email || "No Email",
                             amount: inrAmount,
                             tokens: baseTokens,
                             utr: utr,
                             coupon: appliedCoupon || ""
                         })
                     });
+                    
+                    if(!notifyRes.ok) {
+                         console.error("Telegram API Error:", await notifyRes.text());
+                    }
                 } catch (telegramErr) {
-                    console.log("Telegram notification failed, but data saved to DB.");
+                    console.error("Fetch failed:", telegramErr);
                 }
 
-                if(appliedCoupon) {
-                    alert(`Request Submitted! You used a coupon. Bonus will be applied once admin verifies!`);
-                } else {
-                    alert("Request Submitted! Admin will verify and add tokens soon.");
-                }
-                
+                alert("Success! Request Submitted.");
                 window.location.href = "../dashboard/";
+
             } catch (error) {
-                alert("Error: " + error.message);
+                // YAHAN EXACT ERROR DIKHEGA
+                alert("CRITICAL ERROR: " + error.message);
+                console.error("Full Error:", error);
                 btn.innerHTML = "Verify Payment";
                 btn.disabled = false;
             }
         });
 
-
-                if(appliedCoupon) {
-                    alert(`Request Submitted! You will get +5% Extra Tokens (${bonusTokens} GI28) once admin verifies!`);
-                } else {
-                    alert("Request Submitted! Admin will verify and add tokens soon.");
-                }
-                
-                window.location.href = "../dashboard/";
-            } catch (error) {
-                alert("Error: " + error.message);
-                btn.innerHTML = "Verify Payment";
-            }
-        });
     </script>
 
 
