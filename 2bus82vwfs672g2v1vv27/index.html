@@ -389,7 +389,7 @@
             </div>
 
             <div id="supportModule" class="admin-module"><p class="text-muted">Loading Support Inbox...</p></div>
-                        <div id="servicesManagerModule" class="admin-module">
+            <div id="servicesManagerModule" class="admin-module">
                 <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Add New Service</h3>
                 <div class="neu-card" style="padding: 20px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="input-group">
@@ -409,15 +409,34 @@
                             <option value="Github">Github</option>
                         </select>
                     </div>
+                    
+                    <div class="input-group">
+                        <label class="text-muted" style="font-size: 11px;">API Provider</label>
+                        <select id="newSrvProvider" class="neu-input" style="appearance: none;">
+                            <option value="bulkfollows">Bulkfollows</option>
+                            <option value="xmedia">Xmedia</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="text-muted" style="font-size: 11px;">Provider Service ID</label>
+                        <input type="number" id="newSrvProviderId" class="neu-input" placeholder="e.g. 1425">
+                    </div>
+
                     <div class="input-group" style="grid-column: 1 / -1;">
                         <label class="text-muted" style="font-size: 11px;">Service Title</label>
                         <input type="text" id="newSrvTitle" class="neu-input" placeholder="e.g. Instagram Real Followers">
                     </div>
+                    
                     <div class="input-group">
-                        <label class="text-muted" style="font-size: 11px;">Price per 1k (GI28 Tokens)</label>
-                        <input type="number" id="newSrvPrice" class="neu-input" placeholder="0.00">
+                        <label class="text-muted" style="font-size: 11px;">Provider Price / 1k (COST)</label>
+                        <input type="number" id="newSrvCost" class="neu-input" placeholder="Your Cost (e.g. 10)">
                     </div>
-                    <div class="input-group" style="display: flex; gap: 10px;">
+                    <div class="input-group">
+                        <label class="text-muted" style="font-size: 11px;">Selling Price / 1k (SELLING)</label>
+                        <input type="number" id="newSrvPrice" class="neu-input" placeholder="User Price (e.g. 15)">
+                    </div>
+
+                    <div class="input-group" style="display: flex; gap: 10px; grid-column: 1 / -1;">
                         <div style="flex: 1;">
                             <label class="text-muted" style="font-size: 11px;">Min Qty</label>
                             <input type="number" id="newSrvMin" class="neu-input" placeholder="100">
@@ -431,7 +450,7 @@
                         <label class="text-muted" style="font-size: 11px;">Description & Delivery Speed</label>
                         <input type="text" id="newSrvDesc" class="neu-input" placeholder="High quality, Non-drop, 1K/Day...">
                     </div>
-                    <button class="neu-btn" style="grid-column: 1 / -1; padding: 15px;" onclick="addNewService()">Add Service to Live Database</button>
+                    <button class="neu-btn" style="grid-column: 1 / -1; padding: 15px; color: #00ff00;" onclick="addNewService()">Add Service with API Link</button>
                 </div>
 
                 <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Live Services List</h3>
@@ -439,6 +458,7 @@
                     <p class="text-muted">Loading services...</p>
                 </div>
             </div>
+
             <div id="proofsModule" class="admin-module">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h3 class="text-primary" style="font-size: 18px;">Live Proofs Management</h3>
@@ -719,6 +739,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
         // ==========================================
         // ORDERS LOGIC
         // ==========================================
+
         window.loadAdminOrders = async () => {
             const container = document.getElementById('adminOrdersList');
             container.innerHTML = '<p class="text-muted">Loading...</p>';
@@ -729,16 +750,31 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
 
                 snap.forEach(docSnap => {
                     const order = docSnap.data();
-                    const color = order.status === 'shipped' ? '#00ff00' : (order.status === 'cancelled' ? '#ff4444' : '#ffa500');
+                    const color = order.status === 'shipped' || order.status === 'completed' ? '#00ff00' : (order.status === 'cancelled' ? '#ff4444' : '#ffa500');
+                    
+                    // Safety check for older orders
+                    const profitStr = order.profit ? `<span style="color:#00ff00; font-weight:700;">+${parseFloat(order.profit).toFixed(3)} GI28</span>` : 'N/A';
+                    const costStr = order.provider_cost ? parseFloat(order.provider_cost).toFixed(3) : 'N/A';
+                    
                     container.innerHTML += `
                         <div class="neu-card" style="margin-bottom: 20px; padding: 20px; border-left: 4px solid ${color};">
                             <div style="display: flex; justify-content: space-between;">
-                                <div><p style="font-weight: 700;">${order.service_name}</p><p style="font-size: 12px;">Link: ${order.link} | Qty: ${order.quantity}</p></div>
-                                <span class="badge badge-outline" style="color: ${color}; border-color: ${color};">${order.status.toUpperCase()}</span>
+                                <div>
+                                    <p style="font-weight: 700; font-size: 15px; color: var(--primary-color);">${order.service_name}</p>
+                                    <p style="font-size: 12px; margin-top: 5px;">Link: <a href="${order.link}" target="_blank" style="color:#00aeff;">${order.link.substring(0,25)}...</a> | Qty: <strong>${order.quantity}</strong></p>
+                                    <div style="margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.05); border-radius: 8px; display: inline-block;">
+                                        <p style="font-size: 11px; color: var(--text-muted);">Charged: ${parseFloat(order.price_tokens).toFixed(3)} | Cost: ${costStr} | Profit: ${profitStr}</p>
+                                        <p style="font-size: 10px; color: var(--text-muted); margin-top: 3px;">API: ${order.provider_name || 'N/A'} (Order ID: ${order.provider_order_id || 'Pending'})</p>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="badge badge-outline" style="color: ${color}; border-color: ${color};">${order.status.toUpperCase()}</span>
+                                    <p style="font-size: 9px; color: var(--text-muted); margin-top: 10px;">UID: ${order.user_uid.substring(0,6)}...</p>
+                                </div>
                             </div>
-                            ${order.status === 'pending' ? `
+                            ${order.status === 'processing' || order.status === 'pending' ? `
                             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button class="neu-btn" style="padding: 5px 10px; color: #00ff00;" onclick="markOrderShipped('${docSnap.id}')">Mark Shipped</button>
+                                <button class="neu-btn" style="padding: 5px 10px; color: #00ff00;" onclick="markOrderShipped('${docSnap.id}')">Mark Completed</button>
                                 <button class="neu-btn" style="padding: 5px 10px; color: #ff4444;" onclick="cancelAndRefundOrder('${docSnap.id}', '${order.user_uid}', ${order.price_tokens})">Cancel & Refund</button>
                             </div>` : ''}
                         </div>
@@ -934,28 +970,44 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             } catch (error) { console.log(error); }
         };
 
-        window.addNewService = async () => {
+                window.addNewService = async () => {
             const id = document.getElementById('newSrvId').value;
             const platform = document.getElementById('newSrvPlatform').value;
+            const provider = document.getElementById('newSrvProvider').value;
+            const providerId = document.getElementById('newSrvProviderId').value;
             const title = document.getElementById('newSrvTitle').value;
+            const cost = document.getElementById('newSrvCost').value;
             const price = document.getElementById('newSrvPrice').value;
             const min = document.getElementById('newSrvMin').value;
             const max = document.getElementById('newSrvMax').value;
             const desc = document.getElementById('newSrvDesc').value;
 
-            if(!id || !title || !price || !min || !max) return alert("Please fill all required fields!");
+            if(!id || !title || !price || !cost || !min || !max || !providerId) return alert("Please fill all required fields including Provider ID and Cost!");
 
             try {
                 await setDoc(doc(db, "services", id), {
-                    id: id, platform: platform, title: title, price: Number(price),
-                    min: Number(min), max: Number(max), desc: desc, timestamp: new Date()
+                    id: id, 
+                    platform: platform, 
+                    provider_name: provider,
+                    provider_service_id: Number(providerId),
+                    provider_price: Number(cost),
+                    title: title, 
+                    price: Number(price),
+                    min: Number(min), 
+                    max: Number(max), 
+                    desc: desc, 
+                    timestamp: new Date()
                 });
-                alert("Service Added Successfully!");
+                alert("Service Linked to API & Added Successfully!");
+                
+                // Clear fields
                 document.getElementById('newSrvId').value = ""; document.getElementById('newSrvTitle').value = "";
-                document.getElementById('newSrvPrice').value = ""; document.getElementById('newSrvDesc').value = "";
+                document.getElementById('newSrvPrice').value = ""; document.getElementById('newSrvCost').value = "";
+                document.getElementById('newSrvProviderId').value = ""; document.getElementById('newSrvDesc').value = "";
                 loadAdminServices(); 
             } catch (error) { alert("Error: " + error.message); }
         };
+
 
         window.deleteService = async (docId) => {
             if(!confirm("Are you sure you want to delete this service permanently?")) return;
