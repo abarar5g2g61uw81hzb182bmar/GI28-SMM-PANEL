@@ -393,6 +393,7 @@
                 document.getElementById('calculatedPrice').innerText = '0.00';
             }
         };        // --- ORDER PLACEMENT & RECEIPT (UPDATED FOR SMM API) ---
+        // --- ORDER PLACEMENT & RECEIPT (WITH PROFIT CALCULATION) ---
         document.getElementById('placeOrderBtn').addEventListener('click', async () => {
             const link = document.getElementById('orderLink').value;
             const qty = Number(document.getElementById('orderQuantity').value);
@@ -408,7 +409,6 @@
                 return alert("Insufficient GI28 Tokens. Please Add Funds!");
             }
 
-            // Check if provider details exist in the service
             if(!selectedService.provider_name || !selectedService.provider_service_id) {
                 return alert("System Error: This service is not properly configured with an API provider. Contact Admin.");
             }
@@ -418,9 +418,7 @@
             btn.disabled = true;
 
             try {
-                // ==========================================
-                // 1. SEND ORDER TO VERCEL API
-                // ==========================================
+                // 1. API CALL TO VERCEL
                 const apiResponse = await fetch('/api/place-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -440,14 +438,19 @@
                     return alert("Provider Error: " + apiData.error);
                 }
 
-                btn.innerHTML = "Saving Order...";
+                btn.innerHTML = "Saving Order & Calculating Profit...";
 
                 // ==========================================
-                // 2. ORDER SUCCESSFUL, SAVE TO FIREBASE
+                // 2. PROFIT CALCULATION MAGIC
                 // ==========================================
+                const costPer1k = parseFloat(selectedService.provider_price || 0);
+                const providerCost = (qty / 1000) * costPer1k;
+                const profitMade = totalCharge - providerCost;
+
                 const orderID = "ORD" + Date.now();
                 const newBalance = currentBalance - totalCharge;
 
+                // 3. SAVE FULL DATA TO FIREBASE
                 await setDoc(doc(db, "orders", orderID), {
                     user_uid: currentUserData.uid,
                     service_id: selectedService.id,
@@ -455,8 +458,12 @@
                     link: link,
                     quantity: qty,
                     price_tokens: totalCharge,
-                    status: "processing", 
+                    provider_cost: providerCost,     // Tera kharcha save
+                    profit: profitMade,              // Tera profit save
+                    provider_name: selectedService.provider_name,
+                    provider_service_id: selectedService.provider_service_id,
                     provider_order_id: apiData.provider_order_id, 
+                    status: "processing", 
                     timestamp: new Date()
                 });
 
