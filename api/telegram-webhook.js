@@ -4,55 +4,33 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 export default async function handler(req, res) {
-    // 🚨 TRACKER 1: Pata chalega ki Telegram ne hit kiya ya nahi
     console.log("🔥 WEBHOOK HIT DETECTED! Method:", req.method);
     
-    if (req.method !== 'POST') {
-        console.log("⚠️ Not a POST request.");
-        return res.status(200).send('OK');
-    }
+    if (req.method !== 'POST') return res.status(200).send('OK');
 
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    if (!botToken) console.error("❌ ERROR: BOT TOKEN MISSING IN VERCEL!");
-
     const body = req.body;
-    // 🚨 TRACKER 2: Telegram ne kya data bheja, wo log me print hoga
-    console.log("📦 TELEGRAM PAYLOAD:", JSON.stringify(body));
 
-    if (!body || !body.callback_query) {
-        console.log("⚠️ Callback query nahi mili, ignoring...");
-        return res.status(200).send('OK');
-    }
+    if (!body || !body.callback_query) return res.status(200).send('OK');
 
     const callbackId = body.callback_query.id;
     const chatId = body.callback_query.message.chat.id;
     const messageId = body.callback_query.message.message_id;
-    const data = body.callback_query.data; // e.g., "approve_utr_REQ123"
-
-    console.log(`🔘 BUTTON CLICKED: ${data}`);
+    const data = body.callback_query.data; 
 
     try {
-        // Button ki loading rokne ka code
         await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ callback_query_id: callbackId, text: "Processing..." })
         });
-        console.log("✅ Button loading stopped.");
-    } catch (e) {
-        console.error("❌ Failed to stop button loading:", e);
-    }
+    } catch (e) { console.error("❌ Failed to stop loading:", e); }
 
     let db;
     try {
         if (getApps().length === 0) {
-            if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-                console.error("❌ FIREBASE_SERVICE_ACCOUNT is missing in Vercel!");
-                return res.status(200).send('OK');
-            }
             const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
             initializeApp({ credential: cert(serviceAccount) });
-            console.log("✅ Firebase initialized successfully.");
         }
         db = getFirestore();
     } catch (error) {
@@ -70,19 +48,17 @@ export default async function handler(req, res) {
             const reqRef = db.collection('fund_requests').doc(reqId);
             const reqDoc = await reqRef.get();
 
-            if (!reqDoc.exists) {
-                console.error("❌ Request ID not found in DB: " + reqId);
-                return res.status(200).send('OK');
-            }
+            if (!reqDoc.exists) return res.status(200).send('OK');
             
             const reqData = reqDoc.data();
-            console.log("✅ Request Data found in DB for user:", reqData.user_uid);
 
             if (reqData.status !== 'pending') {
-                console.log("⚠️ Request already processed.");
                 return res.status(200).send('OK');
             }
 
+            // ==========================================
+            // LOGIC FOR APPROVE
+            // ==========================================
             if (action === 'approve') {
                 let bonusPercent = 0;
                 let commissionTokens = 0;
@@ -101,7 +77,6 @@ export default async function handler(req, res) {
                 if(userDoc.exists) {
                     const currentBal = userDoc.data().wallet_balance || 0;
                     await userRef.update({ wallet_balance: currentBal + totalForUser });
-                    console.log("✅ User balance updated.");
                 }
 
                 if (reqData.reseller_uid && commissionTokens > 0) {
@@ -110,7 +85,6 @@ export default async function handler(req, res) {
                     if (partnerDoc.exists) {
                         const currentPartnerBal = partnerDoc.data().reseller_wallet || 0;
                         await partnerRef.update({ reseller_wallet: currentPartnerBal + commissionTokens });
-                        console.log("✅ Partner commission added.");
                     }
                 }
 
@@ -119,32 +93,40 @@ export default async function handler(req, res) {
                     bonus_given: bonusTokens,
                     bonus_percent: bonusPercent.toFixed(2)
                 });
-                console.log("✅ DB status marked as approved.");
+
+                // 🌟 NAYA MSG FORMAT (Approve)
+                const successMsg = `✅ *PAYMENT APPROVED*\n\n` +
+                                   `👤 *User:* ${reqData.user_email || 'N/A'}\n` +
+                                   `💳 *UTR:* \`${reqData.utr_number}\`\n` +
+                                   `🎟 *Coupon:* ${reqData.applied_coupon || 'None'}\n` +
+                                   `🆔 *ReqID:* \`${reqId}\`\n` +
+                                   `💰 *Tokens Added:* ${totalForUser.toFixed(2)} GI28\n` +
+                                   `🎁 *(Bonus included: ${bonusPercent.toFixed(2)}%)*`;
 
                 await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        message_id: messageId,
-                        text: `✅ *PAYMENT APPROVED*\nUser got ${totalForUser.toFixed(2)} Tokens.\n(Bonus: ${bonusPercent.toFixed(2)}%)`,
-                        parse_mode: 'Markdown'
-                    })
+                    body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: successMsg, parse_mode: 'Markdown' })
                 });
-                console.log("✅ Telegram message updated.");
-            } else if (action === 'reject') {
+
+            } 
+            // ==========================================
+            // LOGIC FOR REJECT
+            // ==========================================
+            else if (action === 'reject') {
                 await reqRef.update({ status: 'rejected' });
+                
+                // 🌟 NAYA MSG FORMAT (Reject)
+                const rejectMsg = `❌ *PAYMENT REJECTED*\n\n` +
+                                  `👤 *User:* ${reqData.user_email || 'N/A'}\n` +
+                                  `💳 *UTR:* \`${reqData.utr_number}\`\n` +
+                                  `🆔 *ReqID:* \`${reqId}\``;
+
                 await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        message_id: messageId,
-                        text: "❌ *PAYMENT REJECTED*",
-                        parse_mode: 'Markdown'
-                    })
+                    body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: rejectMsg, parse_mode: 'Markdown' })
                 });
-                console.log("✅ DB and Telegram marked as rejected.");
             }
         }
     } catch (error) {
