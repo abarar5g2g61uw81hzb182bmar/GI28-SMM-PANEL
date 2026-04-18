@@ -13,10 +13,60 @@
         .filter-btn { padding: 8px 15px; font-size: 12px; border-radius: 20px; color: var(--text-muted); background: var(--bg-color); border: 1px solid var(--border-color); cursor: pointer; transition: 0.3s; }
         .filter-btn.active { background: var(--primary-color); color: var(--bg-color); border-color: var(--primary-color); }
         .sort-select { padding: 8px 15px; font-size: 12px; border-radius: 10px; background: var(--bg-color); color: var(--primary-color); border: 1px solid var(--border-color); outline: none; cursor: pointer; }
-        
-        /* New Search Input Style */
-        .search-input { padding: 10px 15px; font-size: 13px; border-radius: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); outline: none; width: 100%; max-width: 300px; transition: border-color 0.3s; }
-        .search-input:focus { border-color: var(--primary-color); }
+        /* --- PREMIUM APPLE-STYLE SEARCH BAR --- */
+.search-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+}
+
+.search-input { 
+    width: 100%;
+    padding: 12px 20px; 
+    font-size: 14px; 
+    border-radius: 30px; /* Pill shape for premium look */
+    background: rgba(0, 0, 0, 0.04); /* Very subtle background like iOS */
+    color: var(--text-color); 
+    border: 1px solid transparent; 
+    outline: none; 
+    /* Smooth Apple-like easing transition */
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+    box-sizing: border-box;
+}
+
+/* Dark mode adjustment if you use it */
+[data-theme="dark"] .search-input {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ON FOCUS: Expand padding, add border & shadow */
+.search-input:focus { 
+    background: var(--bg-color);
+    border-color: var(--primary-color); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding-right: 45px; /* Make space so text doesn't hide behind the icon */
+}
+
+/* THE SVG ICON: Initially hidden & shifted slightly left */
+.search-icon {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    /* Start smaller, transparent, and slightly pushed to the left */
+    transform: translateY(-50%) scale(0.8) translateX(-15px);
+    color: var(--text-muted);
+    opacity: 0;
+    pointer-events: none; /* User can click through the icon to type */
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* THE MAGIC ANIMATION: When input is focused, animate the sibling SVG icon */
+.search-input:focus ~ .search-icon {
+    opacity: 1;
+    /* Scale up to normal size and slide to its original position */
+    transform: translateY(-50%) scale(1) translateX(0);
+    color: var(--primary-color); /* Highlight icon on focus */
+}
 
         .service-card { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;}
         .service-info { flex: 1; margin-left: 15px; }
@@ -62,8 +112,14 @@
         </div>
 
         <div class="controls-bar">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search by ID, Name, Desc, Price..." oninput="applyFilters()">
-            
+            <div class="search-wrapper">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search by ID, Name, Desc, Price..." oninput="applyFilters()">
+    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+</div>
+
             <div class="filter-group" id="filterGroup">
                 <button class="filter-btn active" onclick="filterServices('All')">All</button>
                 <button class="filter-btn" onclick="filterServices('Instagram')">Instagram</button>
