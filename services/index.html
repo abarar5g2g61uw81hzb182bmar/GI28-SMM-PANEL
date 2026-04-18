@@ -421,7 +421,7 @@
                 // ==========================================
                 // 1. SEND ORDER TO VERCEL API
                 // ==========================================
-                const apiResponse = await fetch('https://gi28.in/api/place-order.js', {
+                const apiResponse = await fetch('/api/place-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
