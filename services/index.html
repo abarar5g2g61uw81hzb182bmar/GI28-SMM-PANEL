@@ -336,9 +336,7 @@
             } else {
                 document.getElementById('calculatedPrice').innerText = '0.00';
             }
-        };
-
-        // --- ORDER PLACEMENT & RECEIPT ---
+        };        // --- ORDER PLACEMENT & RECEIPT (UPDATED FOR SMM API) ---
         document.getElementById('placeOrderBtn').addEventListener('click', async () => {
             const link = document.getElementById('orderLink').value;
             const qty = Number(document.getElementById('orderQuantity').value);
@@ -354,14 +352,46 @@
                 return alert("Insufficient GI28 Tokens. Please Add Funds!");
             }
 
+            // Check if provider details exist in the service
+            if(!selectedService.provider_name || !selectedService.provider_service_id) {
+                return alert("System Error: This service is not properly configured with an API provider. Contact Admin.");
+            }
+
             const btn = document.getElementById('placeOrderBtn');
-            btn.innerHTML = "Processing...";
+            btn.innerHTML = "Sending to Provider...";
+            btn.disabled = true;
 
             try {
+                // ==========================================
+                // 1. SEND ORDER TO VERCEL API
+                // ==========================================
+                const apiResponse = await fetch('https://gi28.in/api/place-order.js', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider_name: selectedService.provider_name,
+                        provider_service_id: selectedService.provider_service_id,
+                        link: link,
+                        quantity: qty
+                    })
+                });
+
+                const apiData = await apiResponse.json();
+
+                if (!apiData.success) {
+                    btn.innerHTML = "Place Order";
+                    btn.disabled = false;
+                    return alert("Provider Error: " + apiData.error);
+                }
+
+                btn.innerHTML = "Saving Order...";
+
+                // ==========================================
+                // 2. ORDER SUCCESSFUL, SAVE TO FIREBASE
+                // ==========================================
                 const orderID = "ORD" + Date.now();
                 const newBalance = currentBalance - totalCharge;
 
-                // 1. Save Order to Firestore
                 await setDoc(doc(db, "orders", orderID), {
                     user_uid: currentUserData.uid,
                     service_id: selectedService.id,
@@ -369,29 +399,29 @@
                     link: link,
                     quantity: qty,
                     price_tokens: totalCharge,
-                    status: "pending",
+                    status: "processing", 
+                    provider_order_id: apiData.provider_order_id, 
                     timestamp: new Date()
                 });
 
-                // 2. Deduct Balance from User
                 await setDoc(doc(db, "users", currentUserData.uid), {
                     wallet_balance: newBalance
                 }, { merge: true });
 
-                // Update Local Data
                 currentUserData.wallet_balance = newBalance;
                 document.getElementById("liveBalance").innerText = newBalance.toFixed(2);
 
-                // 3. Generate Receipt
                 generateReceipt(orderID, link, qty, totalCharge);
 
                 alert("Order Placed Successfully! Your receipt is downloading.");
                 closeModal();
                 btn.innerHTML = "Place Order";
+                btn.disabled = false;
                 
             } catch (error) {
                 alert("Error placing order: " + error.message);
                 btn.innerHTML = "Place Order";
+                btn.disabled = false;
             }
         });
 
