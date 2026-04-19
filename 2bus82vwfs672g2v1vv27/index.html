@@ -941,10 +941,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 loadAdminSupport();
             } catch (error) { alert("Error: " + error.message); }
         };
-                // ==========================================
-        // BOSS MODE: MANAGE SERVICES (Tune ye paste nahi kiya tha)
+          // ==========================================
+        // BOSS MODE: MANAGE SERVICES
         // ==========================================
-            window.loadAdminServices = async () => {
+        window.loadAdminServices = async () => {
             const container = document.getElementById('adminServicesList');
             container.innerHTML = '<p class="text-muted">Loading services from database...</p>';
             try {
@@ -957,10 +957,11 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 snap.forEach(docSnap => {
                     const srv = docSnap.data();
                     
-                    // Check if API is linked
                     const apiStatus = srv.provider_service_id ? 
                         `<span style="color:#00ff00; font-size:10px;">✓ API Linked (${srv.provider_name.toUpperCase()})</span>` : 
                         `<span style="color:#ff4444; font-size:10px;">⚠ API Not Linked</span>`;
+
+                    const srvJson = encodeURIComponent(JSON.stringify(srv));
 
                     container.innerHTML += `
                         <div class="neu-card" style="margin-bottom: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -969,15 +970,37 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                                 <p style="font-size: 14px; font-weight: 700; color: var(--primary-color);">${srv.title}</p>
                                 <p style="font-size: 12px; color: var(--text-muted);">Selling Price: <span style="font-weight:600; color:var(--primary-color);">${srv.price} GI28</span> | Cost: ${srv.provider_price || 'N/A'}</p>
                             </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button class="neu-btn" style="padding: 8px 15px; font-size: 11px; color: #00ff88;" onclick="editServiceAPI('${docSnap.id}')">Link API</button>
-                                <button class="neu-btn" style="padding: 8px 15px; font-size: 11px; color: #ff4444;" onclick="deleteService('${docSnap.id}')">Delete</button>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #00aeff;" onclick="editFullService('${srvJson}')">Edit All</button>
+                                <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #00ff88;" onclick="editServiceAPI('${docSnap.id}')">Link API</button>
+                                <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #ff4444;" onclick="deleteService('${docSnap.id}')">Delete</button>
                             </div>
                         </div>
                     `;
                 });
             } catch (error) { console.log(error); }
         };
+
+        window.editFullService = (srvJson) => {
+            const srv = JSON.parse(decodeURIComponent(srvJson));
+            
+            document.getElementById('newSrvId').value = srv.id;
+            document.getElementById('newSrvId').readOnly = true; 
+            
+            document.getElementById('newSrvPlatform').value = srv.platform || 'Instagram';
+            document.getElementById('newSrvProvider').value = srv.provider_name || 'bulkfollows';
+            document.getElementById('newSrvProviderId').value = srv.provider_service_id || '';
+            document.getElementById('newSrvTitle').value = srv.title || '';
+            document.getElementById('newSrvCost').value = srv.provider_price || '';
+            document.getElementById('newSrvPrice').value = srv.price || '';
+            document.getElementById('newSrvMin').value = srv.min || '';
+            document.getElementById('newSrvMax').value = srv.max || '';
+            document.getElementById('newSrvDesc').value = srv.desc || '';
+
+            document.getElementById('servicesManagerModule').scrollIntoView({ behavior: 'smooth' });
+            alert("✏️ EDIT MODE: Service details form me bhar di gayi hain. Change karke wapas 'Add Service' button daba dein!");
+        };
+
         window.editServiceAPI = async (docId) => {
             const provider = prompt("Enter Provider Name (Type exactly: bulkfollows OR xmedia):", "bulkfollows");
             if(!provider) return;
@@ -989,20 +1012,17 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             if(!provCost) return;
 
             try {
-                // Update the specific service with new API details
                 await updateDoc(doc(db, "services", docId), {
                     provider_name: provider.toLowerCase().trim(),
                     provider_service_id: Number(provId),
                     provider_price: Number(provCost)
                 });
                 alert("API Linked Successfully! Automation is now active for this service.");
-                loadAdminServices(); // Refresh list
-            } catch (error) {
-                alert("Error linking API: " + error.message);
-            }
+                loadAdminServices(); 
+            } catch (error) { alert("Error linking API: " + error.message); }
         };
 
-                window.addNewService = async () => {
+        window.addNewService = async () => {
             const id = document.getElementById('newSrvId').value;
             const platform = document.getElementById('newSrvPlatform').value;
             const provider = document.getElementById('newSrvProvider').value;
@@ -1029,17 +1049,21 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                     max: Number(max), 
                     desc: desc, 
                     timestamp: new Date()
-                });
-                alert("Service Linked to API & Added Successfully!");
+                }, { merge: true });
                 
-                // Clear fields
-                document.getElementById('newSrvId').value = ""; document.getElementById('newSrvTitle').value = "";
-                document.getElementById('newSrvPrice').value = ""; document.getElementById('newSrvCost').value = "";
-                document.getElementById('newSrvProviderId').value = ""; document.getElementById('newSrvDesc').value = "";
+                alert("Service Saved / Updated Successfully! ✅");
+                
+                document.getElementById('newSrvId').value = ""; 
+                document.getElementById('newSrvId').readOnly = false; 
+                document.getElementById('newSrvTitle').value = "";
+                document.getElementById('newSrvPrice').value = ""; 
+                document.getElementById('newSrvCost').value = "";
+                document.getElementById('newSrvProviderId').value = ""; 
+                document.getElementById('newSrvDesc').value = "";
+                
                 loadAdminServices(); 
             } catch (error) { alert("Error: " + error.message); }
         };
-
 
         window.deleteService = async (docId) => {
             if(!confirm("Are you sure you want to delete this service permanently?")) return;
@@ -1048,10 +1072,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 loadAdminServices();
             } catch (error) { alert("Error: " + error.message); }
         };
-                // ==========================================
-        // BOSS MODE: LIVE PROOFS APPROVAL
+
         // ==========================================
-                // ==========================================
         // BOSS MODE: LIVE PROOFS MANAGEMENT
         // ==========================================
         window.loadAdminProofs = async () => {
@@ -1062,16 +1084,12 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             liveContainer.innerHTML = '<p class="text-muted" style="font-size: 12px;">Fetching live proofs...</p>';
             
             try {
-                // Fetch ALL proofs (Pending + Approved)
                 const snap = await getDocs(collection(db, "proofs"));
-                
                 pendingContainer.innerHTML = '';
                 liveContainer.innerHTML = '';
                 
                 let pendingCount = 0;
                 let liveCount = 0;
-                
-                // Array banakar local sorting karenge latest first
                 let allProofs = [];
                 snap.forEach(d => allProofs.push({ id: d.id, ...d.data() }));
                 allProofs.sort((a, b) => b.timestamp - a.timestamp);
@@ -1097,7 +1115,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
 
                             <div style="display: flex; gap: 10px;">
                                 ${proof.status === 'pending' ? `<button class="neu-btn" style="padding: 8px 15px; font-size: 11px; color: #00ff00; flex: 1;" onclick="approveProof('${proof.id}')">Approve</button>` : ''}
-                                <button class="neu-btn" style="padding: 8px 15px; font-size: 11px; color: #ff4444; flex: 1;" onclick="deleteProof('${proof.id}')">Delete Permanently</button>
+                                <button class="neu-btn" style="padding: 8px 15px; font-size: 11px; color: #ff4444; flex: 1;" onclick="deleteProof('${proof.id}')">Delete</button>
                             </div>
                         </div>
                     `;
@@ -1137,59 +1155,14 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             } catch (error) { alert("Error: " + error.message); }
         };
 
+        window.toggleSidebar = () => {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
 
-        window.approveProof = async (proofId) => {
-            if(!confirm("Approve this proof and show it publicly?")) return;
-            try {
-                await updateDoc(doc(db, "proofs", proofId), { status: "approved" });
-                loadAdminProofs();
-            } catch (error) { alert("Error: " + error.message); }
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
         };
-
-        window.rejectProof = async (proofId) => {
-            if(!confirm("Reject and permanently delete this proof?")) return;
-            try {
-                await deleteDoc(doc(db, "proofs", proofId));
-                loadAdminProofs();
-            } catch (error) { alert("Error: " + error.message); }
-        };
-
-window.toggleSidebar = () => {
-    const sidebar = document.querySelector('.admin-sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-};
-let touchStartX = 0;
-let touchEndX = 0;
-
-document.addEventListener("touchstart", (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-});
-
-document.addEventListener("touchend", (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-});
-
-function handleSwipe() {
-    const sidebar = document.querySelector('.admin-sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-
-    if (touchEndX - touchStartX > 70) {
-        if (window.innerWidth <= 768) {
-            sidebar.classList.add('active');
-            overlay.classList.add('active');
-        }
-    }
-
-    if (touchStartX - touchEndX > 70) {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-}
-        // ==========================================
+      // ==========================================
         // BOSS MODE: AFFILIATE PAYOUTS
         // ==========================================
         window.loadAdminPayouts = async () => {
