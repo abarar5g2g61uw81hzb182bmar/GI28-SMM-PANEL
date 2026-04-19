@@ -944,7 +944,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 // ==========================================
         // BOSS MODE: MANAGE SERVICES (Tune ye paste nahi kiya tha)
         // ==========================================
-        window.loadAdminServices = async () => {
+            window.loadAdminServices = async () => {
             const container = document.getElementById('adminServicesList');
             container.innerHTML = '<p class="text-muted">Loading services from database...</p>';
             try {
@@ -956,18 +956,50 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 }
                 snap.forEach(docSnap => {
                     const srv = docSnap.data();
+                    
+                    // Check if API is linked
+                    const apiStatus = srv.provider_service_id ? 
+                        `<span style="color:#00ff00; font-size:10px;">✓ API Linked (${srv.provider_name.toUpperCase()})</span>` : 
+                        `<span style="color:#ff4444; font-size:10px;">⚠ API Not Linked</span>`;
+
                     container.innerHTML += `
-                        <div class="neu-card" style="margin-bottom: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <p style="font-size: 10px; color: var(--text-muted);">${srv.id} | ${srv.platform}</p>
+                        <div class="neu-card" style="margin-bottom: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div style="flex: 1;">
+                                <p style="font-size: 10px; color: var(--text-muted);">${srv.id} | ${srv.platform} <br>${apiStatus}</p>
                                 <p style="font-size: 14px; font-weight: 700; color: var(--primary-color);">${srv.title}</p>
-                                <p style="font-size: 12px; color: var(--text-muted);">Price: <span style="font-weight:600; color:var(--primary-color);">${srv.price} GI28</span> | Min: ${srv.min} - Max: ${srv.max}</p>
+                                <p style="font-size: 12px; color: var(--text-muted);">Selling Price: <span style="font-weight:600; color:var(--primary-color);">${srv.price} GI28</span> | Cost: ${srv.provider_price || 'N/A'}</p>
                             </div>
-                            <button class="neu-btn" style="padding: 8px 15px; font-size: 11px; color: #ff4444;" onclick="deleteService('${docSnap.id}')">Delete</button>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="neu-btn" style="padding: 8px 15px; font-size: 11px; color: #00ff88;" onclick="editServiceAPI('${docSnap.id}')">Link API</button>
+                                <button class="neu-btn" style="padding: 8px 15px; font-size: 11px; color: #ff4444;" onclick="deleteService('${docSnap.id}')">Delete</button>
+                            </div>
                         </div>
                     `;
                 });
             } catch (error) { console.log(error); }
+        };
+        window.editServiceAPI = async (docId) => {
+            const provider = prompt("Enter Provider Name (Type exactly: bulkfollows OR xmedia):", "bulkfollows");
+            if(!provider) return;
+            
+            const provId = prompt("Enter Provider's Service ID (e.g. 1425):");
+            if(!provId) return;
+            
+            const provCost = prompt("Enter Your Cost Price per 1k (e.g. 10.50):");
+            if(!provCost) return;
+
+            try {
+                // Update the specific service with new API details
+                await updateDoc(doc(db, "services", docId), {
+                    provider_name: provider.toLowerCase().trim(),
+                    provider_service_id: Number(provId),
+                    provider_price: Number(provCost)
+                });
+                alert("API Linked Successfully! Automation is now active for this service.");
+                loadAdminServices(); // Refresh list
+            } catch (error) {
+                alert("Error linking API: " + error.message);
+            }
         };
 
                 window.addNewService = async () => {
