@@ -56,7 +56,22 @@ export default async function handler(req, res) {
             [{ text: "❌ Reject Trial", callback_data: `reject_trial_${reqId}` }]
         ];
     }
+    // Logic 3: Agar "Manual Order" ki request aayi
+    else if (type === 'manual_order') {
+        const { serviceName, link, qty, charge, orderId } = req.body;
+        message = `🛠 *NEW MANUAL ORDER* 🛠\n\n` +
+                  `👤 *User:* ${email}\n` +
+                  `📦 *Service:* ${serviceName}\n` +
+                  `🔗 *Link:* ${link}\n` +
+                  `🔢 *Qty:* ${qty}\n` +
+                  `💰 *Charge:* ${charge} GI28\n` +
+                  `🆔 *OrderID:* \`${orderId}\``;
 
+        inlineKeyboard = [
+            [{ text: "🖥️ View in Admin Panel", url: "https://gi28.in/admin" }]
+        ];
+    }
+    
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
     try {
