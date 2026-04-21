@@ -7,66 +7,116 @@
     <link rel="stylesheet" href="../assets/css/global.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* Services Page Specific Styles */
-        .controls-bar { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; align-items: center; justify-content: space-between; }
-        .filter-group, .sort-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        .filter-btn { padding: 8px 15px; font-size: 12px; border-radius: 20px; color: var(--text-muted); background: var(--bg-color); border: 1px solid var(--border-color); cursor: pointer; transition: 0.3s; }
-        .filter-btn.active { background: var(--primary-color); color: var(--bg-color); border-color: var(--primary-color); }
-        .sort-select { padding: 8px 15px; font-size: 12px; border-radius: 10px; background: var(--bg-color); color: var(--primary-color); border: 1px solid var(--border-color); outline: none; cursor: pointer; }
-        /* --- PREMIUM APPLE-STYLE SEARCH BAR --- */
+    /* --- CONTROLS BAR (SEARCH + SORT) --- */
+.controls-bar { 
+    display: flex; 
+    flex-wrap: nowrap; /* Dono ko ek line mein rakhega */
+    gap: 15px; 
+    margin-bottom: 20px; 
+    align-items: center; 
+    justify-content: space-between; 
+    width: 100%;
+}
+
+/* --- PREMIUM APPLE-STYLE SEARCH BAR --- */
 .search-wrapper {
     position: relative;
-    width: 100%;
-    max-width: 320px;
+    flex: 1; /* Bachi hui jagah automatically le lega */
+    max-width: 300px; /* Default chhota size */
+    transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth expanding animation */
+}
+
+/* MAGIC: Jab input par click hoga, Wrapper expand ho jayega! */
+.search-wrapper:focus-within {
+    max-width: 100%; /* Pura available space cover karega, par Sort button ko nahi dabayega */
 }
 
 .search-input { 
     width: 100%;
     padding: 12px 20px; 
     font-size: 14px; 
-    border-radius: 30px; /* Pill shape for premium look */
-    background: rgba(0, 0, 0, 0.04); /* Very subtle background like iOS */
+    border-radius: 30px; 
+    background: rgba(0, 0, 0, 0.04); 
     color: var(--text-color); 
     border: 1px solid transparent; 
     outline: none; 
-    /* Smooth Apple-like easing transition */
     transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
     box-sizing: border-box;
 }
 
-/* Dark mode adjustment if you use it */
-[data-theme="dark"] .search-input {
-    background: rgba(255, 255, 255, 0.05);
-}
+[data-theme="dark"] .search-input { background: rgba(255, 255, 255, 0.05); }
 
-/* ON FOCUS: Expand padding, add border & shadow */
 .search-input:focus { 
     background: var(--bg-color);
     border-color: var(--primary-color); 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    padding-right: 45px; /* Make space so text doesn't hide behind the icon */
+    padding-right: 45px; 
 }
 
-/* THE SVG ICON: Initially hidden & shifted slightly left */
 .search-icon {
     position: absolute;
     right: 18px;
     top: 50%;
-    /* Start smaller, transparent, and slightly pushed to the left */
     transform: translateY(-50%) scale(0.8) translateX(-15px);
     color: var(--text-muted);
     opacity: 0;
-    pointer-events: none; /* User can click through the icon to type */
+    pointer-events: none; 
     transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* THE MAGIC ANIMATION: When input is focused, animate the sibling SVG icon */
 .search-input:focus ~ .search-icon {
     opacity: 1;
-    /* Scale up to normal size and slide to its original position */
     transform: translateY(-50%) scale(1) translateX(0);
-    color: var(--primary-color); /* Highlight icon on focus */
+    color: var(--primary-color); 
 }
+
+/* --- SORT DROPDOWN --- */
+.sort-group {
+    flex-shrink: 0; /* Yeh ensure karega ki search expand hone par sort button squish (chhota) na ho */
+}
+
+.sort-select { 
+    padding: 10px 15px; /* Thoda padding badhaya achhe look ke liye */
+    font-size: 13px; 
+    border-radius: 12px; 
+    background: var(--bg-color); 
+    color: var(--primary-color); 
+    border: 1px solid var(--border-color); 
+    outline: none; 
+    cursor: pointer; 
+    height: 100%;
+}
+
+                /* Agar Swipeable Menu chahiye toh yeh use karein */
+        .filter-group { 
+            display: flex; 
+            gap: 10px; 
+            width: 100%;
+            overflow-x: auto; /* Side scroll allow karega */
+            padding-bottom: 10px; /* Scrollbar ke liye space */
+            scrollbar-width: none; /* Firefox mein scrollbar hide karne ke liye */
+        }
+        
+        .filter-group::-webkit-scrollbar {
+            display: none; /* Chrome/Safari mein scrollbar hide karne ke liye */
+        }
+
+        .filter-btn { 
+            flex-shrink: 0; /* Buttons ko chhota hone se rokega */
+            padding: 8px 16px; 
+            font-size: 13px; 
+            border-radius: 20px; 
+            /* Baki colors aur borders same rahenge */
+            color: var(--text-muted); 
+            background: var(--bg-color); 
+            border: 1px solid var(--border-color); 
+            cursor: pointer; 
+            transition: 0.3s; 
+        }
+
+        .filter-btn.active { background: var(--primary-color); color: var(--bg-color); border-color: var(--primary-color); }
+        .sort-select { padding: 8px 15px; font-size: 12px; border-radius: 10px; background: var(--bg-color); color: var(--primary-color); border: 1px solid var(--border-color); outline: none; cursor: pointer; }
+
 
         .service-card { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;}
         .service-info { flex: 1; margin-left: 15px; }
@@ -95,6 +145,75 @@
         .receipt-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; }
         .receipt-row span:last-child { font-weight: 600; text-align: right; }
     </style>
+    <style>
+              /* Warning Box Styles */
+        .warning-box {
+            position: relative;
+            width: 100%;
+            background-color: rgba(255, 71, 87, 0.08); /* Light reddish background */
+            border-left: 4px solid #ff4757; /* Red accent line */
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 25px; 
+            overflow: hidden; /* Keeps the background SVG inside the box */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.05);
+        }
+
+        /* Dark mode adjustment if you use it */
+        [data-theme="dark"] .warning-box {
+            background-color: rgba(255, 71, 87, 0.12);
+        }
+
+        /* The large faded background SVG */
+        .bg-warning-svg {
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 120px;
+            height: 120px;
+            opacity: 0.04; /* Very transparent watermark */
+            color: #ff4757;
+            pointer-events: none;
+        }
+
+        .warning-content {
+            position: relative;
+            z-index: 1; /* Keeps text above the background SVG */
+        }
+
+        .warning-content h4 {
+            display: flex;
+            align-items: center;
+            color: #ff4757;
+            font-size: 14px;
+            margin: 0 0 8px 0;
+            font-weight: 600;
+        }
+
+        .warning-content p {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-muted, #666);
+        }
+        
+        /* Mobile Optimization */
+        @media (max-width: 480px) {
+            .warning-box {
+                padding: 12px 15px;
+            }
+            .bg-warning-svg {
+                width: 80px;
+                height: 80px;
+                right: -10px;
+            }
+        }
+
+    </style>
 </head>
 <body>
 
@@ -102,45 +221,69 @@
     <div id="sidebar-placeholder"></div>
     <div id="navbar-placeholder"></div>
 
-    <div class="main-content">
-        <div class="section-header">
-            <h2 class="section-title" style="margin: 0;">Our Services</h2>
-            <button class="neu-btn" style="padding: 8px 15px; font-size: 12px;" onclick="downloadServicesTXT()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" style="margin-right: 5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Save TXT
-            </button>
+  <div class="main-content">
+    <div class="section-header">
+        <h2 class="section-title" style="margin: 0;">Our Services</h2>
+        <button class="neu-btn" style="padding: 8px 15px; font-size: 12px;" onclick="downloadServicesTXT()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" style="margin-right: 5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Save TXT
+        </button>
+    </div>
+
+    <div class="warning-box">
+        <svg class="bg-warning-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/>
+        </svg>
+        <div class="warning-content">
+            <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                Important Notice
+            </h4>
+            <p>When the service is busy, the starting speed of the process changes.<br>
+            Do not place the second order on the same link before your order is completed in the system.<br> We'll unable to Refund in this case!
+            In case of any other problems with the service, please contact support.</p>
+        </div>
+    </div>
+
+    <div class="controls-bar">
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search..." oninput="applyFilters()">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
         </div>
 
-        <div class="controls-bar">
-            <div class="search-wrapper">
-    <input type="text" id="searchInput" class="search-input" placeholder="Search by ID, Name, Desc, Price..." oninput="applyFilters()">
-    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
+        <div class="sort-group">
+            <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+                <option value="default">Sort By</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="a-z">Name: A-Z</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="filter-group" id="filterGroup">
+        <button class="filter-btn active" onclick="filterServices('All')">All</button>
+        <button class="filter-btn" onclick="filterServices('Instagram')">Instagram</button>
+        <button class="filter-btn" onclick="filterServices('Facebook')">Facebook</button>
+        <button class="filter-btn" onclick="filterServices('YouTube')">YouTube</button>
+        <button class="filter-btn" onclick="filterServices('Telegram')">Telegram</button>
+        <button class="filter-btn" onclick="filterServices('Web Services')">Web Services</button>
+        <button class="filter-btn" onclick="filterServices('Limited Services')">Limited Services</button>
+        <button class="filter-btn" onclick="filterServices('Twitter')">Twitter</button>
+        <button class="filter-btn" onclick="filterServices('Github')">Github</button>
+    </div>
+    
+    <div id="servicesList">
+        </div>
 </div>
 
-            <div class="filter-group" id="filterGroup">
-                <button class="filter-btn active" onclick="filterServices('All')">All</button>
-                <button class="filter-btn" onclick="filterServices('Instagram')">Instagram</button>
-                <button class="filter-btn" onclick="filterServices('Facebook')">Facebook</button>
-                <button class="filter-btn" onclick="filterServices('YouTube')">YouTube</button>
-                <button class="filter-btn" onclick="filterServices('Telegram')">Telegram</button>
-                <button class="filter-btn" onclick="filterServices('Web Services')">Web Services</button>
-                <button class="filter-btn" onclick="filterServices('Limited Services')">Limited Services</button>
-                <button class="filter-btn" onclick="filterServices('Twitter')">Twitter</button>
-                <button class="filter-btn" onclick="filterServices('Github')">Github</button>
-            </div>
-            
-            <div class="sort-group">
-                <select class="sort-select" id="sortSelect" onchange="applyFilters()">
-                    <option value="default">Sort By</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="a-z">Name: A-Z</option>
-                </select>
-            </div>
-        </div>
 
         <div id="servicesList">
             </div>
