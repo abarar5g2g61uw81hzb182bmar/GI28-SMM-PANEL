@@ -404,45 +404,47 @@
             }
 
             const currentBalance = parseFloat(currentUserData.wallet_balance || 0);
+            if(currentBalance < totalCharge) return alert("Insufficient GI28 Tokens. Please Add Funds!");
 
-            if(currentBalance < totalCharge) {
-                return alert("Insufficient GI28 Tokens. Please Add Funds!");
-            }
-
-            if(!selectedService.provider_name || !selectedService.provider_service_id) {
-                return alert("System Error: This service is not properly configured with an API provider. Contact Admin.");
-            }
+            if(!selectedService.provider_name) return alert("System Error: Provider not set.");
 
             const btn = document.getElementById('placeOrderBtn');
-            btn.innerHTML = "Sending to Provider...";
+            btn.innerHTML = "Processing...";
             btn.disabled = true;
 
             try {
-                // 1. API CALL TO VERCEL
-                const apiResponse = await fetch('/api/place-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        provider_name: selectedService.provider_name,
-                        provider_service_id: selectedService.provider_service_id,
-                        link: link,
-                        quantity: qty
-                    })
-                });
+                let providerOrderId = "PENDING";
+                const isManual = selectedService.provider_name === 'manual';
 
-                const apiData = await apiResponse.json();
+                // 1. AGAR AUTOMATIC (API) HAI TOH VERCEL KO BHEJO
+                if (!isManual) {
+                    btn.innerHTML = "Sending to SMM API...";
+                    const apiResponse = await fetch('/api/place-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            provider_name: selectedService.provider_name,
+                            provider_service_id: selectedService.provider_service_id,
+                            link: link,
+                            quantity: qty
+                        })
+                    });
 
-                if (!apiData.success) {
-                    btn.innerHTML = "Place Order";
-                    btn.disabled = false;
-                    return alert("Provider Error: " + apiData.error);
+                    const apiData = await apiResponse.json();
+
+                    if (!apiData.success) {
+                        btn.innerHTML = "Place Order";
+                        btn.disabled = false;
+                        return alert("Provider Error: " + apiData.error);
+                    }
+                    providerOrderId = apiData.provider_order_id;
+                } else {
+                    providerOrderId = "MANUAL_ORDER";
                 }
 
-                btn.innerHTML = "Saving Order & Calculating Profit...";
+                btn.innerHTML = "Saving Order & Deducting Balance...";
 
-                // ==========================================
-                // 2. PROFIT CALCULATION MAGIC
-                // ==========================================
+                // 2. PROFIT CALCULATION & FIREBASE SAVE
                 const costPer1k = parseFloat(selectedService.provider_price || 0);
                 const providerCost = (qty / 1000) * costPer1k;
                 const profitMade = totalCharge - providerCost;
@@ -450,7 +452,6 @@
                 const orderID = "ORD" + Date.now();
                 const newBalance = currentBalance - totalCharge;
 
-                // 3. SAVE FULL DATA TO FIREBASE
                 await setDoc(doc(db, "orders", orderID), {
                     user_uid: currentUserData.uid,
                     service_id: selectedService.id,
@@ -458,12 +459,12 @@
                     link: link,
                     quantity: qty,
                     price_tokens: totalCharge,
-                    provider_cost: providerCost,     // Tera kharcha save
-                    profit: profitMade,              // Tera profit save
+                    provider_cost: providerCost,
+                    profit: profitMade,
                     provider_name: selectedService.provider_name,
-                    provider_service_id: selectedService.provider_service_id,
-                    provider_order_id: apiData.provider_order_id, 
-                    status: "processing", 
+                    provider_service_id: selectedService.provider_service_id || "N/A",
+                    provider_order_id: providerOrderId,
+                    status: isManual ? "pending" : "processing", // Manual is pending till you do it
                     timestamp: new Date()
                 });
 
@@ -474,8 +475,26 @@
                 currentUserData.wallet_balance = newBalance;
                 document.getElementById("liveBalance").innerText = newBalance.toFixed(2);
 
-                generateReceipt(orderID, link, qty, totalCharge);
+                // 3. AGAR MANUAL HAI TOH TELEGRAM PAR NOTIFY KARO
+                if (isManual) {
+                    try {
+                        await fetch('/api/notify-admin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'manual_order',
+                                email: currentUserData.email || "No Email",
+                                serviceName: selectedService.title,
+                                link: link,
+                                qty: qty,
+                                charge: totalCharge.toFixed(2),
+                                orderId: orderID
+                            })
+                        });
+                    } catch (err) { console.log("Telegram notification failed but order saved."); }
+                }
 
+                generateReceipt(orderID, link, qty, totalCharge);
                 alert("Order Placed Successfully! Your receipt is downloading.");
                 closeModal();
                 btn.innerHTML = "Place Order";
