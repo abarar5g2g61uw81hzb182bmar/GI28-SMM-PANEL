@@ -1022,28 +1022,39 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 loadAdminServices(); 
             } catch (error) { alert("Error linking API: " + error.message); }
         };
-
         window.addNewService = async () => {
             const id = document.getElementById('newSrvId').value;
             const platform = document.getElementById('newSrvPlatform').value;
             const provider = document.getElementById('newSrvProvider').value;
-            const providerId = document.getElementById('newSrvProviderId').value;
+            let providerId = document.getElementById('newSrvProviderId').value;
             const title = document.getElementById('newSrvTitle').value;
-            const cost = document.getElementById('newSrvCost').value;
+            let cost = document.getElementById('newSrvCost').value;
             const price = document.getElementById('newSrvPrice').value;
             const min = document.getElementById('newSrvMin').value;
             const max = document.getElementById('newSrvMax').value;
             const desc = document.getElementById('newSrvDesc').value;
-            if(!id || !title || !price || !cost || !min || !max) return alert("Please fill all required fields!");
-            if(provider !== 'manual' && !providerId) return alert("Please enter Provider Service ID for API!");
 
+            // 1. Basic validation (Jo sabke liye zaroori hai)
+            if(!id || !title || !price || !min || !max) {
+                return alert("Please fill ID, Title, Selling Price, Min, and Max fields!");
+            }
+
+            // 2. Smart Validation: API vs Manual
+            if(provider !== 'manual') {
+                // Agar API hai, toh ID aur Cost zaroori hai
+                if(!providerId || cost === "") return alert("For API services, 'Provider ID' and 'Cost' are MUST!");
+            } else {
+                // Agar Manual hai, toh Provider ID "MANUAL" set kar do aur Cost 0 kar do (100% Profit)
+                if(!providerId) providerId = "MANUAL";
+                if(cost === "") cost = 0; 
+            }
 
             try {
                 await setDoc(doc(db, "services", id), {
                     id: id, 
                     platform: platform, 
                     provider_name: provider,
-                    provider_service_id: Number(providerId),
+                    provider_service_id: provider === 'manual' ? "MANUAL" : Number(providerId),
                     provider_price: Number(cost),
                     title: title, 
                     price: Number(price),
@@ -1055,6 +1066,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 
                 alert("Service Saved / Updated Successfully! ✅");
                 
+                // Form saaf kar do
                 document.getElementById('newSrvId').value = ""; 
                 document.getElementById('newSrvId').readOnly = false; 
                 document.getElementById('newSrvTitle').value = "";
