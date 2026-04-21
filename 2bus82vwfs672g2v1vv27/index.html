@@ -999,7 +999,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             document.getElementById('newSrvDesc').value = srv.desc || '';
 
             document.getElementById('servicesManagerModule').scrollIntoView({ behavior: 'smooth' });
-            alert("✏️ EDIT MODE: Service details form me bhar di gayi hain. Change karke wapas 'Add Service' button daba dein!");
+            alert("EDIT MODE: Service details form me bhar di gayi hain. Change karke wapas 'Add Service' button daba dein!");
         };
 
         window.editServiceAPI = async (docId) => {
@@ -1034,8 +1034,9 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             const min = document.getElementById('newSrvMin').value;
             const max = document.getElementById('newSrvMax').value;
             const desc = document.getElementById('newSrvDesc').value;
+            if(!id || !title || !price || !cost || !min || !max) return alert("Please fill all required fields!");
+            if(provider !== 'manual' && !providerId) return alert("Please enter Provider Service ID for API!");
 
-            if(!id || !title || !price || !cost || !min || !max || !providerId) return alert("Please fill all required fields including Provider ID and Cost!");
 
             try {
                 await setDoc(doc(db, "services", id), {
