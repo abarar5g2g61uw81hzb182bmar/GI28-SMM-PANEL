@@ -1,379 +1,258 @@
-<!DOCTYPE html>  <html lang="en" data-theme="light">  
-<head>  
-    <meta charset="UTF-8">  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>GI28 PANEL - Login</title>  
-    <link rel="stylesheet" href="./assets/css/global.css">  
-    <style>  
-        /* Auth Page Specific Layout */  
-        body { display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; min-height: 100vh; }  
-        .auth-container { width: 100%; max-width: 400px; margin-top: 20px; }  /* Tabs Styling */  
-    .tabs { display: flex; justify-content: space-between; margin-bottom: 30px; gap: 15px; }  
-    .tab { flex: 1; padding: 12px; text-align: center; border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--text-muted); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); transition: all 0.3s ease; }  
-    .tab.active { color: var(--primary-color); box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light); }  
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI28 PANEL - Dashboard</title>
+    <script src="../assets/js/auth-check.js"></script>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    
+    <style>
+        /* Dashboard Specific Layout Styles */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .stat-item { text-align: center; padding: 15px; }
+        .stat-val { font-size: 22px; font-weight: 700; color: var(--primary-color); display: block; }
+        
+        .proof-card { min-width: 140px; height: 90px; border-radius: 12px; overflow: hidden; }
+        .proof-card img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.3s; }
+        .proof-card:hover img { filter: grayscale(0%); }
 
-    /* Form Group */  
-    .input-group { margin-bottom: 20px; }  
-    .input-group label { font-size: 12px; font-weight: 600; margin-bottom: 8px; display: block; padding-left: 5px; color: var(--text-muted); }  
-    .auth-btn { width: 100%; padding: 15px; margin-top: 10px; font-size: 16px; }  
-    .google-btn { width: 100%; padding: 12px; margin-top: 20px; gap: 10px; font-size: 14px; }  
-    .hidden { display: none; }  
-    .text-center { text-align: center; }  
-    .mt-15 { margin-top: 15px; }  
-      
-    .divider { display: flex; align-items: center; text-align: center; margin: 25px 0; color: var(--text-muted); font-size: 12px; }  
-    .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }  
-    .divider:not(:empty)::before { margin-right: .25em; }  
-    .divider:not(:empty)::after { margin-left: .25em; }  
+        .expert-card { min-width: 110px; padding: 15px; text-align: center; border-radius: 12px; }
+        .expert-avatar { width: 45px; height: 45px; border-radius: 50%; margin: 0 auto 10px; background: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); overflow: hidden; }
+        .expert-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .trending-item { padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; }
+        .service-info { flex: 1; }
+        
+        .order-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--shadow-light); }
+        .order-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
 
-    /* Checkbox Styling */  
-    .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; cursor: pointer; }  
-    .checkbox-group input { display: none; }  
-    .checkbox-box { width: 20px; height: 20px; border-radius: 5px; background: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); display: flex; justify-content: center; align-items: center; }  
-    .checkbox-group input:checked + .checkbox-box::after { content: '✓'; color: var(--primary-color); font-size: 14px; font-weight: bold; }  
-    .checkbox-group label { font-size: 12px; color: var(--text-muted); cursor: pointer; }  
+    <div id="loader-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
 
-    /* Agreement Popup */  
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 999; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: 0.3s; }  
-    .modal-overlay.active { visibility: visible; opacity: 1; }  
-    .modal-box { width: 90%; max-width: 400px; padding: 30px; text-align: center; }  
-      
-</style>  
-<style>
+    <div class="main-content">
+        
+        <div style="margin-top: 10px; margin-bottom: 25px;">
+            <h2 class="text-primary" style="font-weight: 600;" id="welcomeText">Welcome back, User!</h2>
+            <p class="text-muted">Here's what's happening with your account today.</p>
+        </div>
 
-#entryGate {
-position: fixed;
-inset: 0;
-display: flex;
-align-items: center;
-justify-content: center;
+        <h3 class="section-title">Live Analytics</h3>
+        <div class="neu-card">
+            <div style="height: 200px; width: 100%;">
+                <canvas id="trafficChart"></canvas>
+            </div>
+            <div class="stats-grid">
+                <div class="neu-card stat-item">
+                    <span class="stat-val" id="totalUsersStat">...</span>
+                    <span class="text-muted">Total Users</span>
+                </div>
+                <div class="neu-card stat-item">
+                    <span class="stat-val" id="totalOrdersStat">...</span>
+                    <span class="text-muted">My Orders</span>
+                </div>
+            </div>
+        </div>
 
-/* VERY LIGHT overlay (almost transparent) */
-background: rgba(0,0,0,0.08);
+        <div class="section-header">
+            <h3 class="section-title" style="margin: 0;">Live Proofs</h3>
+            <a href="../reviews/" class="see-more-link">See All &rarr;</a>
+        </div>
+        <div class="horizontal-scroll" style="padding-bottom: 15px;">
+            <div class="neu-card proof-card"><img src="https://ui-avatars.com/api/?name=Proof+1&background=121212&color=ffffff&size=150" alt="Proof"></div>
+            <div class="neu-card proof-card"><img src="https://ui-avatars.com/api/?name=Proof+2&background=121212&color=ffffff&size=150" alt="Proof"></div>
+            <div class="neu-card proof-card"><img src="https://ui-avatars.com/api/?name=Proof+3&background=121212&color=ffffff&size=150" alt="Proof"></div>
+        </div>
 
-backdrop-filter: blur(4px); /* low blur */
--webkit-backdrop-filter: blur(4px);
+        <div class="section-header">
+            <h3 class="section-title" style="margin: 0;">Community Profiles</h3>
+            <a href="../users/" class="see-more-link">View All &rarr;</a>
+        </div>
+        <div class="horizontal-scroll" style="padding-bottom: 15px;" id="communityContainer">
+            <p class="text-muted" style="font-size: 11px;">Loading community...</p>
+        </div>
 
-z-index: 9999;
-}
+        <div class="section-header">
+            <h3 class="section-title" style="margin: 0;">Trending Services</h3>
+            <a href="../services/" class="see-more-link">View All &rarr;</a>
+        </div>
+        <div id="trendingServicesContainer">
+            <p class="text-muted" style="font-size: 11px;">Loading services...</p>
+        </div>
 
-.glass-card {
-width: 280px;
-padding: 26px;
-border-radius: 22px;
+        <div class="section-header" style="margin-top: 40px;">
+            <h3 class="section-title" style="margin: 0;">Recent Orders</h3>
+            <a href="../order-history/" class="see-more-link">See All &rarr;</a>
+        </div>
+        <div class="neu-card" id="recentOrdersContainer">
+            <p class="text-muted" style="font-size: 11px;">Loading orders...</p>
+        </div>
 
-/* HIGH transparency */
-background: rgba(255,255,255,0.04);
+    </div>
+<div id="footer-placeholder"></div>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script type="module">
+        import { auth, db, doc, getDoc, collection, getDocs, query, where, orderBy, limit } from "../assets/js/firebase-config.js";
 
-backdrop-filter: blur(6px);
--webkit-backdrop-filter: blur(6px);
+        // --- 1. FIREBASE: Fetch Data & Make Dashboard Live ---
+        auth.onAuthStateChanged(async (user) => {
+            const guestMode = localStorage.getItem("guestMode");
+            
+            if (user) {
+                try {
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        
+                        // Wait for Navbar to be injected by app.js, then update balance
+                        const checkNavbar = setInterval(() => {
+                            const balanceEl = document.getElementById("liveBalance");
+                            if (balanceEl) {
+                                balanceEl.innerText = `${parseFloat(userData.wallet_balance || 0).toFixed(2)}`;
+                                clearInterval(checkNavbar);
+                            }
+                        }, 200);
 
-/* SHARP GLASS EDGE */
-border: 1px solid rgba(255,255,255,0.35);
+                        document.getElementById("welcomeText").innerText = `Welcome back, ${userData.username || "User"}!`;
 
-/* subtle inner highlight (glass shine) */
-box-shadow:
-inset 0 1px 1px rgba(255,255,255,0.4),
-0 10px 30px rgba(0,0,0,0.15);
+                        // Fetch Live Stats
+                        fetchLiveStats(user.uid);
+                    }
+                } catch (error) { console.error("Error fetching data:", error); }
+            } else if (!guestMode) {
+                window.location.href = "../index.html";
+            } else {
+                document.getElementById("welcomeText").innerText = `Welcome, Guest!`;
+            }
+        });
 
-text-align: center;
-color: var(--text-color);
-font-family: Poppins, sans-serif;
+        async function fetchLiveStats(uid) {
+            // A. Total Platform Users
+            try {
+                const usersSnap = await getDocs(collection(db, "users"));
+                document.getElementById('totalUsersStat').innerText = usersSnap.size;
+            } catch(e) {}
 
-/* smooth entrance */
-animation: glassPop 0.5s ease;
-}
+            // B. My Total Orders
+            try {
+                const q = query(collection(db, "orders"), where("user_uid", "==", uid));
+                const orderSnap = await getDocs(q);
+                document.getElementById('totalOrdersStat').innerText = orderSnap.size;
+            } catch(e) {}
 
-@keyframes glassPop {
-from {
-transform: scale(0.9);
-opacity: 0;
-}
-to {
-transform: scale(1);
-opacity: 1;
-}
-}
+            // C. Recent Orders (Top 2)
+            try {
+                const q = query(collection(db, "orders"), where("user_uid", "==", uid), orderBy("timestamp", "desc"), limit(2));
+                const snap = await getDocs(q);
+                const container = document.getElementById('recentOrdersContainer');
+                container.innerHTML = '';
+                
+                if(snap.empty) { container.innerHTML = '<p class="text-muted" style="font-size: 11px;">No orders placed yet.</p>'; }
+                
+                snap.forEach(d => {
+                    const o = d.data();
+                    const color = o.status === 'shipped' ? '#00ff00' : (o.status === 'cancelled' ? '#ff4444' : '#ffa500');
+                    container.innerHTML += `
+                        <div class="order-row">
+                            <div style="display: flex; flex-direction: column;">
+                                <span class="text-primary" style="font-weight: 600; font-size: 14px;">#${d.id.substring(0,8)}</span>
+                                <span class="text-muted" style="font-size: 12px;">${o.service_name.substring(0,20)}...</span>
+                            </div>
+                            <span class="badge badge-filled" style="color: ${color}; border-color: ${color}; background: transparent; border: 1px solid ${color};">${o.status.toUpperCase()}</span>
+                        </div>
+                    `;
+                });
+            } catch(e) { console.log(e); }
 
-.glass-card h2 {
-margin-bottom: 8px;
-font-weight: 600;
-letter-spacing: 0.5px;
-}
+            // D. Trending Services (Top 2)
+            try {
+                const snap = await getDocs(query(collection(db, "services"), limit(2)));
+                const container = document.getElementById('trendingServicesContainer');
+                container.innerHTML = '';
+                snap.forEach(d => {
+                    const s = d.data();
+                    container.innerHTML += `
+                        <div class="neu-card trending-item">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            <div class="service-info">
+                                <span class="text-primary" style="font-weight: 600; font-size: 14px; display: block;">${s.title}</span>
+                                <span class="text-muted" style="font-size: 11px;">${parseFloat(s.price).toFixed(2)} GI28 / 1k</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch(e) {}
 
-.glass-card p {
-font-size: 13px;
-opacity: 0.75;
-margin-bottom: 18px;
-}
-
-#entryGate:active .glass-card {
-transform: scale(0.98);
-}
-</style>
-
-</head>  
-<body>  
-<div id="entryGate">  
-  <div class="glass-card">  
-    <h2>⚠ Attention</h2>  
-    <p>Sorry! Signing in with Google may not work, Continue manually. </p>  
-    <p>Tap anywhere to <b>CONTINUE</b></p>  
-  </div>  
-</div>  <audio id="whooshSound" preload="auto">  
-  <!-- lightweight whoosh / faah sound -->  
-  <source src="data:audio/mp3;base64,//uQxAAAAA..." type="audio/mpeg">  
-</audio>  
-    <h1 class="brand-logo" style="font-size: 36px; margin-bottom: 10px;">GI28</h1>  
-    <p class="text-muted" style="letter-spacing: 1px; text-transform: uppercase;">Premium SMM Panel</p>  <div class="neu-card auth-container">  
-      
-    <div class="tabs">  
-        <div class="tab active" id="loginTab" onclick="switchTab('login')">Login</div>  
-        <div class="tab" id="signupTab" onclick="switchTab('signup')">Sign Up</div>  
-    </div>  
-
-    <div id="loginForm">  
-        <div class="input-group">  
-            <label>Email</label>  
-            <input type="email" id="loginEmail" class="neu-input" placeholder="Enter your email">  
-        </div>  
-        <div class="input-group">  
-            <label>Password</label>  
-            <input type="password" id="loginPass" class="neu-input" placeholder="Enter your password">  
-        </div>  
-          
-        <label class="checkbox-group">  
-            <input type="checkbox" id="stayLoggedInLogin" checked>  
-            <div class="checkbox-box"></div>  
-            <label>Stay Logged In</label>  
-        </label>  
-
-        <button class="neu-btn auth-btn" id="loginBtn">Sign In</button>  
-        <div class="text-center mt-15">  
-            <a href="#" onclick="forgotPassword()" class="text-muted" style="text-decoration: underline; font-size: 12px;">Forgot Password?</a>  
-        </div>  
-    </div>  
-
-    <div id="signupForm" class="hidden">  
-        <div class="input-group">  
-            <label>Username</label>  
-            <input type="text" id="signupUser" class="neu-input" placeholder="Choose a username">  
-        </div>  
-        <div class="input-group">  
-            <label>Email</label>  
-            <input type="email" id="signupEmail" class="neu-input" placeholder="Enter your email">  
-        </div>  
-        <div class="input-group">  
-            <label>Mobile Number</label>  
-            <input type="number" id="signupPhone" class="neu-input" placeholder="Enter mobile number">  
-        </div>  
-        <div class="input-group">  
-            <label>Password</label>  
-            <input type="password" id="signupPass" class="neu-input" placeholder="Create a password">  
-        </div>  
-        <button class="neu-btn auth-btn" id="signupBtn">Create Account</button>  
-    </div>  
-
-    <div class="divider">OR</div>  
-
-    <button class="neu-btn google-btn" id="googleLoginBtn">  
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--text-muted)" stroke="none">  
-            <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>  
-        </svg>  
-        Continue with Google  
-    </button>  
-      
-    <div class="text-center" style="margin-top: 25px;">  
-        <a href="#" onclick="skipForNow()" class="text-muted" style="font-size: 13px; font-weight: 600; text-decoration: underline;">Skip for now &rarr;</a>  
-    </div>  
-
-</div>  
-
-<div class="modal-overlay" id="agreementPopup">  
-    <div class="neu-card modal-box">  
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" style="margin-bottom:15px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>  
-        <h3 class="text-primary" style="margin-bottom: 10px;">Terms & Agreement</h3>  
-        <p class="text-muted" style="font-size: 12px; line-height: 1.6; margin-bottom: 20px;">  
-            By continuing, you agree to accept all our <a href="terms-conditions/" target="_blank" style="color:var(--primary-color); text-decoration:underline;">Terms & Conditions</a>. We reserve the right to edit and modify our terms anytime, so please read them carefully.  
-        </p>  
-          
-        <label class="checkbox-group" style="justify-content: center; margin-bottom: 25px;">  
-            <input type="checkbox" id="agreeTermsBox">  
-            <div class="checkbox-box"></div>  
-            <label>I have read and agree to the Terms</label>  
-        </label>  
-
-        <button class="neu-btn" style="width: 100%; padding: 15px;" id="agreeContinueBtn">I Agree & Continue</button>  
-        <button class="neu-btn" style="width: 100%; padding: 10px; margin-top: 10px; font-size: 12px; background: transparent; border:none; box-shadow:none; color:var(--text-muted)" onclick="cancelLogin()">Cancel</button>  
-    </div>  
-</div>  
-  
-<script src="assets/js/app.js"></script>  
-<script>  
-    function switchTab(tab) {  
-        const loginForm = document.getElementById('loginForm');  
-        const signupForm = document.getElementById('signupForm');  
-        const loginTab = document.getElementById('loginTab');  
-        const signupTab = document.getElementById('signupTab');  
-
-        if(tab === 'login') {  
-            loginForm.classList.remove('hidden'); signupForm.classList.add('hidden');  
-            loginTab.classList.add('active'); signupTab.classList.remove('active');  
-        } else {  
-            loginForm.classList.add('hidden'); signupForm.classList.remove('hidden');  
-            loginTab.classList.remove('active'); signupTab.classList.add('active');  
-        }  
-    }  
-
-    function skipForNow() {  
-        localStorage.setItem("guestMode", "true");  
-        window.location.href = "dashboard/";   
-    }  
-
-    function cancelLogin() {  
-        document.getElementById('agreementPopup').classList.remove('active');  
-    }  
-</script>  
-<script type="module">  
-    import { auth, db, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, doc, setDoc } from "./assets/js/firebase-config.js";  
-    import { sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"; // <-- onAuthStateChanged add kiya yahan
-
-    // ====== NAYA AUTO-REDIRECT LOGIC ======
-    onAuthStateChanged(auth, (user) => {
-        const isGuest = localStorage.getItem("guestMode") === "true";
-        // Agar user pehle se logged in hai ya guest mode on hai, seedha dashboard bhej do
-        if (user || isGuest) {
-            window.location.replace("dashboard/"); // replace isliye use kiya taaki back button dabane pe wapas redirect loop me na fanse
+                        // E. Community Profiles (Top 3)
+            try {
+                const snap = await getDocs(query(collection(db, "users"), limit(3)));
+                const container = document.getElementById('communityContainer');
+                container.innerHTML = '';
+                snap.forEach(d => {
+                    const u = d.data();
+                    if(d.id !== uid) { // Don't show current user
+                        const initial = (u.username || 'U').charAt(0).toUpperCase();
+                        const dp = u.photoURL ? u.photoURL : `https://ui-avatars.com/api/?name=${initial}&background=121212&color=ffffff`;
+                        
+                        container.innerHTML += `
+                            <div class="neu-card expert-card">
+                                <div class="expert-avatar"><img src="${dp}" style="filter: grayscale(100%);"></div>
+                                <span class="text-primary" style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 10px;">${u.username || 'User'}</span>
+                                <button class="neu-btn" style="padding: 5px 15px; font-size: 10px; width: 100%;" onclick="startChatFromDashboard('${d.id}', '${(u.username || 'User').replace(/'/g, "\\'")}')">Connect</button>
+                            </div>
+                        `;
+                    }
+                });
+            } catch(e) {}
         }
-    });
-    // ======================================
 
-    // ... aapka baaki ka code (forgotPassword, signup, etc.) ...
+        // --- 2. B&W MONOCHROME CHART ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            const config = {
+                type: 'line',
+                data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Traffic', data: [150, 230, 180, 320, 290, 450, 400], borderColor: '#ffffff', backgroundColor: 'rgba(128, 128, 128, 0.1)', borderWidth: 2, tension: 0.4, fill: true, pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            };
 
-    // ==========================  
-    // 1. FORGOT PASSWORD LOGIC  
-    // ==========================  
-    window.forgotPassword = async () => {  
-        const email = document.getElementById('loginEmail').value;  
-        if(!email) return alert("Please enter your email address in the Login box first!");  
-        try {  
-            await sendPasswordResetEmail(auth, email);  
-            alert("Password reset link has been sent to your email!");  
-        } catch (error) { alert("Error: " + error.message); }  
-    };  
+            const trafficChart = new Chart(ctx, config);
 
-    // ==========================  
-    // 2. SIGN UP LOGIC  
-    // ==========================  
-    document.getElementById('signupBtn').addEventListener('click', () => {  
-        const email = document.getElementById('signupEmail').value;  
-        const pass = document.getElementById('signupPass').value;  
-        const user = document.getElementById('signupUser').value;  
-        const phone = document.getElementById('signupPhone').value;  
-        if(!email || !pass || !user || !phone) return alert("Please fill all details!");  
-          
-        askForAgreement('signup', { email, pass, user, phone });  
-    });  
+            window.updateChartTheme = function(theme) {
+                trafficChart.data.datasets[0].borderColor = theme === 'light' ? '#000000' : '#ffffff';
+                trafficChart.update();
+            };
+            
+            setTimeout(() => { window.updateChartTheme(document.documentElement.getAttribute('data-theme')); }, 100);
+        });
+    </script>
+    <script>
+        const welcomeSound = new Audio('/assets/sounds/welcome.mp3');
+        welcomeSound.volume = 1;
+        let hasPlayed = false;
+        function playWelcome() {
+            if (hasPlayed) return;
+            hasPlayed = true;
+            welcomeSound.currentTime = 0;
+            welcomeSound.play().catch(()=>{});
+        }
+        document.addEventListener('click', playWelcome);
+        document.addEventListener('touchstart', playWelcome);
+    </script>
+    <script>
+              window.startChatFromDashboard = (targetUID, targetName) => {
+            localStorage.setItem("activeChatUser", JSON.stringify({ uid: targetUID, name: targetName }));
+            window.location.href = "../messages/";
+        };
 
-    // ==========================  
-    // 3. LOGIN LOGIC  
-    // ==========================  
-    document.getElementById('loginBtn').addEventListener('click', () => {  
-        const email = document.getElementById('loginEmail').value;  
-        const pass = document.getElementById('loginPass').value;  
-        if(!email || !pass) return alert("Please enter email and password.");  
-          
-        askForAgreement('login', { email, pass });  
-    });  
-
-    // ==========================  
-    // 4. GOOGLE LOGIN LOGIC  
-    // ==========================  
-    document.getElementById('googleLoginBtn').addEventListener('click', () => {  
-        askForAgreement('google', {});  
-    });  
-
-    // ==========================  
-    // 5. EXECUTE AFTER AGREEMENT  
-    // ==========================  
-    document.getElementById('agreeContinueBtn').addEventListener('click', async () => {  
-        const isChecked = document.getElementById('agreeTermsBox').checked;  
-        if(!isChecked) return alert("You must check the box to agree to our Terms & Conditions.");  
-
-        const btn = document.getElementById('agreeContinueBtn');  
-        btn.innerHTML = "Processing...";  
-
-        try {  
-            await applyPersistence(); // Apply stay logged in logic  
-
-            if(pendingAuthAction === 'signup') {  
-                const userCredential = await createUserWithEmailAndPassword(auth, pendingCredentials.email, pendingCredentials.pass);  
-                await setDoc(doc(db, "users", userCredential.user.uid), {  
-                    username: pendingCredentials.user, email: pendingCredentials.email, mobile: pendingCredentials.phone,  
-                    wallet_balance: 0.00, role: "user", account_status: "active", created_at: new Date()  
-                });  
-            }   
-            else if (pendingAuthAction === 'login') {  
-                await signInWithEmailAndPassword(auth, pendingCredentials.email, pendingCredentials.pass);  
-            }   
-                          else if (pendingAuthAction === 'google') {  
-                const result = await signInWithPopup(auth, googleProvider);  
-                // We save data on google login to ensure they exist in our DB  
-                await setDoc(doc(db, "users", result.user.uid), {  
-                    username: result.user.displayName,   
-                    email: result.user.email,   
-                    role: "user",  
-                    photoURL: result.user.photoURL // <-- Yeh nayi line Google ki image layegi  
-                }, { merge: true });  
-            }  
-
-
-            // If success, redirect to dashboard  
-            window.location.href = "dashboard/";  
-
-        } catch (error) {  
-            alert("Authentication Failed: " + error.message);  
-            btn.innerHTML = "I Agree & Continue";  
-            document.getElementById('agreementPopup').classList.remove('active');  
-        }  
-    });  
-</script>  
-<script>
-
-const gate = document.getElementById("entryGate");
-const card = document.querySelector(".glass-card");
-const sound = document.getElementById("whooshSound");
-
-sound.volume = 0.35;
-
-// prevent double trigger
-let opened = false;
-
-function enterSite() {
-if (opened) return;
-opened = true;
-
-// play FAAAah sound
-sound.currentTime = 0;
-sound.play().catch(()=>{});
-
-// smooth fade + slight scale
-gate.style.transition = "opacity 0.45s ease";
-card.style.transition = "transform 0.45s ease, opacity 0.45s ease";
-
-gate.style.opacity = "0";
-card.style.transform = "scale(1.05)";
-card.style.opacity = "0";
-
-setTimeout(() => {
-gate.style.display = "none";
-}, 450);
-}
-
-// tap anywhere (mobile + desktop)
-gate.addEventListener("click", enterSite);
-gate.addEventListener("touchstart", enterSite);
-</script>
-
-</body>  
+    </script>
+</body>
 </html>
