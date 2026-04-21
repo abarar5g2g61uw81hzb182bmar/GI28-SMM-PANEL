@@ -234,28 +234,18 @@ transform: scale(0.98);
         document.getElementById('agreementPopup').classList.remove('active');  
     }  
 </script>  
-
 <script type="module">  
     import { auth, db, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, doc, setDoc } from "./assets/js/firebase-config.js";  
-    // Import explicitly from firebase-auth for reset password  
-    import { sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";  
+    import { sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"; // <-- onAuthStateChanged add kiya yahan
 
-    let pendingAuthAction = null; // Stores what action to take after user agrees to T&C  
-    let pendingCredentials = {};  
-
-    // Helper: Trigger T&C Popup  
-    function askForAgreement(action, credentials) {  
-        pendingAuthAction = action;  
-        pendingCredentials = credentials;  
-        document.getElementById('agreementPopup').classList.add('active');  
-    }  
-
-    // Helper: Check Stay Logged In  
-    async function applyPersistence() {  
-        const stayLogged = document.getElementById('stayLoggedInLogin').checked;  
-        const persistenceType = stayLogged ? browserLocalPersistence : browserSessionPersistence;  
-        await setPersistence(auth, persistenceType);  
-    }  
+    // ====== NAYA AUTO-REDIRECT LOGIC ======
+    onAuthStateChanged(auth, (user) => {
+        const isGuest = localStorage.getItem("guestMode") === "true";
+        // Agar user pehle se logged in hai ya guest mode on hai, seedha dashboard bhej do
+        if (user || isGuest) {
+            window.location.replace("dashboard/"); // replace isliye use kiya taaki back button dabane pe wapas redirect loop me na fanse
+        }
+    });
 
     // ==========================  
     // 1. FORGOT PASSWORD LOGIC  
