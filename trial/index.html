@@ -112,66 +112,78 @@
             }
         });
 
-        // =======================================================
+           // =======================================================
         document.getElementById('submitTrialBtn').addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if (!user) {
-        alert("Please login first.");
-        return;
-    }
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Please login first.");
+                return;
+            }
 
-    const serviceId = document.getElementById('trialServiceSelect').value;
-    const targetLink = document.getElementById('trialLink').value.trim();
-    const utr = document.getElementById('trialUtr').value.trim();
-    const btn = document.getElementById('submitTrialBtn');
+            const serviceSelect = document.getElementById('trialServiceSelect');
+            const serviceId = serviceSelect.value;
+            const serviceText = serviceSelect.options[serviceSelect.selectedIndex].text; // Service ka pura naam Telegram ke liye
+            const targetLink = document.getElementById('trialLink').value.trim();
+            const utr = document.getElementById('trialUtr').value.trim();
+            const btn = document.getElementById('submitTrialBtn');
 
-    // Validation
-    if (!serviceId) {
-        alert("Please select a service.");
-        return;
-    }
-    if (!targetLink) {
-        alert("Please enter target link.");
-        return;
-    }
-    if (!/^\d{12}$/.test(utr)) {
-        alert("UTR must be exactly 12 digits.");
-        return;
-    }
+            // Validation
+            if (!serviceId) return alert("Please select a service.");
+            if (!targetLink) return alert("Please enter target link.");
+            if (!/^\d{12}$/.test(utr)) return alert("UTR must be exactly 12 digits.");
 
-    try {
-        // Processing state
-        btn.disabled = true;
-        btn.innerText = "Processing...";
+            try {
+                // Processing state
+                btn.disabled = true;
+                btn.innerText = "Processing...";
 
-        const orderId = "TRL" + Date.now();
+                const orderId = "TRL" + Date.now();
 
-        // Save trial order
-        await setDoc(doc(collection(db, "trial_orders"), orderId), {
-            user_uid: user.uid,
-            user_email: user.email || "",
-            service_id: serviceId,
-            target_url: targetLink,
-            transaction_id: utr,
-            status: "pending",
-            timestamp: serverTimestamp()
+                // 1. Save trial order to Database
+                await setDoc(doc(collection(db, "trial_orders"), orderId), {
+                    user_uid: user.uid,
+                    user_email: user.email || "",
+                    service_id: serviceId,
+                    target_url: targetLink,
+                    transaction_id: utr,
+                    status: "pending",
+                    timestamp: serverTimestamp()
+                });
+
+                // 2. Update user (mark trial used)
+                await setDoc(doc(db, "users", user.uid), {
+                    has_used_trial: true
+                }, { merge: true });
+
+                // 🚀 3. TELEGRAM NOTIFICATION BHEJO (Vercel API Call)
+                try {
+                    await fetch('/api/notify-admin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'trial',
+                            email: user.email || "Unknown User",
+                            serviceId: serviceText, // Ex: "Instagram Real Likes - Trial"
+                            link: targetLink,
+                            utr: utr,
+                            reqId: orderId
+                        })
+                    });
+                } catch (err) {
+                    console.log("Telegram notification failed but order saved.", err);
+                }
+
+                alert("Success! Request submitted for verification.");
+                location.reload();
+
+            } catch (error) {
+                console.error(error);
+                alert("Error: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "Claim My Trial Now";
+            }
         });
 
-        // Update user (mark trial used)
-        await setDoc(doc(db, "users", user.uid), {
-            has_used_trial: true
-        }, { merge: true });
-
-        alert("Success! Request submitted for verification.");
-        location.reload();
-
-    } catch (error) {
-        console.error(error);
-        alert("Error: " + error.message);
-        btn.disabled = false;
-        btn.innerText = "Claim My Trial Now";
-    }
-});
     </script>
 </body>
 </html>
