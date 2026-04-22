@@ -71,6 +71,39 @@ export default async function handler(req, res) {
             [{ text: "🖥️ View in Admin Panel", url: "https://gi28.in/admin" }]
         ];
     }
+        // Logic 4: Partner Payout Request
+    else if (type === 'payout') {
+        const { email, upi, amountInr, amountTokens, reqId } = req.body;
+        message = `💸 *NEW PAYOUT REQUEST* 💸\n\n` +
+                  `👤 *Partner:* ${email}\n` +
+                  `🏦 *UPI ID:* \`${upi}\`\n` +
+                  `💰 *Pay:* ₹${amountInr} (${amountTokens} GI28)\n` +
+                  `🆔 *ReqID:* \`${reqId}\``;
+
+        inlineKeyboard = [
+            [
+                { text: "✅ Mark as Paid", callback_data: `paid_payout_${reqId}` },
+                { text: "❌ Reject & Refund", callback_data: `reject_payout_${reqId}` }
+            ]
+        ];
+    }
+    // Logic 5: ₹1 Trial Request
+    else if (type === 'trial') {
+        const { email, serviceId, link, utr, reqId } = req.body;
+        message = `🚀 *NEW ₹1 TRIAL REQUEST* 🚀\n\n` +
+                  `👤 *User:* ${email}\n` +
+                  `📦 *Service:* ${serviceId}\n` +
+                  `🔗 *Link:* ${link}\n` +
+                  `💳 *UTR:* \`${utr}\`\n` +
+                  `🆔 *ReqID:* \`${reqId}\``;
+
+        inlineKeyboard = [
+            [
+                { text: "✅ Approve Trial", callback_data: `approve_trial_${reqId}` },
+                { text: "❌ Fake UTR (Reject)", callback_data: `reject_trial_${reqId}` }
+            ]
+        ];
+    }
     
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
