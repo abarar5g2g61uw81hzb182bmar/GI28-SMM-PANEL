@@ -25,7 +25,6 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById('inrValue').innerText = "~ ₹" + (bal * 99).toFixed(2);
     });
 });
-
 window.requestWithdrawal = async () => {
     const amt = parseFloat(document.getElementById('withdrawAmt').value);
     const upi = document.getElementById('upiId').value;
@@ -40,7 +39,7 @@ window.requestWithdrawal = async () => {
     if (amt > currentBal) return alert("Insufficient balance!");
 
     // Create Payout Request
-    await addDoc(collection(db, "payouts"), {
+    const payoutRef = await addDoc(collection(db, "payouts"), {
         user_uid: user.uid,
         amount_tokens: amt,
         amount_inr: (amt * 99).toFixed(2),
@@ -52,8 +51,25 @@ window.requestWithdrawal = async () => {
     // Deduct from wallet
     await setDoc(doc(db, "users", user.uid), { reseller_wallet: currentBal - amt }, { merge: true });
     
+    // 🚀 TELEGRAM NOTIFICATION BHEJO
+    try {
+        await fetch('/api/notify-admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'payout',
+                email: user.email || "Partner",
+                upi: upi,
+                amountInr: (amt * 99).toFixed(2),
+                amountTokens: amt,
+                reqId: payoutRef.id
+            })
+        });
+    } catch (err) { console.log(err); }
+
     alert("Withdrawal request sent! Your employee will process this shortly.");
 };
+
 
 window.copyCode = () => {
     navigator.clipboard.writeText(document.getElementById('partnerCode').innerText);
