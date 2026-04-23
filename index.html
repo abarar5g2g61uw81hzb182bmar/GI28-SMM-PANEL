@@ -235,11 +235,30 @@ transform: scale(0.98);
     }  
 </script>  
 <script type="module">  
-    import { auth, db, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, doc, setDoc } from "./assets/js/firebase-config.js";  
-    import { sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"; // <-- onAuthStateChanged add kiya yahan
+        import { auth, db, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, doc, setDoc } from "./assets/js/firebase-config.js";  
+    import { sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    // 👇====== YAHAN SE NAYA CODE PASTE KARNA HAI (MISSING VARIABLES & FUNCTIONS) ======👇
+    
+    let pendingAuthAction = null;
+    let pendingCredentials = {};
+
+    function askForAgreement(action, credentials) {
+        pendingAuthAction = action;
+        pendingCredentials = credentials;
+        document.getElementById('agreementPopup').classList.add('active');
+    }
+
+    async function applyPersistence() {
+        const stayLoggedIn = document.getElementById('stayLoggedInLogin').checked;
+        await setPersistence(auth, stayLoggedIn ? browserLocalPersistence : browserSessionPersistence);
+    }
+
+    // 👆====== YAHAN TAK ======👆
 
     // ====== NAYA AUTO-REDIRECT LOGIC ======
     onAuthStateChanged(auth, (user) => {
+        
         const isGuest = localStorage.getItem("guestMode") === "true";
         // Agar user pehle se logged in hai ya guest mode on hai, seedha dashboard bhej do
         if (user || isGuest) {
