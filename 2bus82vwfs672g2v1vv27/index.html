@@ -407,6 +407,23 @@
                     </div>
                 </div>
 
+                   <div id="importerModule" class="admin-module">
+                <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Smart API Importer</h3>
+                <div class="neu-card" style="padding: 20px; margin-bottom: 20px;">
+                    <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Fetch services directly from your provider, add markup, and generate automatic GI-IDs.</p>
+                    
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
+                        <div class="input-group" style="flex: 1; min-width: 150px;">
+                            <label class="text-muted" style="font-size: 11px;">Select Provider</label>
+                            <select id="importProvider" class="neu-input" style="appearance: none;">
+                                <option value="bulkfollows">Bulkfollows</option>
+                                <option value="xmedia">Xmedia</option>
+                            </select>
+                        </div>
+                        <button class="neu-btn" style="padding: 15px 20px; color: #00aeff;" onclick="fetchProviderServices()">1. Fetch Provider Services</button>
+                    </div>
+                </div>
+
                 <div id="importControls" class="neu-card" style="padding: 20px; display: none;">
                     <h4 class="text-primary" style="margin-bottom: 15px;">Setup Import Settings</h4>
                     
@@ -430,9 +447,22 @@
                         </div>
                     </div>
                     
-                    <p style="font-size: 11px; color: #ff4444; margin-top: 15px;">Note: Check the boxes next to the services below, then click Import.</p>
-                    <button class="neu-btn" style="width: 100%; padding: 15px; margin-top: 15px; color: #00ff88; font-weight: bold;" onclick="importSelectedServices()">2. IMPORT SELECTED SERVICES</button>
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                        <p class="text-muted" style="font-size: 11px; margin-bottom: 10px;">Smart Filters (Filter before selecting)</p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <input type="text" id="filter1" class="neu-input" style="flex: 1; min-width: 120px; padding: 10px;" placeholder="Filter Platform (e.g. Instagram)" oninput="filterFetchedServices()">
+                            <input type="text" id="filter2" class="neu-input" style="flex: 1; min-width: 120px; padding: 10px;" placeholder="Filter Type (e.g. Likes, Followers)" oninput="filterFetchedServices()">
+                            <button class="neu-btn" style="padding: 10px 15px; font-size: 12px; color: #00aeff;" onclick="selectAllServices()">Check All Visible</button>
+                            <button class="neu-btn" style="padding: 10px 15px; font-size: 12px; color: #ff4444;" onclick="deselectAllServices()">Uncheck All</button>
+                        </div>
+                    </div>
+
+                    <button class="neu-btn" style="width: 100%; padding: 15px; margin-top: 20px; color: #00ff88; font-weight: bold; font-size: 16px;" onclick="importSelectedServices()">2. IMPORT SELECTED SERVICES</button>
                 </div>
+
+                <div id="fetchedServicesList" style="margin-top: 20px;"></div>
+            </div>
+
 
                 <div id="fetchedServicesList" style="margin-top: 20px;"></div>
                     </div>
@@ -1345,7 +1375,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 loadAdminTrialOrders();
             } catch (error) { alert("Error: " + error.message); }
         };
-        // ==========================================
+            // ==========================================
         // BOSS MODE: SMART API IMPORTER
         // ==========================================
         let rawProviderServices = [];
@@ -1355,10 +1385,11 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             const container = document.getElementById('fetchedServicesList');
             const controls = document.getElementById('importControls');
             
-            container.innerHTML = '<p class="text-muted">Fetching from API... Please wait.</p>';
+            container.innerHTML = '<p class="text-muted">Fetching 1000s of services from API... Please wait.</p>';
             controls.style.display = 'none';
 
             try {
+                // Vercel wali API ko call kar raha hai
                 const response = await fetch('/api/get-provider-services', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1367,32 +1398,56 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 
                 const data = await response.json();
                 if(!data.success) {
-                    container.innerHTML = `<p style="color:#ff4444;">Error: ${data.error}</p>`;
+                    container.innerHTML = `<p style="color:#ff4444;">API Error: ${data.error}</p>`;
                     return;
                 }
 
                 rawProviderServices = data.services;
                 controls.style.display = 'block';
                 
-                let html = '<h4 class="text-primary" style="margin-bottom:10px;">Available Services</h4>';
-                // Render list with checkboxes
-                rawProviderServices.forEach(srv => {
-                    html += `
-                        <div class="neu-card" style="margin-bottom: 10px; padding: 10px 15px; display: flex; align-items: center; gap: 15px;">
-                            <input type="checkbox" class="import-checkbox" value="${srv.service}" style="width: 20px; height: 20px;">
-                            <div>
-                                <p style="font-size: 10px; color: var(--text-muted);">API ID: ${srv.service} | Category: ${srv.category}</p>
-                                <p style="font-size: 13px; font-weight: bold; color: var(--primary-color);">${srv.name}</p>
-                                <p style="font-size: 11px; color: var(--text-muted);">Cost: $${srv.rate} | Min: ${srv.min} | Max: ${srv.max}</p>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
+                // Fetch hone ke baad saari dikha do
+                filterFetchedServices();
 
             } catch (error) {
                 container.innerHTML = `<p style="color:#ff4444;">Connection Error: ${error.message}</p>`;
             }
+        };
+
+        // 🌟 NEW: DUAL FILTER LOGIC 🌟
+        window.filterFetchedServices = () => {
+            const term1 = document.getElementById('filter1').value.toLowerCase();
+            const term2 = document.getElementById('filter2').value.toLowerCase();
+            const container = document.getElementById('fetchedServicesList');
+            
+            if(!rawProviderServices || rawProviderServices.length === 0) return;
+
+            const filtered = rawProviderServices.filter(srv => {
+                const searchString = (srv.category + " " + srv.name).toLowerCase();
+                return searchString.includes(term1) && searchString.includes(term2);
+            });
+
+            let html = `<h4 class="text-primary" style="margin-bottom:10px;">Found: ${filtered.length} Services</h4>`;
+            filtered.forEach(srv => {
+                html += `
+                    <div class="neu-card" style="margin-bottom: 10px; padding: 10px 15px; display: flex; align-items: center; gap: 15px;">
+                        <input type="checkbox" class="import-checkbox" value="${srv.service}" style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <p style="font-size: 10px; color: var(--text-muted);">API ID: ${srv.service} | Category: <span style="color:#00aeff">${srv.category}</span></p>
+                            <p style="font-size: 13px; font-weight: bold; color: var(--primary-color);">${srv.name}</p>
+                            <p style="font-size: 11px; color: var(--text-muted);">Cost: $${srv.rate} | Min: ${srv.min} | Max: ${srv.max}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        };
+
+        // 🌟 NEW: SELECT ALL VISIBLE BUTTON 🌟
+        window.selectAllServices = () => {
+            document.querySelectorAll('.import-checkbox').forEach(cb => cb.checked = true);
+        };
+        window.deselectAllServices = () => {
+            document.querySelectorAll('.import-checkbox').forEach(cb => cb.checked = false);
         };
 
         const prefixMap = {
@@ -1405,23 +1460,22 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             const targetPlatform = document.getElementById('importTargetPlatform').value;
             const markupPercent = Number(document.getElementById('importMarkup').value) || 0;
             
-            // Get selected checkboxes
+            // Sirf wahi lenge jo Tick hain
             const checkboxes = document.querySelectorAll('.import-checkbox:checked');
-            if (checkboxes.length === 0) return alert("Select at least one service to import!");
+            if (checkboxes.length === 0) return alert("Please check at least one service to import!");
 
-            if (!confirm(`Import ${checkboxes.length} services to ${targetPlatform} with ${markupPercent}% markup?`)) return;
+            if (!confirm(`Importing ${checkboxes.length} services to ${targetPlatform} with ${markupPercent}% margin. Continue?`)) return;
 
-            // Generate ID Logic
+            // Database se aakhri number nikalne ka logic (Overwriting rokne ke liye)
             const prefix = prefixMap[targetPlatform] || '9';
             let currentMaxIdNum = 0;
 
             try {
-                // Find existing highest ID for this platform
                 const existingSnap = await getDocs(collection(db, "services"));
                 existingSnap.forEach(doc => {
                     const id = doc.id;
                     if (id.startsWith('GI' + prefix) && id.endsWith('28')) {
-                        const numStr = id.substring(3, id.length - 2); // extract xxxx from GI0xxxx28
+                        const numStr = id.substring(3, id.length - 2); // 'GI0' aur '28' ke beech ka number
                         const num = parseInt(numStr);
                         if (!isNaN(num) && num > currentMaxIdNum) {
                             currentMaxIdNum = num;
@@ -1430,20 +1484,19 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 });
 
                 let importedCount = 0;
+                document.querySelector('.admin-main').style.opacity = '0.5'; // Processing effect
 
-                // Loop through selected services and import
+                // Loop chalao aur save karo
                 for (let box of checkboxes) {
                     const apiServiceId = box.value;
                     const srvData = rawProviderServices.find(s => s.service == apiServiceId);
                     
                     if (srvData) {
-                        currentMaxIdNum++;
-                        // Format ID: GI + Prefix(1 digit) + Number(4 digits) + 28 = GI0000128
+                        currentMaxIdNum++; // Naya number
                         const newId = `GI${prefix}${currentMaxIdNum.toString().padStart(4, '0')}28`;
                         
                         const costPrice = parseFloat(srvData.rate);
-                        // Calculate selling price with markup
-                        let sellingPrice = costPrice + (costPrice * (markupPercent / 100));
+                        const sellingPrice = costPrice + (costPrice * (markupPercent / 100));
 
                         await setDoc(doc(db, "services", newId), {
                             id: newId,
@@ -1461,17 +1514,17 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                         importedCount++;
                     }
                 }
-
-                alert(`✅ Successfully imported ${importedCount} services! Custom IDs generated.`);
-                loadAdminServices(); // Refresh your main service list
+// Kya dekh raha hai teri MKC
+                document.querySelector('.admin-main').style.opacity = '1';
+                alert(`✅ Boom! Successfully imported ${importedCount} services with Auto-Generated IDs!`);
+                loadAdminServices(); // List refresh
                 
             } catch (error) {
+                document.querySelector('.admin-main').style.opacity = '1';
                 alert("Import Error: " + error.message);
             }
         };
-
-        // Make sure to add 'importerModule' to your switchAdminTab function logic if it's not working automatically.
-                
+            
     </script>
 
 </body>
