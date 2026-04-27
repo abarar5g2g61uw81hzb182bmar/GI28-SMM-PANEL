@@ -385,7 +385,7 @@
             <div id="importerModule" class="admin-module">
                 <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Smart API Importer</h3>
                 <div class="neu-card" style="padding: 20px; margin-bottom: 20px;">
-                    <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Fetch services directly from your provider, add markup, and generate automatic GI-IDs.</p>
+                    <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Fetch services directly from your provider, add markup, convert currency, and generate automatic GI-IDs.</p>
                     
                     <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
                         <div class="input-group" style="flex: 1; min-width: 150px;">
@@ -402,7 +402,7 @@
                 <div id="importControls" class="neu-card" style="padding: 20px; display: none;">
                     <h4 class="text-primary" style="margin-bottom: 15px;">Setup Import Settings</h4>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px;">
                         <div class="input-group">
                             <label class="text-muted" style="font-size: 11px;">Map to Category</label>
                             <select id="importTargetPlatform" class="neu-input" style="appearance: none;">
@@ -419,6 +419,10 @@
                         <div class="input-group">
                             <label class="text-muted" style="font-size: 11px;">Markup Percentage (%)</label>
                             <input type="number" id="importMarkup" class="neu-input" value="30">
+                        </div>
+                        <div class="input-group">
+                            <label class="text-muted" style="font-size: 11px;">$ to ₹ Rate (Put 1 if ₹)</label>
+                            <input type="number" id="importExchangeRate" class="neu-input" value="84">
                         </div>
                     </div>
                     
@@ -437,6 +441,7 @@
 
                 <div id="fetchedServicesList" style="margin-top: 20px;"></div>
             </div>
+
                         
             <div id="servicesManagerModule" class="admin-module">
                 <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Add New Service</h3>
@@ -991,44 +996,98 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
         };
 
         // ==========================================
-        // BOSS MODE: MANAGE SERVICES
         // ==========================================
+        // BOSS MODE: MANAGE SERVICES & BULK DELETE
+        // ==========================================
+        let allLiveServices = [];
+
         window.loadAdminServices = async () => {
             const container = document.getElementById('adminServicesList');
             container.innerHTML = '<p class="text-muted">Loading services from database...</p>';
             try {
                 const snap = await getDocs(collection(db, "services"));
-                container.innerHTML = '';
-                if(snap.empty) {
+                allLiveServices = [];
+                snap.forEach(docSnap => allLiveServices.push(docSnap.data()));
+                
+                if(allLiveServices.length === 0) {
                     container.innerHTML = '<p class="text-muted">No services found. Add one above.</p>';
                     return;
                 }
-                snap.forEach(docSnap => {
-                    const srv = docSnap.data();
-                    
-                    const apiStatus = srv.provider_service_id ? 
-                        `<span style="color:#00ff00; font-size:10px;">✓ API Linked (${srv.provider_name.toUpperCase()})</span>` : 
-                        `<span style="color:#ff4444; font-size:10px;">⚠ API Not Linked</span>`;
-
-                    const srvJson = encodeURIComponent(JSON.stringify(srv));
-
-                    container.innerHTML += `
-                        <div class="neu-card" style="margin-bottom: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                            <div style="flex: 1;">
-                                <p style="font-size: 10px; color: var(--text-muted);">${srv.id} | ${srv.platform} <br>${apiStatus}</p>
-                                <p style="font-size: 14px; font-weight: 700; color: var(--primary-color);">${srv.title}</p>
-                                <p style="font-size: 12px; color: var(--text-muted);">Selling Price: <span style="font-weight:600; color:var(--primary-color);">${srv.price} GI28</span> | Cost: ${srv.provider_price || 'N/A'}</p>
-                            </div>
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #00aeff;" onclick="editFullService('${srvJson}')">Edit All</button>
-                                <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #00ff88;" onclick="editServiceAPI('${docSnap.id}')">Link API</button>
-                                <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #ff4444;" onclick="deleteService('${docSnap.id}')">Delete</button>
-                            </div>
-                        </div>
-                    `;
-                });
+                renderManageServices();
             } catch (error) { console.log(error); }
         };
+
+        // UI me list dikhane aur filter karne ka naya function
+        window.renderManageServices = () => {
+            const container = document.getElementById('adminServicesList');
+            const filterTerm = (document.getElementById('manageSrvFilter').value || "").toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = allLiveServices.filter(srv => 
+                (srv.platform + " " + srv.title + " " + srv.id).toLowerCase().includes(filterTerm)
+            );
+
+            filtered.forEach(srv => {
+                const apiStatus = srv.provider_service_id !== "MANUAL" && srv.provider_service_id ? 
+                    `<span style="color:#00ff00; font-size:10px;">✓ API (${srv.provider_name.toUpperCase()})</span>` : 
+                    `<span style="color:#ffa500; font-size:10px;">⚠ Manual/Not Linked</span>`;
+
+                const srvJson = encodeURIComponent(JSON.stringify(srv));
+
+                container.innerHTML += `
+                    <div class="neu-card" style="margin-bottom: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; gap: 15px; align-items: center; flex: 1;">
+                            <input type="checkbox" class="manage-srv-cb" value="${srv.id}" style="width: 20px; height: 20px; cursor: pointer;">
+                            <div>
+                                <p style="font-size: 10px; color: var(--text-muted);">${srv.id} | ${srv.platform} <br>${apiStatus}</p>
+                                <p style="font-size: 14px; font-weight: 700; color: var(--primary-color);">${srv.title}</p>
+                                <p style="font-size: 12px; color: var(--text-muted);">Selling: <span style="font-weight:600; color:var(--primary-color);">${srv.price} GI28</span> | Cost: ${srv.provider_price || '0'}</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #00aeff;" onclick="editFullService('${srvJson}')">Edit</button>
+                            <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #ff4444;" onclick="deleteService('${srv.id}')">Del</button>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        // Naye Check All & Delete functions
+        window.selectAllManageServices = () => {
+            const boxes = document.querySelectorAll('.manage-srv-cb');
+            const allChecked = Array.from(boxes).every(b => b.checked);
+            boxes.forEach(cb => cb.checked = !allChecked); // Toggle functionality
+        };
+
+        window.bulkDeleteServices = async () => {
+            const checkboxes = document.querySelectorAll('.manage-srv-cb:checked');
+            if(checkboxes.length === 0) return alert("Please check at least one service to delete!");
+            
+            if(!confirm(`DANGER: Are you sure you want to permanently delete ${checkboxes.length} services?`)) return;
+
+            document.querySelector('.admin-main').style.opacity = '0.5';
+            
+            try {
+                // Ek saath tezi se delete marne ka code (Speed boost)
+                let deletePromises = [];
+                for(let box of checkboxes) {
+                    deletePromises.push(deleteDoc(doc(db, "services", box.value)));
+                }
+                await Promise.all(deletePromises);
+
+                document.querySelector('.admin-main').style.opacity = '1';
+                alert(`✅ Deleted ${checkboxes.length} services successfully!`);
+                
+                // Search bar khali kar do aur wapas load karo
+                document.getElementById('manageSrvFilter').value = "";
+                loadAdminServices();
+            } catch(e) {
+                document.querySelector('.admin-main').style.opacity = '1';
+                alert("Error deleting: " + e.message);
+            }
+        };
+
 
         window.editFullService = (srvJson) => {
             const srv = JSON.parse(decodeURIComponent(srvJson));
@@ -1420,6 +1479,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             const provider = document.getElementById('importProvider').value;
             const targetPlatform = document.getElementById('importTargetPlatform').value;
             const markupPercent = Number(document.getElementById('importMarkup').value) || 0;
+            const exchangeRate = Number(document.getElementById('importExchangeRate').value) || 1; // 🌟 NAYA CURRENCY LOGIC
             
             const checkboxes = document.querySelectorAll('.import-checkbox:checked');
             if (checkboxes.length === 0) return alert("Please check at least one service to import!");
@@ -1453,7 +1513,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                         currentMaxIdNum++; 
                         const newId = `GI${prefix}${currentMaxIdNum.toString().padStart(4, '0')}28`;
                         
-                        const costPrice = parseFloat(srvData.rate);
+                        // 🌟 MAGIC: $ ko ₹ me convert kiya aur phir markup lagaya
+                        const costPrice = parseFloat(srvData.rate) * exchangeRate; 
                         const sellingPrice = costPrice + (costPrice * (markupPercent / 100));
 
                         await setDoc(doc(db, "services", newId), {
@@ -1461,7 +1522,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                             platform: targetPlatform,
                             provider_name: provider,
                             provider_service_id: Number(apiServiceId),
-                            provider_price: costPrice,
+                            provider_price: Number(costPrice.toFixed(3)),
                             title: srvData.name,
                             price: Number(sellingPrice.toFixed(3)),
                             min: Number(srvData.min),
@@ -1474,7 +1535,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 }
 
                 document.querySelector('.admin-main').style.opacity = '1';
-                alert(`✅ Boom! Successfully imported ${importedCount} services with Auto-Generated IDs!`);
+                alert(`✅ Boom! Successfully imported ${importedCount} services in INR!`);
                 loadAdminServices(); 
                 
             } catch (error) {
@@ -1482,6 +1543,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 alert("Import Error: " + error.message);
             }
         };
+
     </script>
 </body>
 </html>
