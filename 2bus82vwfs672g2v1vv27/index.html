@@ -390,24 +390,21 @@
             </div>
 
             <div id="supportModule" class="admin-module"><p class="text-muted">Loading Support Inbox...</p></div>
-                    <div id="importerModule" class="admin-module">
-                <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Smart API Importer</h3>
-                <div class="neu-card" style="padding: 20px; margin-bottom: 20px;">
-                    <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Fetch services directly from your provider, add markup, and generate automatic GI-IDs.</p>
-                    
-                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
-                        <div class="input-group" style="flex: 1; min-width: 150px;">
-                            <label class="text-muted" style="font-size: 11px;">Select Provider</label>
-                            <select id="importProvider" class="neu-input" style="appearance: none;">
-                                <option value="bulkfollows">Bulkfollows</option>
-                                <option value="xmedia">Xmedia</option>
-                            </select>
-                        </div>
-                        <button class="neu-btn" style="padding: 15px 20px; color: #00aeff;" onclick="fetchProviderServices()">1. Fetch Provider Services</button>
-                    </div>
+            
+            <div id="servicesManagerModule" class="admin-module">
+                <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Add New Service</h3>
+                <div class="neu-card" style="padding: 20px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="input-group">
+             <div id="ordersModule" class="admin-module">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                    <h3 class="text-primary">All Orders</h3>
+                    <button class="neu-btn" style="padding: 5px 15px; font-size: 12px;" onclick="loadAdminOrders()">Refresh</button>
                 </div>
+                <div id="adminOrdersList"><p class="text-muted">Loading orders...</p></div>
+            </div>
 
-                   <div id="importerModule" class="admin-module">
+            <div id="supportModule" class="admin-module"><p class="text-muted">Loading Support Inbox...</p></div>
+                        <div id="importerModule" class="admin-module">
                 <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Smart API Importer</h3>
                 <div class="neu-card" style="padding: 20px; margin-bottom: 20px;">
                     <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Fetch services directly from your provider, add markup, and generate automatic GI-IDs.</p>
@@ -461,12 +458,8 @@
                 </div>
 
                 <div id="fetchedServicesList" style="margin-top: 20px;"></div>
-            </div>
-
-
-                <div id="fetchedServicesList" style="margin-top: 20px;"></div>
-                    </div>
-            
+                        </div>
+                        
             <div id="servicesManagerModule" class="admin-module">
                 <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Add New Service</h3>
                 <div class="neu-card" style="padding: 20px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -474,21 +467,7 @@
                         <label class="text-muted" style="font-size: 11px;">Service ID (e.g. GI005)</label>
                         <input type="text" id="newSrvId" class="neu-input" placeholder="GIXXX">
                     </div>
-                    <div class="input-group">
-                        <label class="text-muted" style="font-size: 11px;">Platform (e.g. Instagram)</label>
-                        <select id="newSrvPlatform" class="neu-input" style="appearance: none;">
-                            <option value="Instagram">Instagram</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="YouTube">YouTube</option>
-                            <option value="Telegram">Telegram</option>
-                            <option value="Web Services">Web Services</option>
-                            <option value="Limited Services">Limited Services</option>
-                            <option value="Twitter">Twitter</option>
-                            <option value="Github">Github</option>
-                        </select>
-                    </div>
-                                        <div class="input-group">
-                        <label class="text-muted" style="font-size: 11px;">API Provider</label>
+                <label class="text-muted" style="font-size: 11px;">API Provider</label>
                         <select id="newSrvProvider" class="neu-input" style="appearance: none;">
                             <option value="bulkfollows">Bulkfollows</option>
                             <option value="xmedia">Xmedia</option>
