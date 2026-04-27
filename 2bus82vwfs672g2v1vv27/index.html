@@ -278,7 +278,8 @@
             <div class="admin-tab" onclick="switchAdminTab('trialOrdersModule', this)">
                 Bhuke Nange log
             </div>
-
+<div class="admin-tab" onclick="switchAdminTab('importerModule', this)">API Bulk Importer</div>
+            
                         <div class="admin-tab" onclick="switchAdminTab('servicesManagerModule', this)">
                 Manage Services
             </div>
@@ -389,6 +390,53 @@
             </div>
 
             <div id="supportModule" class="admin-module"><p class="text-muted">Loading Support Inbox...</p></div>
+                    <div id="importerModule" class="admin-module">
+                <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Smart API Importer</h3>
+                <div class="neu-card" style="padding: 20px; margin-bottom: 20px;">
+                    <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Fetch services directly from your provider, add markup, and generate automatic GI-IDs.</p>
+                    
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
+                        <div class="input-group" style="flex: 1; min-width: 150px;">
+                            <label class="text-muted" style="font-size: 11px;">Select Provider</label>
+                            <select id="importProvider" class="neu-input" style="appearance: none;">
+                                <option value="bulkfollows">Bulkfollows</option>
+                                <option value="xmedia">Xmedia</option>
+                            </select>
+                        </div>
+                        <button class="neu-btn" style="padding: 15px 20px; color: #00aeff;" onclick="fetchProviderServices()">1. Fetch Provider Services</button>
+                    </div>
+                </div>
+
+                <div id="importControls" class="neu-card" style="padding: 20px; display: none;">
+                    <h4 class="text-primary" style="margin-bottom: 15px;">Setup Import Settings</h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="input-group">
+                            <label class="text-muted" style="font-size: 11px;">Map to Category</label>
+                            <select id="importTargetPlatform" class="neu-input" style="appearance: none;">
+                                <option value="Instagram">Instagram (GI0)</option>
+                                <option value="Facebook">Facebook (GI1)</option>
+                                <option value="YouTube">YouTube (GI2)</option>
+                                <option value="Telegram">Telegram (GI3)</option>
+                                <option value="Web Services">Web Services (GI4)</option>
+                                <option value="Limited Services">Limited Services (GI5)</option>
+                                <option value="Twitter">Twitter (GI6)</option>
+                                <option value="Github">Github (GI7)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label class="text-muted" style="font-size: 11px;">Markup Percentage (%)</label>
+                            <input type="number" id="importMarkup" class="neu-input" value="30">
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 11px; color: #ff4444; margin-top: 15px;">Note: Check the boxes next to the services below, then click Import.</p>
+                    <button class="neu-btn" style="width: 100%; padding: 15px; margin-top: 15px; color: #00ff88; font-weight: bold;" onclick="importSelectedServices()">2. IMPORT SELECTED SERVICES</button>
+                </div>
+
+                <div id="fetchedServicesList" style="margin-top: 20px;"></div>
+                    </div>
+            
             <div id="servicesManagerModule" class="admin-module">
                 <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Add New Service</h3>
                 <div class="neu-card" style="padding: 20px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -1297,7 +1345,133 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 loadAdminTrialOrders();
             } catch (error) { alert("Error: " + error.message); }
         };
+        // ==========================================
+        // BOSS MODE: SMART API IMPORTER
+        // ==========================================
+        let rawProviderServices = [];
 
+        window.fetchProviderServices = async () => {
+            const provider = document.getElementById('importProvider').value;
+            const container = document.getElementById('fetchedServicesList');
+            const controls = document.getElementById('importControls');
+            
+            container.innerHTML = '<p class="text-muted">Fetching from API... Please wait.</p>';
+            controls.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/get-provider-services', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider: provider })
+                });
+                
+                const data = await response.json();
+                if(!data.success) {
+                    container.innerHTML = `<p style="color:#ff4444;">Error: ${data.error}</p>`;
+                    return;
+                }
+
+                rawProviderServices = data.services;
+                controls.style.display = 'block';
+                
+                let html = '<h4 class="text-primary" style="margin-bottom:10px;">Available Services</h4>';
+                // Render list with checkboxes
+                rawProviderServices.forEach(srv => {
+                    html += `
+                        <div class="neu-card" style="margin-bottom: 10px; padding: 10px 15px; display: flex; align-items: center; gap: 15px;">
+                            <input type="checkbox" class="import-checkbox" value="${srv.service}" style="width: 20px; height: 20px;">
+                            <div>
+                                <p style="font-size: 10px; color: var(--text-muted);">API ID: ${srv.service} | Category: ${srv.category}</p>
+                                <p style="font-size: 13px; font-weight: bold; color: var(--primary-color);">${srv.name}</p>
+                                <p style="font-size: 11px; color: var(--text-muted);">Cost: $${srv.rate} | Min: ${srv.min} | Max: ${srv.max}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+
+            } catch (error) {
+                container.innerHTML = `<p style="color:#ff4444;">Connection Error: ${error.message}</p>`;
+            }
+        };
+
+        const prefixMap = {
+            'Instagram': '0', 'Facebook': '1', 'YouTube': '2', 'Telegram': '3',
+            'Web Services': '4', 'Limited Services': '5', 'Twitter': '6', 'Github': '7'
+        };
+
+        window.importSelectedServices = async () => {
+            const provider = document.getElementById('importProvider').value;
+            const targetPlatform = document.getElementById('importTargetPlatform').value;
+            const markupPercent = Number(document.getElementById('importMarkup').value) || 0;
+            
+            // Get selected checkboxes
+            const checkboxes = document.querySelectorAll('.import-checkbox:checked');
+            if (checkboxes.length === 0) return alert("Select at least one service to import!");
+
+            if (!confirm(`Import ${checkboxes.length} services to ${targetPlatform} with ${markupPercent}% markup?`)) return;
+
+            // Generate ID Logic
+            const prefix = prefixMap[targetPlatform] || '9';
+            let currentMaxIdNum = 0;
+
+            try {
+                // Find existing highest ID for this platform
+                const existingSnap = await getDocs(collection(db, "services"));
+                existingSnap.forEach(doc => {
+                    const id = doc.id;
+                    if (id.startsWith('GI' + prefix) && id.endsWith('28')) {
+                        const numStr = id.substring(3, id.length - 2); // extract xxxx from GI0xxxx28
+                        const num = parseInt(numStr);
+                        if (!isNaN(num) && num > currentMaxIdNum) {
+                            currentMaxIdNum = num;
+                        }
+                    }
+                });
+
+                let importedCount = 0;
+
+                // Loop through selected services and import
+                for (let box of checkboxes) {
+                    const apiServiceId = box.value;
+                    const srvData = rawProviderServices.find(s => s.service == apiServiceId);
+                    
+                    if (srvData) {
+                        currentMaxIdNum++;
+                        // Format ID: GI + Prefix(1 digit) + Number(4 digits) + 28 = GI0000128
+                        const newId = `GI${prefix}${currentMaxIdNum.toString().padStart(4, '0')}28`;
+                        
+                        const costPrice = parseFloat(srvData.rate);
+                        // Calculate selling price with markup
+                        let sellingPrice = costPrice + (costPrice * (markupPercent / 100));
+
+                        await setDoc(doc(db, "services", newId), {
+                            id: newId,
+                            platform: targetPlatform,
+                            provider_name: provider,
+                            provider_service_id: Number(apiServiceId),
+                            provider_price: costPrice,
+                            title: srvData.name,
+                            price: Number(sellingPrice.toFixed(3)),
+                            min: Number(srvData.min),
+                            max: Number(srvData.max),
+                            desc: srvData.desc || srvData.category || "Imported Service",
+                            timestamp: new Date()
+                        });
+                        importedCount++;
+                    }
+                }
+
+                alert(`✅ Successfully imported ${importedCount} services! Custom IDs generated.`);
+                loadAdminServices(); // Refresh your main service list
+                
+            } catch (error) {
+                alert("Import Error: " + error.message);
+            }
+        };
+
+        // Make sure to add 'importerModule' to your switchAdminTab function logic if it's not working automatically.
+                
     </script>
 
 </body>
