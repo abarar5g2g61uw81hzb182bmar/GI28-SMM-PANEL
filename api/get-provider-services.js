@@ -9,10 +9,10 @@ export default async function handler(req, res) {
     // Vercel Environment Variables me in dono keys ka hona zaroori hai
     if (provider === 'bulkfollows') {
         apiUrl = 'https://bulkfollows.com/api/v2';
-        apiKey = process.env.BULKFOLLOWS_API_KEY; 
+        apiKey = process.env.BULKFOLLOWS_KEY; 
     } else if (provider === 'xmedia') {
         apiUrl = 'https://xmedia-panel.com/api/v2'; // Replace with actual xmedia api url if different
-        apiKey = process.env.XMEDIA_API_KEY;
+        apiKey = process.env.XMEDIA_KEY;
     } else {
         return res.status(400).json({ success: false, error: 'Invalid Provider' });
     }
