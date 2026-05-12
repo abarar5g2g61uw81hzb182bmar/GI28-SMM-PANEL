@@ -370,7 +370,7 @@
             }
         });
 
-        // --- FETCH SERVICES FROM FIREBASE ---
+       // --- FETCH SERVICES FROM FIREBASE ---
         async function fetchLiveServices() {
             const container = document.getElementById('servicesList');
             container.innerHTML = '<p class="text-muted" style="text-align:center;">Loading services...</p>';
@@ -381,9 +381,27 @@
                     servicesDB.push(doc.data());
                 });
                 
+                // Count Services logic
+                let counts = { 'All': servicesDB.length };
+                servicesDB.forEach(srv => {
+                    const plat = srv.platform || 'Other';
+                    counts[plat] = (counts[plat] || 0) + 1;
+                });
+
+                // Update filter button text dynamically
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    let baseName = btn.getAttribute('data-platform');
+                    if(!baseName) {
+                        baseName = btn.innerText.split(' (')[0]; // Extract clean name
+                        btn.setAttribute('data-platform', baseName);
+                    }
+                    const count = counts[baseName] || 0;
+                    btn.innerText = `${baseName} (${count})`;
+                });
+
                 // Default sorting by ID
                 servicesDB.sort((a,b) => a.id.localeCompare(b.id));
-                applyFilters(); // Initial render via central filter function
+                applyFilters(); 
             } catch (error) {
                 container.innerHTML = '<p class="text-muted" style="color: #ff4444; text-align:center;">Failed to load services.</p>';
                 console.error(error);
