@@ -1001,8 +1001,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             } catch (error) { alert("Error: " + error.message); }
         };
 
-        // ==========================================
-        // ==========================================
+       // ==========================================
         // BOSS MODE: MANAGE SERVICES & BULK DELETE
         // ==========================================
         let allLiveServices = [];
@@ -1013,29 +1012,54 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             try {
                 const snap = await getDocs(collection(db, "services"));
                 allLiveServices = [];
-                snap.forEach(docSnap => allLiveServices.push(docSnap.data()));
+                let counts = { Total: 0 }; // Counts store karne ke liye
+                
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    allLiveServices.push(data);
+                    
+                    // Count logic
+                    counts.Total++;
+                    const plat = data.platform || 'Other';
+                    counts[plat] = (counts[plat] || 0) + 1;
+                });
                 
                 if(allLiveServices.length === 0) {
                     container.innerHTML = '<p class="text-muted">No services found. Add one above.</p>';
                     return;
                 }
-                renderManageServices();
-            } catch (error) { console.log(error); }
+
+                // Top pe badges dikhane ke liye
+                let countHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 15px;">`;
+                for(let [key, val] of Object.entries(counts)) {
+                    countHtml += `<span class="badge badge-outline" style="border-color:var(--primary-color); color:var(--primary-color); font-weight:bold;">${key}: ${val}</span>`;
+                }
+                countHtml += `</div>`;
+                
+                renderManageServices(countHtml);
+            } catch (error) { 
+                console.log(error); 
+                container.innerHTML = `<p style="color:#ff4444;">Error: ${error.message}</p>`;
+            }
         };
 
-        // UI me list dikhane aur filter karne ka naya function
-        window.renderManageServices = () => {
+        window.renderManageServices = (countHtml = '') => {
             const container = document.getElementById('adminServicesList');
-            const filterTerm = (document.getElementById('manageSrvFilter').value || "").toLowerCase();
-            container.innerHTML = '';
+            const filterTerm = (document.getElementById('manageSrvFilter')?.value || "").toLowerCase();
+            
+            // Purana rendered HTML hata kar naya daal rahe hain
+            if(countHtml) container.dataset.counts = countHtml; 
+            container.innerHTML = container.dataset.counts || '';
 
             const filtered = allLiveServices.filter(srv => 
-                (srv.platform + " " + srv.title + " " + srv.id).toLowerCase().includes(filterTerm)
+                ((srv.platform || "") + " " + (srv.title || "") + " " + (srv.id || "")).toLowerCase().includes(filterTerm)
             );
 
             filtered.forEach(srv => {
+                // Crash Fix: Agar provider_name null hai toh 'UNKNOWN' assume karega
+                const providerName = (srv.provider_name || "UNKNOWN").toUpperCase();
                 const apiStatus = srv.provider_service_id !== "MANUAL" && srv.provider_service_id ? 
-                    `<span style="color:#00ff00; font-size:10px;">✓ API (${srv.provider_name.toUpperCase()})</span>` : 
+                    `<span style="color:#00ff00; font-size:10px;">✓ API (${providerName})</span>` : 
                     `<span style="color:#ffa500; font-size:10px;">⚠ Manual/Not Linked</span>`;
 
                 const srvJson = encodeURIComponent(JSON.stringify(srv));
@@ -1045,13 +1069,14 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                         <div style="display: flex; gap: 15px; align-items: center; flex: 1;">
                             <input type="checkbox" class="manage-srv-cb" value="${srv.id}" style="width: 20px; height: 20px; cursor: pointer;">
                             <div>
-                                <p style="font-size: 10px; color: var(--text-muted);">${srv.id} | ${srv.platform} <br>${apiStatus}</p>
-                                <p style="font-size: 14px; font-weight: 700; color: var(--primary-color);">${srv.title}</p>
-                                <p style="font-size: 12px; color: var(--text-muted);">Selling: <span style="font-weight:600; color:var(--primary-color);">${srv.price} GI28</span> | Cost: ${srv.provider_price || '0'}</p>
+                                <p style="font-size: 10px; color: var(--text-muted);">${srv.id} | ${srv.platform || 'Unknown'} <br>${apiStatus}</p>
+                                <p style="font-size: 14px; font-weight: 700; color: var(--primary-color);">${srv.title || 'No Title'}</p>
+                                <p style="font-size: 12px; color: var(--text-muted);">Selling: <span style="font-weight:600; color:var(--primary-color);">${srv.price || 0} GI28</span> | Cost: ${srv.provider_price || '0'}</p>
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                             <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #00aeff;" onclick="editFullService('${srvJson}')">Edit</button>
+                            <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #00ff88;" onclick="editServiceAPI('${srv.id}')">Link API</button>
                             <button class="neu-btn" style="padding: 8px 12px; font-size: 11px; color: #ff4444;" onclick="deleteService('${srv.id}')">Del</button>
                         </div>
                     </div>
@@ -1059,11 +1084,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             });
         };
 
-        // Naye Check All & Delete functions
         window.selectAllManageServices = () => {
             const boxes = document.querySelectorAll('.manage-srv-cb');
             const allChecked = Array.from(boxes).every(b => b.checked);
-            boxes.forEach(cb => cb.checked = !allChecked); // Toggle functionality
+            boxes.forEach(cb => cb.checked = !allChecked); 
         };
 
         window.bulkDeleteServices = async () => {
@@ -1075,7 +1099,6 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             document.querySelector('.admin-main').style.opacity = '0.5';
             
             try {
-                // Ek saath tezi se delete marne ka code (Speed boost)
                 let deletePromises = [];
                 for(let box of checkboxes) {
                     deletePromises.push(deleteDoc(doc(db, "services", box.value)));
@@ -1085,8 +1108,9 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 document.querySelector('.admin-main').style.opacity = '1';
                 alert(`✅ Deleted ${checkboxes.length} services successfully!`);
                 
-                // Search bar khali kar do aur wapas load karo
-                document.getElementById('manageSrvFilter').value = "";
+                const filterInput = document.getElementById('manageSrvFilter');
+                if(filterInput) filterInput.value = "";
+                
                 loadAdminServices();
             } catch(e) {
                 document.querySelector('.admin-main').style.opacity = '1';
@@ -1094,13 +1118,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             }
         };
 
-
         window.editFullService = (srvJson) => {
             const srv = JSON.parse(decodeURIComponent(srvJson));
-            
             document.getElementById('newSrvId').value = srv.id;
             document.getElementById('newSrvId').readOnly = true; 
-            
             document.getElementById('newSrvPlatform').value = srv.platform || 'Instagram';
             document.getElementById('newSrvProvider').value = srv.provider_name || 'bulkfollows';
             document.getElementById('newSrvProviderId').value = srv.provider_service_id || '';
@@ -1110,7 +1131,6 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             document.getElementById('newSrvMin').value = srv.min || '';
             document.getElementById('newSrvMax').value = srv.max || '';
             document.getElementById('newSrvDesc').value = srv.desc || '';
-
             document.getElementById('servicesManagerModule').scrollIntoView({ behavior: 'smooth' });
             alert("EDIT MODE: Service details form me bhar di gayi hain. Change karke wapas 'Add Service' button daba dein!");
         };
@@ -1148,12 +1168,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
             const max = document.getElementById('newSrvMax').value;
             const desc = document.getElementById('newSrvDesc').value;
 
-            // 1. Basic validation (Jo sabke liye zaroori hai)
             if(!id || !title || !price || !min || !max) {
                 return alert("Please fill ID, Title, Selling Price, Min, and Max fields!");
             }
 
-            // 2. Smart Validation: API vs Manual
             if(provider !== 'manual') {
                 if(!providerId || cost === "") return alert("For API services, 'Provider ID' and 'Cost' are MUST!");
             } else {
@@ -1197,7 +1215,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
                 loadAdminServices();
             } catch (error) { alert("Error: " + error.message); }
         };
-
+        
         // ==========================================
         // BOSS MODE: LIVE PROOFS MANAGEMENT
         // ==========================================
