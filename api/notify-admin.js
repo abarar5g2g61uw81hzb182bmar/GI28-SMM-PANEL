@@ -56,13 +56,14 @@ export default async function handler(req, res) {
             [{ text: "❌ Reject Trial", callback_data: `reject_trial_${reqId}` }]
         ];
     }
-    // Logic 3: Agar "Manual Order" ki request aayi
+       // Logic 3: Agar "Manual Order" ki request aayi
     else if (type === 'manual_order') {
-        const { serviceName, link, qty, charge, orderId } = req.body;
+        const { serviceName, link, qty, charge, orderId, notes } = req.body; // notes ko destruct kiya
         message = `🛠 *NEW MANUAL ORDER* 🛠\n\n` +
                   `👤 *User:* ${email}\n` +
                   `📦 *Service:* ${serviceName}\n` +
                   `🔗 *Link:* ${link}\n` +
+                  `📝 *Notes:* ${notes || 'None'}\n` + // YAHAN ADD KIYA
                   `🔢 *Qty:* ${qty}\n` +
                   `💰 *Charge:* ${charge} GI28\n` +
                   `🆔 *OrderID:* \`${orderId}\``;
@@ -71,6 +72,7 @@ export default async function handler(req, res) {
             [{ text: "🖥️ View in Admin Panel", url: "https://gi28.in/admin" }]
         ];
     }
+
         // Logic 4: Partner Payout Request
     else if (type === 'payout') {
         const { email, upi, amountInr, amountTokens, reqId } = req.body;
