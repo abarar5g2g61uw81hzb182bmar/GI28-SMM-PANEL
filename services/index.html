@@ -527,8 +527,7 @@
             link.download = `GI28_Services_${new Date().getTime()}.txt`;
             link.click();
         };
-
-        // --- Modal & Calculation ---
+// Modal Open Logic
         window.openModal = function(id) {
             if(!currentUserData) return alert("Please login to place an order.");
             selectedService = servicesDB.find(s => s.id === id);
@@ -540,13 +539,21 @@
             document.getElementById('modalMax').innerText = selectedService.max;
             document.getElementById('modalPrice').innerText = parseFloat(selectedService.price).toFixed(2);
             
+            // MAGIC: Agar service manual hai toh Notes field dikhao, warna chupao
+            if(selectedService.provider_name === 'manual') {
+                document.getElementById('notesContainer').style.display = 'block';
+            } else {
+                document.getElementById('notesContainer').style.display = 'none';
+            }
+
             document.getElementById('orderLink').value = '';
             document.getElementById('orderQuantity').value = '';
+            document.getElementById('orderNotes').value = ''; // Clear old notes
             document.getElementById('calculatedPrice').innerText = '0.00';
             
             document.getElementById('orderModal').classList.add('active');
         };
-
+                    
         window.closeModal = function() {
             document.getElementById('orderModal').classList.remove('active');
         };
@@ -559,12 +566,15 @@
             } else {
                 document.getElementById('calculatedPrice').innerText = '0.00';
             }
-        };        // --- ORDER PLACEMENT & RECEIPT (UPDATED FOR SMM API) ---
-        // --- ORDER PLACEMENT & RECEIPT (WITH PROFIT CALCULATION) ---
+        };       
+        // --- ORDER PLACEMENT & RECEIPT (UPDATED FOR SMM API) ---
         document.getElementById('placeOrderBtn').addEventListener('click', async () => {
             const link = document.getElementById('orderLink').value;
             const qty = Number(document.getElementById('orderQuantity').value);
+            const notes = document.getElementById('orderNotes').value; // NAYA FIELD UTTHAYA
             const totalCharge = Number(document.getElementById('calculatedPrice').innerText);
+
+            // ... (Baaki ki conditions waise hi rahengi)
 
             if(!link || qty < selectedService.min || qty > selectedService.max) {
                 return alert(`Invalid Link or Quantity. Must be between ${selectedService.min} and ${selectedService.max}`);
@@ -625,6 +635,7 @@
                     service_name: selectedService.title,
                     link: link,
                     quantity: qty,
+                    notes: isManual ? notes : "N/A", // YE LINE ADD KI
                     price_tokens: totalCharge,
                     provider_cost: providerCost,
                     profit: profitMade,
@@ -642,7 +653,6 @@
                 currentUserData.wallet_balance = newBalance;
                 document.getElementById("liveBalance").innerText = newBalance.toFixed(2);
 
-                // 3. AGAR MANUAL HAI TOH TELEGRAM PAR NOTIFY KARO
                 if (isManual) {
                     try {
                         await fetch('/api/notify-admin', {
@@ -655,7 +665,8 @@
                                 link: link,
                                 qty: qty,
                                 charge: totalCharge.toFixed(2),
-                                orderId: orderID
+                                orderId: orderID,
+                                notes: notes // YE BHEJA TELEGRAM KO
                             })
                         });
                     } catch (err) { console.log("Telegram notification failed but order saved."); }
