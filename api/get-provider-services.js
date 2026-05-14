@@ -11,8 +11,8 @@ export default async function handler(req, res) {
         apiUrl = 'https://bulkfollows.com/api/v2';
         apiKey = process.env.BULKFOLLOWS_KEY; 
     } else if (provider === 'xmedia') {
-        apiUrl = 'https://xmedia-panel.com/api/v2'; // Replace with actual xmedia api url if different
-        apiKey = process.env.XMEDIA_KEY;
+               apiUrl = 'https://xmediasmm.in/api/v2'; 
+               apiKey = process.env.XMEDIA_KEY;
     } else {
         return res.status(400).json({ success: false, error: 'Invalid Provider' });
     }
