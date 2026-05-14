@@ -799,64 +799,85 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/fi
         // ORDERS LOGIC
         // ==========================================
 
+              // ==========================================
+        // ORDERS LOGIC (FIXED FETCH ISSUE & ADDED NOTES)
+        // ==========================================
+
         window.loadAdminOrders = async () => {
             const container = document.getElementById('adminOrdersList');
             container.innerHTML = '<p class="text-muted">Loading...</p>';
             try {
-                const snap = await getDocs(query(collection(db, "orders"), orderBy("timestamp", "desc")));
+                // FIXED THE FETCH ISSUE: Firebase ka orderBy hataya taaki index error na aaye, sorting JS me karenge
+                const snap = await getDocs(collection(db, "orders"));
                 container.innerHTML = '';
-                if(snap.empty) { container.innerHTML = '<p class="text-muted">No orders.</p>'; return; }
+                
+                let allOrders = [];
+                snap.forEach(docSnap => allOrders.push({ id: docSnap.id, ...docSnap.data() }));
+                
+                if(allOrders.length === 0) { container.innerHTML = '<p class="text-muted">No orders.</p>'; return; }
 
-                snap.forEach(docSnap => {
-                    const order = docSnap.data();
+                // Sort descending using JS (Newest First)
+                allOrders.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
+
+                allOrders.forEach(order => {
                     const color = order.status === 'shipped' || order.status === 'completed' ? '#00ff00' : (order.status === 'cancelled' ? '#ff4444' : '#ffa500');
                     
-                    // Safety check for older orders
                     const profitStr = order.profit ? `<span style="color:#00ff00; font-weight:700;">+${parseFloat(order.profit).toFixed(3)} GI28</span>` : 'N/A';
                     const costStr = order.provider_cost ? parseFloat(order.provider_cost).toFixed(3) : 'N/A';
+                    
+                    // NOTES HTML (Agar manual notes hain toh alag se highlight karke dikhao)
+                    const notesHtml = (order.notes && order.notes !== 'N/A') ? 
+                        `<div style="margin-top: 10px; padding: 10px; background: rgba(255,165,0,0.1); border-left: 3px solid #ffa500; border-radius: 5px;">
+                            <p style="font-size: 11px; color: #ffa500; font-weight: 600; white-space: pre-wrap;">📝 Custom Notes:\n${order.notes}</p>
+                        </div>` : '';
                     
                     container.innerHTML += `
                         <div class="neu-card" style="margin-bottom: 20px; padding: 20px; border-left: 4px solid ${color};">
                             <div style="display: flex; justify-content: space-between;">
-                                <div>
+                                <div style="flex:1;">
                                     <p style="font-weight: 700; font-size: 15px; color: var(--primary-color);">${order.service_name}</p>
                                     <p style="font-size: 12px; margin-top: 5px;">Link: <a href="${order.link}" target="_blank" style="color:#00aeff;">${order.link.substring(0,25)}...</a> | Qty: <strong>${order.quantity}</strong></p>
+                                    
+                                    ${notesHtml}
+                                    
                                     <div style="margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.05); border-radius: 8px; display: inline-block;">
                                         <p style="font-size: 11px; color: var(--text-muted);">Charged: ${parseFloat(order.price_tokens).toFixed(3)} | Cost: ${costStr} | Profit: ${profitStr}</p>
                                         <p style="font-size: 10px; color: var(--text-muted); margin-top: 3px;">API: ${order.provider_name || 'N/A'} (Order ID: ${order.provider_order_id || 'Pending'})</p>
                                     </div>
                                 </div>
-                                <div style="text-align: right;">
+                                <div style="text-align: right; margin-left: 10px;">
                                     <span class="badge badge-outline" style="color: ${color}; border-color: ${color};">${order.status.toUpperCase()}</span>
                                     <p style="font-size: 9px; color: var(--text-muted); margin-top: 10px;">UID: ${order.user_uid.substring(0,6)}...</p>
                                 </div>
                             </div>
                             ${order.status === 'processing' || order.status === 'pending' ? `
                             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button class="neu-btn" style="padding: 5px 10px; color: #00ff00;" onclick="markOrderShipped('${docSnap.id}')">Mark Completed</button>
-                                <button class="neu-btn" style="padding: 5px 10px; color: #ff4444;" onclick="cancelAndRefundOrder('${docSnap.id}', '${order.user_uid}', ${order.price_tokens})">Cancel & Refund</button>
+                                <button class="neu-btn" style="padding: 5px 10px; color: #00ff00;" onclick="markOrderShipped('${order.id}')">Mark Completed ✓</button>
+                                <button class="neu-btn" style="padding: 5px 10px; color: #ff4444;" onclick="cancelAndRefundOrder('${order.id}', '${order.user_uid}', ${order.price_tokens})">Cancel & Refund ✖</button>
                             </div>` : ''}
                         </div>
                     `;
                 });
-            } catch (error) { console.log(error); }
+            } catch (error) { 
+                console.log(error); 
+                container.innerHTML = `<p style="color:#ff4444;">Error Fetching: ${error.message}</p>`;
+            }
         };
 
         window.markOrderShipped = async (orderId) => {
-            if(!confirm("Mark SHIPPED?")) return;
-            await updateDoc(doc(db, "orders", orderId), { status: "shipped" });
+            if(!confirm("Mark this order as COMPLETED?")) return;
+            await updateDoc(doc(db, "orders", orderId), { status: "completed" }); // Backend API uses "completed", better sync
             loadAdminOrders();
         };
 
         window.cancelAndRefundOrder = async (orderId, uid, price) => {
-            if(!confirm("Cancel & Refund?")) return;
+            if(!confirm("Are you sure you want to Cancel & Refund this order?")) return;
             const userRef = doc(db, "users", uid);
             const userSnap = await getDoc(userRef);
             await updateDoc(userRef, { wallet_balance: parseFloat(userSnap.data().wallet_balance || 0) + price });
             await updateDoc(doc(db, "orders", orderId), { status: "cancelled" });
             loadAdminOrders();
         };
-
         // ==========================================
         // BOSS MODE: DASHBOARD, USERS, SUPPORT & PIN
         // ==========================================
