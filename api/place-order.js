@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         apiUrl = 'https://bulkfollows.com/api/v2';
         apiKey = process.env.BULKFOLLOWS_KEY;
     } else if (provider_name === 'xmedia') {
-        apiUrl = 'https://xmedia.com/api/v2'; // Agar xmedia ka url kuch aur ho toh yahan change kar lena
+        apiUrl = 'https://xmediasmm.in/api/v2'; 
         apiKey = process.env.XMEDIA_KEY;
     } else {
         return res.status(400).json({ success: false, error: 'Invalid Provider in Database' });
