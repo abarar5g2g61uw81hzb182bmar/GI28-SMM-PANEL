@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-<script>
-// ========== SECRET ADMIN GATE (must be first) ==========
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.has('bd54501095e140743a67f96534cbe412')) {
-    sessionStorage.setItem('gi28_admin_unlocked', '1');
-    window.location.replace('/core-x9f2/');
-    return;
-  }
-})();
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GI28 PANEL - Login</title>
@@ -128,7 +117,6 @@ animation: glassPop 0.5s ease;
         </svg>
         Continue with Google
     </button>
-    <!-- Guest mode / Skip for now REMOVED for security -->
 </div>
 
 <div class="modal-overlay" id="agreementPopup">
@@ -171,6 +159,8 @@ animation: glassPop 0.5s ease;
     import { auth, db, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, doc, setDoc } from "./assets/js/firebase-config.js";
     import { sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
+    const ADMIN_EMAIL = "const.abrar@gmail.com";
+
     let pendingAuthAction = null;
     let pendingCredentials = {};
 
@@ -185,13 +175,19 @@ animation: glassPop 0.5s ease;
         await setPersistence(auth, stayLoggedIn ? browserLocalPersistence : browserSessionPersistence);
     }
 
-    // Auto-redirect only if logged in (guest mode removed)
+    // Smart redirect: Admin email → Admin Panel, others → Dashboard
+    function redirectAfterLogin(user) {
+        if (user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+            window.location.replace("/core-x9f2/");
+        } else {
+            window.location.replace("dashboard/");
+        }
+    }
+
+    // Auto redirect if already logged in
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Do NOT redirect if we are about to go to admin (handled by top script)
-            if (!new URLSearchParams(window.location.search).has('bd54501095e140743a67f96534cbe412')) {
-                window.location.replace("dashboard/");
-            }
+            redirectAfterLogin(user);
         }
     });
 
@@ -233,19 +229,23 @@ animation: glassPop 0.5s ease;
 
         try {
             await applyPersistence();
+            let loggedInUser = null;
 
             if(pendingAuthAction === 'signup') {
                 const userCredential = await createUserWithEmailAndPassword(auth, pendingCredentials.email, pendingCredentials.pass);
+                loggedInUser = userCredential.user;
                 await setDoc(doc(db, "users", userCredential.user.uid), {
                     username: pendingCredentials.user, email: pendingCredentials.email, mobile: pendingCredentials.phone,
                     wallet_balance: 0.00, role: "user", account_status: "active", created_at: new Date()
                 });
             }
             else if (pendingAuthAction === 'login') {
-                await signInWithEmailAndPassword(auth, pendingCredentials.email, pendingCredentials.pass);
+                const userCredential = await signInWithEmailAndPassword(auth, pendingCredentials.email, pendingCredentials.pass);
+                loggedInUser = userCredential.user;
             }
             else if (pendingAuthAction === 'google') {
                 const result = await signInWithPopup(auth, googleProvider);
+                loggedInUser = result.user;
                 await setDoc(doc(db, "users", result.user.uid), {
                     username: result.user.displayName,
                     email: result.user.email,
@@ -254,7 +254,8 @@ animation: glassPop 0.5s ease;
                 }, { merge: true });
             }
 
-            window.location.href = "dashboard/";
+            // Smart redirect based on email
+            redirectAfterLogin(loggedInUser);
 
         } catch (error) {
             alert("Authentication Failed: " + error.message);
