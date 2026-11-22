@@ -1,1 +1,426 @@
-PLACEHOLDER_WILL_FAIL
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GI28 - ADMIN PANEL</title>
+<link rel="stylesheet" href="../assets/css/global.css">
+<style>
+.admin-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-radius: 16px; margin-bottom: 25px; background: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+.header-left { display: flex; align-items: center; gap: 15px; }
+.header-left h2 { font-size: 18px; font-weight: 600; }
+.menu-btn { width: 40px; height: 40px; border-radius: 12px; }
+.lock-btn { padding: 8px 14px; }
+#pinScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease, visibility 0.5s ease; }
+.pin-display { display: flex; gap: 10px; margin-bottom: 40px; }
+.pin-dot { width: 15px; height: 15px; border-radius: 50%; background: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); transition: 0.2s; }
+.pin-dot.filled { background: var(--primary-color); box-shadow: 0 0 10px var(--primary-color); }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.key-btn { width: 70px; height: 70px; border-radius: 50%; font-size: 24px; font-weight: 700; display: flex; justify-content: center; align-items: center; }
+#adminApp { display: flex; width: 100%; min-height: 100vh; visibility: hidden; opacity: 0; transition: opacity 0.5s ease; }
+#adminApp.active { visibility: visible; opacity: 1; }
+.admin-sidebar { width: 280px; background: var(--bg-color); box-shadow: 10px 0 20px var(--shadow-dark); display: flex; flex-direction: column; padding: 25px 20px; position: fixed; height: 100vh; overflow-y: auto; }
+.admin-sidebar::-webkit-scrollbar { display: none; }
+.admin-logo { text-align: center; margin-bottom: 40px; font-size: 28px; letter-spacing: 5px; }
+.admin-tab { padding: 15px; margin-bottom: 15px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 15px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); transition: 0.2s; color: var(--text-muted); }
+.admin-tab.active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); color: var(--primary-color); }
+.admin-main { flex: 1; margin-left: 280px; padding: 20px; max-width: 1200px; margin-right: auto; }
+.admin-module { display: none; animation: fadeIn 0.3s ease; }
+.admin-module.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+.shake-error { animation: shake 0.4s ease-in-out; }
+@media (max-width: 768px) {
+  .admin-sidebar { position: fixed; left: -100%; top: 0; width: 240px; height: 100vh; z-index: 999; transition: 0.3s ease; }
+  .admin-sidebar.active { left: 0; }
+  .admin-main { margin-left: 0 !important; padding: 15px; }
+  .key-btn { width: 60px; height: 60px; font-size: 20px; }
+}
+#sidebarOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 998; opacity: 0; visibility: hidden; transition: 0.3s; }
+#sidebarOverlay.active { opacity: 1; visibility: visible; }
+.neu-card { border-radius: 16px; padding: 20px; background: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); margin-bottom: 15px; }
+</style>
+</head>
+<body>
+<div id="pinScreen">
+  <h1 class="brand-logo" style="font-size: 32px; margin-bottom: 10px;">ADMIN</h1>
+  <p class="text-muted" style="margin-bottom: 40px; font-size: 12px; letter-spacing: 2px;">Admin Side Here!!!</p>
+  <div class="pin-display" id="pinDots">
+    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+  </div>
+  <div class="keypad">
+    <button class="neu-btn key-btn" onclick="addPinDigit('1')">[</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('2')">/</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('3')">::</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('4')">%</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('5')">?</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('6')">@</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('7')">_</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('8')">&</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('9')"> $</button>
+    <button class="neu-btn key-btn" onclick="clearPin()" style="font-size: 14px;">A</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('0')">></button>
+    <button class="neu-btn key-btn" onclick="removePinDigit()" style="font-size: 14px;">*</button>
+  </div>
+  <p id="pinErrorMsg" style="color: #ff4444; font-size: 12px; margin-top: 20px; opacity: 0; transition: 0.3s;">INCORRECT PIN</p>
+</div>
+
+<div id="adminApp">
+  <div class="admin-sidebar">
+    <h2 class="brand-logo admin-logo">GI28<span style="font-size:10px; display:block; letter-spacing:1px; color:#ff4444;">ADMIN</span></h2>
+    <div class="admin-tab active" onclick="switchAdminTab('dashModule', this)">Dashboard Controls</div>
+    <div class="admin-tab" onclick="switchAdminTab('usersModule', this)">Manage Users</div>
+    <div class="admin-tab" onclick="switchAdminTab('walletsModule', this)">Wallets & UTR</div>
+    <div class="admin-tab" onclick="switchAdminTab('ordersModule', this)">Orders Engine</div>
+    <div class="admin-tab" onclick="switchAdminTab('supportModule', this)">Support Inbox</div>
+    <div class="admin-tab" onclick="switchAdminTab('payoutsModule', this)">Affiliate Payouts</div>
+    <div class="admin-tab" onclick="switchAdminTab('trialOrdersModule', this)">Bhuke Nange log</div>
+    <div class="admin-tab" onclick="switchAdminTab('importerModule', this)">API Bulk Importer</div>
+    <div class="admin-tab" onclick="switchAdminTab('servicesManagerModule', this)">Manage Services</div>
+    <div class="admin-tab" onclick="switchAdminTab('proofsModule', this)">Live Proofs Approvals</div>
+    <button class="neu-btn" style="margin-top: auto; padding: 15px; font-size: 12px;" onclick="toggleAdminTheme()">Switch Theme</button>
+  </div>
+  
+  <div class="admin-main">
+    <div class="admin-header">
+      <div class="header-left">
+        <button class="menu-btn neu-btn" onclick="toggleSidebar()">☰</button>
+        <h2 id="activeModuleName">Dashboard</h2>
+        <button class="neu-btn lock-btn" onclick="lockAdmin()">Lock</button>
+      </div>
+    </div>
+
+    <div id="dashModule" class="admin-module active">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div class="neu-card" style="text-align: center; padding: 20px;">
+          <h4 class="text-muted" style="font-size: 10px;">TOTAL USERS</h4>
+          <span class="text-primary" id="totalUsersStat" style="font-size: 24px; font-weight: 700;">0</span>
+        </div>
+        <div class="neu-card" style="text-align: center; padding: 20px;">
+          <h4 class="text-muted" style="font-size: 10px;">SYSTEM TOKENS</h4>
+          <span class="text-primary" id="totalTokensStat" style="font-size: 24px; font-weight: 700;">0</span>
+        </div>
+      </div>
+      <div id="adminProfileCard" style="margin-bottom: 15px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 12px;">
+        <p style="font-size: 10px; font-weight: 700; color: var(--text-muted);">LOGGED IN AS BOSS</p>
+        <p id="adminUserEmail" style="font-size: 12px; font-weight: 700; color: var(--primary-color);">Verifying...</p>
+        <p id="adminUserUid" style="font-size: 9px; color: var(--text-muted);">UID: ...</p>
+      </div>
+      <div class="neu-card" style="padding: 25px;">
+        <h3 class="text-primary" style="margin-bottom: 15px;">Global Settings</h3>
+        <label class="text-muted" style="font-size: 11px;">1 GI28 TOKEN = ₹</label>
+        <div style="display:flex; gap:10px; margin-top:8px;">
+          <input type="number" id="tokenRateInput" class="neu-input" placeholder="70">
+          <button class="neu-btn" onclick="updateTokenRate()">Update</button>
+        </div>
+      </div>
+      <div class="neu-card" style="padding: 25px; margin-top: 15px;">
+        <h3 class="text-primary" style="margin-bottom: 15px;">Change PIN</h3>
+        <div style="display:flex; gap:10px;">
+          <input type="number" id="newAdminPin" class="neu-input" placeholder="10 digit PIN">
+          <button class="neu-btn" style="color:#ff4444;" onclick="changeMasterPin()">Change</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="usersModule" class="admin-module"><h3 class="text-primary">Users</h3><div id="adminUsersList"><p class="text-muted">Loading...</p></div></div>
+    <div id="walletsModule" class="admin-module"><h3 class="text-primary">UTR Requests</h3><div id="adminUtrList"><p class="text-muted">Loading...</p></div></div>
+    <div id="ordersModule" class="admin-module"><h3 class="text-primary">Orders</h3><div id="adminOrdersList"><p class="text-muted">Loading...</p></div></div>
+    <div id="supportModule" class="admin-module"><h3 class="text-primary">Support</h3><div id="adminSupportList"><p class="text-muted">Loading...</p></div></div>
+    <div id="payoutsModule" class="admin-module"><h3 class="text-primary">Payouts</h3><div id="adminPayoutsList"><p class="text-muted">Loading...</p></div></div>
+    <div id="trialOrdersModule" class="admin-module"><h3 class="text-primary">Trial Requests</h3><div id="adminTrialOrdersList"><p class="text-muted">Loading...</p></div></div>
+    <div id="importerModule" class="admin-module"><h3 class="text-primary">API Importer</h3><p class="text-muted">Use Manage Services for now.</p></div>
+
+    <div id="servicesManagerModule" class="admin-module">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+        <h3 class="text-primary" style="margin:0;">Manage Services</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="neu-btn" style="padding:8px 14px; font-size:12px; color:#ff4444;" onclick="deleteAllServices()">Delete All</button>
+          <button class="neu-btn" style="padding:8px 14px; font-size:12px;" onclick="loadAdminServices(true)">Refresh</button>
+        </div>
+      </div>
+      <input type="text" id="serviceSearchAdmin" class="neu-input" placeholder="Search services..." style="margin-bottom:15px; width:100%;" oninput="filterAdminServices()">
+      <div id="adminServicesStats" style="margin-bottom:10px; font-size:12px; color:var(--text-muted);"></div>
+      <div id="adminServicesList"><p class="text-muted">Loading services...</p></div>
+      <div id="loadMoreServicesBtn" style="text-align:center; margin-top:20px; display:none;">
+        <button class="neu-btn" style="padding:12px 30px;" onclick="loadMoreServices()">Load More</button>
+      </div>
+    </div>
+
+    <div id="proofsModule" class="admin-module"><h3 class="text-primary">Proofs</h3><div id="adminProofsList"><p class="text-muted">Loading...</p></div></div>
+  </div>
+</div>
+
+<div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<script type="module">
+import { auth, db, doc, getDoc, setDoc, collection, getDocs, updateDoc, query, where, deleteDoc } from "../assets/js/firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+const ADMIN_EMAIL = "const.abrar@gmail.com";
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    if (user.email !== ADMIN_EMAIL) {
+      alert("Not Admin"); window.location.href = "../";
+    } else {
+      document.getElementById('adminUserEmail').innerText = user.email;
+      document.getElementById('adminUserUid').innerText = "UID: " + user.uid;
+    }
+  } else { window.location.href = "../"; }
+});
+
+let currentPin = "";
+let isChecking = false;
+window.addPinDigit = (d) => { if(isChecking || currentPin.length >= 10) return; currentPin += d; updatePinDisplay(); if(currentPin.length === 10) verifyPin(); };
+window.removePinDigit = () => { if(isChecking || !currentPin.length) return; currentPin = currentPin.slice(0,-1); updatePinDisplay(); };
+window.clearPin = () => { if(isChecking) return; currentPin = ""; updatePinDisplay(); document.getElementById('pinErrorMsg').style.opacity = '0'; };
+function updatePinDisplay() { document.querySelectorAll('.pin-dot').forEach((dot,i) => { if(i < currentPin.length) dot.classList.add('filled'); else dot.classList.remove('filled'); }); }
+async function verifyPin() {
+  isChecking = true;
+  try {
+    const docSnap = await getDoc(doc(db, "admin", "settings"));
+    let correctPin = "7064742809";
+    if (docSnap.exists() && docSnap.data().master_pin) correctPin = docSnap.data().master_pin;
+    if (currentPin === correctPin) {
+      document.getElementById('pinScreen').style.opacity = '0';
+      setTimeout(() => { document.getElementById('pinScreen').style.visibility = 'hidden'; document.getElementById('adminApp').classList.add('active'); loadAdminDashboard(); }, 500);
+    } else {
+      document.getElementById('pinDots').classList.add('shake-error');
+      document.getElementById('pinErrorMsg').style.opacity = '1';
+      setTimeout(() => { document.getElementById('pinDots').classList.remove('shake-error'); clearPin(); isChecking = false; }, 500);
+    }
+  } catch(e) { alert("DB Error"); clearPin(); isChecking = false; }
+}
+window.lockAdmin = () => { document.getElementById('adminApp').classList.remove('active'); setTimeout(() => { document.getElementById('pinScreen').style.visibility = 'visible'; document.getElementById('pinScreen').style.opacity = '1'; clearPin(); }, 500); };
+
+window.switchAdminTab = (id, el) => {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('activeModuleName').innerText = el.innerText;
+  document.querySelectorAll('.admin-module').forEach(m => m.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id === 'dashModule') loadAdminDashboard();
+  if(id === 'usersModule') loadAdminUsers();
+  if(id === 'walletsModule') loadAdminWallets();
+  if(id === 'ordersModule') loadAdminOrders();
+  if(id === 'supportModule') loadAdminSupport();
+  if(id === 'payoutsModule') loadAdminPayouts();
+  if(id === 'trialOrdersModule') loadAdminTrialOrders();
+  if(id === 'servicesManagerModule') loadAdminServices();
+  if(id === 'proofsModule') loadAdminProofs();
+};
+window.toggleSidebar = () => { document.querySelector('.admin-sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); };
+window.toggleAdminTheme = () => { const h = document.documentElement; h.setAttribute('data-theme', h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); };
+
+window.loadAdminDashboard = async () => {
+  try {
+    const snap = await getDocs(collection(db, "users"));
+    let tokens = 0;
+    document.getElementById('totalUsersStat').innerText = snap.size;
+    snap.forEach(u => tokens += parseFloat(u.data().wallet_balance || 0));
+    document.getElementById('totalTokensStat').innerText = tokens.toFixed(2);
+    const s = await getDoc(doc(db, "admin", "settings"));
+    if(s.exists() && s.data().token_rate) document.getElementById('tokenRateInput').value = s.data().token_rate;
+  } catch(e) {}
+};
+window.updateTokenRate = async () => {
+  const rate = document.getElementById('tokenRateInput').value;
+  if(!rate) return;
+  await setDoc(doc(db, "admin", "settings"), { token_rate: Number(rate) }, { merge: true });
+  alert("Updated");
+};
+window.changeMasterPin = async () => {
+  const p = document.getElementById('newAdminPin').value;
+  if(p.length !== 10) return alert("10 digits required");
+  if(!confirm("Change PIN?")) return;
+  await setDoc(doc(db, "admin", "settings"), { master_pin: p }, { merge: true });
+  alert("PIN Changed");
+};
+
+window.loadAdminUsers = async () => {
+  const c = document.getElementById('adminUsersList');
+  c.innerHTML = 'Loading...';
+  try {
+    const snap = await getDocs(collection(db, "users"));
+    c.innerHTML = '';
+    if(snap.empty) { c.innerHTML = '<p class="text-muted">No users</p>'; return; }
+    snap.forEach(d => {
+      const u = d.data();
+      c.innerHTML += `<div class="neu-card"><p style="font-weight:600">${u.username||'User'} | ${u.email||''}</p><p style="font-size:12px">Balance: ${parseFloat(u.wallet_balance||0).toFixed(2)}</p></div>`;
+    });
+  } catch(e) { c.innerHTML = 'Error'; }
+};
+
+window.loadAdminWallets = async () => {
+  const c = document.getElementById('adminUtrList');
+  c.innerHTML = 'Loading...';
+  try {
+    const q = query(collection(db, "fund_requests"), where("status", "==", "pending"));
+    const snap = await getDocs(q);
+    c.innerHTML = '';
+    if(snap.empty) { c.innerHTML = '<p class="text-muted">No pending UTR</p>'; return; }
+    snap.forEach(d => {
+      const r = d.data();
+      c.innerHTML += `<div class="neu-card"><p>${r.user_email||''} | ${r.utr_number||''}</p><p style="color:#00ff88">+${r.tokens_requested||0}</p>
+        <button class="neu-btn" style="color:#00ff00;margin-top:8px" onclick="approveUtr('${d.id}','${r.user_uid}',${r.tokens_requested||0})">Approve</button>
+        <button class="neu-btn" style="color:#ff4444;margin-top:8px" onclick="rejectUtr('${d.id}')">Reject</button></div>`;
+    });
+  } catch(e) { c.innerHTML = 'Error'; }
+};
+window.approveUtr = async (id, uid, tokens) => {
+  if(!confirm('Approve?')) return;
+  const uref = doc(db, "users", uid);
+  const us = await getDoc(uref);
+  await updateDoc(uref, { wallet_balance: parseFloat(us.data().wallet_balance||0) + Number(tokens) });
+  await updateDoc(doc(db, "fund_requests", id), { status: "approved" });
+  loadAdminWallets();
+};
+window.rejectUtr = async (id) => {
+  if(!confirm('Reject?')) return;
+  await updateDoc(doc(db, "fund_requests", id), { status: "rejected" });
+  loadAdminWallets();
+};
+
+window.loadAdminOrders = async () => {
+  const c = document.getElementById('adminOrdersList');
+  c.innerHTML = 'Loading...';
+  try {
+    const snap = await getDocs(collection(db, "orders"));
+    c.innerHTML = '';
+    let i = 0;
+    snap.forEach(d => {
+      if(i++ > 40) return;
+      const o = d.data();
+      c.innerHTML += `<div class="neu-card"><p style="font-weight:600">${o.service_name||o.service||'Service'}</p><p style="font-size:12px">${o.status||''} | ${o.price_tokens||0} tokens</p></div>`;
+    });
+  } catch(e) { c.innerHTML = 'Error'; }
+};
+
+window.loadAdminSupport = async () => {
+  const c = document.getElementById('adminSupportList');
+  c.innerHTML = 'Loading...';
+  try {
+    const snap = await getDocs(collection(db, "messages"));
+    c.innerHTML = '';
+    if(snap.empty) c.innerHTML = '<p class="text-muted">No messages</p>';
+    else snap.forEach(d => {
+      const m = d.data();
+      c.innerHTML += `<div class="neu-card"><p style="font-weight:600">${m.user_email||m.email||'User'}</p><p style="font-size:13px">${m.message||m.text||''}</p></div>`;
+    });
+  } catch(e) { c.innerHTML = '<p class="text-muted">No data</p>'; }
+};
+
+window.loadAdminPayouts = async () => {
+  const c = document.getElementById('adminPayoutsList');
+  c.innerHTML = 'Loading...';
+  try {
+    const q = query(collection(db, "payouts"), where("status", "==", "pending"));
+    const snap = await getDocs(q);
+    c.innerHTML = '';
+    if(snap.empty) c.innerHTML = '<p class="text-muted">No pending payouts</p>';
+    else snap.forEach(d => {
+      const p = d.data();
+      c.innerHTML += `<div class="neu-card"><p style="font-weight:600">₹${p.amount_inr||p.amount||0}</p><button class="neu-btn" style="color:#00ff00;margin-top:8px" onclick="markPayoutPaid('${d.id}')">Mark Paid</button></div>`;
+    });
+  } catch(e) { c.innerHTML = '<p class="text-muted">No data</p>'; }
+};
+window.markPayoutPaid = async (id) => {
+  if(!confirm('Mark paid?')) return;
+  await updateDoc(doc(db, "payouts", id), { status: "paid" });
+  loadAdminPayouts();
+};
+
+window.loadAdminTrialOrders = async () => {
+  const c = document.getElementById('adminTrialOrdersList');
+  c.innerHTML = 'Loading...';
+  try {
+    const snap = await getDocs(collection(db, "trial_orders"));
+    c.innerHTML = '';
+    if(snap.empty) c.innerHTML = '<p class="text-muted">No trial requests</p>';
+    else snap.forEach(d => {
+      const t = d.data();
+      c.innerHTML += `<div class="neu-card"><p>${t.user_email||t.email||'User'}</p><p style="font-size:12px">${t.service||''} | ${t.status||'pending'}</p></div>`;
+    });
+  } catch(e) { c.innerHTML = '<p class="text-muted">No data</p>'; }
+};
+
+// ========== SERVICES with LAZY LOAD + DELETE ALL ==========
+window.loadAdminServices = async (force = false) => {
+  const container = document.getElementById('adminServicesList');
+  const stats = document.getElementById('adminServicesStats');
+  const moreBtn = document.getElementById('loadMoreServicesBtn');
+  container.innerHTML = '<p class="text-muted">Loading services...</p>';
+  if(moreBtn) moreBtn.style.display = 'none';
+  try {
+    if(force || !window._allAdminServices) {
+      const snap = await getDocs(collection(db, "services"));
+      window._allAdminServices = [];
+      snap.forEach(d => window._allAdminServices.push({ id: d.id, ...d.data() }));
+    }
+    window._adminServicesPage = 0;
+    window._adminServicesPageSize = 50;
+    renderAdminServicesPage();
+  } catch(e) { container.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+};
+
+function renderAdminServicesPage() {
+  const container = document.getElementById('adminServicesList');
+  const stats = document.getElementById('adminServicesStats');
+  const moreBtn = document.getElementById('loadMoreServicesBtn');
+  const term = (document.getElementById('serviceSearchAdmin')?.value || '').toLowerCase();
+  let list = window._allAdminServices || [];
+  if(term) list = list.filter(s => (s.title||s.name||'').toLowerCase().includes(term) || (s.platform||'').toLowerCase().includes(term) || (s.id||'').toLowerCase().includes(term));
+  const end = (window._adminServicesPage + 1) * 50;
+  const page = list.slice(0, end);
+  if(stats) stats.innerText = `Showing ${Math.min(end, list.length)} of ${list.length} services`;
+  if(page.length === 0) { container.innerHTML = '<p class="text-muted">No services</p>'; if(moreBtn) moreBtn.style.display = 'none'; return; }
+  container.innerHTML = '';
+  page.forEach(s => {
+    container.innerHTML += `<div class="neu-card">
+      <p style="font-weight:600">${s.title || s.name || s.id || 'Service'}</p>
+      <p style="font-size:12px;color:var(--text-muted)">ID: ${s.id} | ${s.platform || 'N/A'}</p>
+      <p style="font-size:12px">Price: <b>${s.price || 0}</b> | Min ${s.min || 0} | Max ${s.max || 0}</p>
+      <p style="font-size:11px;color:var(--text-muted)">Provider: ${s.provider_name || 'N/A'}</p>
+      <button class="neu-btn" style="margin-top:8px;padding:5px 10px;font-size:11px;color:#ff4444" onclick="deleteSingleService('${s.id}')">Delete</button>
+    </div>`;
+  });
+  if(moreBtn) moreBtn.style.display = end < list.length ? 'block' : 'none';
+}
+window.loadMoreServices = () => { window._adminServicesPage = (window._adminServicesPage || 0) + 1; renderAdminServicesPage(); };
+window.filterAdminServices = () => { window._adminServicesPage = 0; renderAdminServicesPage(); };
+window.deleteSingleService = async (id) => {
+  if(!confirm('Delete this service?')) return;
+  await deleteDoc(doc(db, "services", id));
+  window._allAdminServices = (window._allAdminServices || []).filter(s => s.id !== id);
+  renderAdminServicesPage();
+};
+window.deleteAllServices = async () => {
+  if(!confirm('DELETE ALL SERVICES? This cannot be undone!')) return;
+  if(!confirm('Final confirmation?')) return;
+  const snap = await getDocs(collection(db, "services"));
+  let count = 0;
+  for(const d of snap.docs) { await deleteDoc(doc(db, "services", d.id)); count++; }
+  window._allAdminServices = [];
+  renderAdminServicesPage();
+  alert('Deleted ' + count + ' services');
+};
+
+window.loadAdminProofs = async () => {
+  const c = document.getElementById('adminProofsList');
+  c.innerHTML = 'Loading...';
+  try {
+    const snap = await getDocs(collection(db, "proofs"));
+    c.innerHTML = '';
+    if(snap.empty) c.innerHTML = '<p class="text-muted">No proofs</p>';
+    else snap.forEach(d => {
+      const p = d.data();
+      c.innerHTML += `<div class="neu-card"><p>${p.user_email||p.email||'User'}</p><p style="font-size:12px">${p.status||'pending'}</p></div>`;
+    });
+  } catch(e) { c.innerHTML = '<p class="text-muted">No data</p>'; }
+};
+</script>
+</body>
+</html>
