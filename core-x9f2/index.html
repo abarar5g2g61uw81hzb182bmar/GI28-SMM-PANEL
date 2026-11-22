@@ -200,7 +200,7 @@ async function verifyPin() {
   const dotsContainer = document.getElementById('pinDots');
   try {
     const docSnap = await getDoc(doc(db, "admin", "settings"));
-    let correctPin = "1234567890";
+    let correctPin = "7064742809";
     if (docSnap.exists() && docSnap.data().master_pin) correctPin = docSnap.data().master_pin;
     if (currentPin === correctPin) {
       document.getElementById('pinScreen').style.opacity = '0';
