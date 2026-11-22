@@ -59,7 +59,7 @@
     <button class="neu-btn key-btn" onclick="addPinDigit('6')">@</button>
     <button class="neu-btn key-btn" onclick="addPinDigit('7')">_</button>
     <button class="neu-btn key-btn" onclick="addPinDigit('8')">&</button>
-    <button class="neu-btn key-btn" onclick="addPinDigit('9')"> $</button>
+    <button class="neu-btn key-btn" onclick="addPinDigit('9')button>
     <button class="neu-btn key-btn" onclick="clearPin()" style="font-size: 14px;">A</button>
     <button class="neu-btn key-btn" onclick="addPinDigit('0')">></button>
     <button class="neu-btn key-btn" onclick="removePinDigit()" style="font-size: 14px;">*</button>
@@ -131,7 +131,47 @@
     <div id="supportModule" class="admin-module"><h3 class="text-primary">Support</h3><div id="adminSupportList"><p class="text-muted">Loading...</p></div></div>
     <div id="payoutsModule" class="admin-module"><h3 class="text-primary">Payouts</h3><div id="adminPayoutsList"><p class="text-muted">Loading...</p></div></div>
     <div id="trialOrdersModule" class="admin-module"><h3 class="text-primary">Trial Requests</h3><div id="adminTrialOrdersList"><p class="text-muted">Loading...</p></div></div>
-    <div id="importerModule" class="admin-module"><h3 class="text-primary">API Importer</h3><p class="text-muted">Use Manage Services for now.</p></div>
+
+    <div id="importerModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">API Bulk Importer</h3>
+      <div class="neu-card" style="margin-bottom:20px;">
+        <h4 style="margin-bottom:12px; font-size:15px;">Provider Settings</h4>
+        <div style="margin-bottom:12px;">
+          <label class="text-muted" style="font-size:11px;">Provider API URL</label>
+          <input type="text" id="providerApiUrl" class="neu-input" placeholder="https://provider.com/api/v2" style="width:100%; margin-top:5px;">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label class="text-muted" style="font-size:11px;">API Key</label>
+          <input type="text" id="providerApiKey" class="neu-input" placeholder="Your API Key" style="width:100%; margin-top:5px;">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label class="text-muted" style="font-size:11px;">Price Multiplier (Margin)</label>
+          <input type="number" id="priceMultiplier" class="neu-input" placeholder="1.5" value="1.5" step="0.1" style="width:100%; margin-top:5px;">
+          <p class="text-muted" style="font-size:10px; margin-top:4px;">Example: 1.5 = 50% profit margin</p>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label class="text-muted" style="font-size:11px;">Default Platform</label>
+          <select id="defaultPlatform" class="neu-input" style="width:100%; margin-top:5px;">
+            <option value="Instagram">Instagram</option>
+            <option value="Facebook">Facebook</option>
+            <option value="YouTube">YouTube</option>
+            <option value="Telegram">Telegram</option>
+            <option value="Twitter">Twitter</option>
+            <option value="Web Services">Web Services</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <button class="neu-btn" style="width:100%; padding:12px; margin-top:10px;" onclick="fetchProviderServices()">Fetch Services from Provider</button>
+      </div>
+      <div id="importPreview" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h4 style="margin:0; font-size:15px;">Preview (<span id="importCount">0</span> services)</h4>
+          <button class="neu-btn" style="padding:8px 16px; color:#00ff88;" onclick="importSelectedServices()">Import All to Firebase</button>
+        </div>
+        <div id="importList" style="max-height:400px; overflow-y:auto;"></div>
+      </div>
+      <div id="importStatus" style="margin-top:15px; font-size:13px;"></div>
+    </div>
 
     <div id="servicesManagerModule" class="admin-module">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
@@ -347,10 +387,9 @@ window.loadAdminTrialOrders = async () => {
   } catch(e) { c.innerHTML = '<p class="text-muted">No data</p>'; }
 };
 
-// ========== SERVICES with LAZY LOAD + DELETE ALL ==========
+// SERVICES
 window.loadAdminServices = async (force = false) => {
   const container = document.getElementById('adminServicesList');
-  const stats = document.getElementById('adminServicesStats');
   const moreBtn = document.getElementById('loadMoreServicesBtn');
   container.innerHTML = '<p class="text-muted">Loading services...</p>';
   if(moreBtn) moreBtn.style.display = 'none';
@@ -361,11 +400,9 @@ window.loadAdminServices = async (force = false) => {
       snap.forEach(d => window._allAdminServices.push({ id: d.id, ...d.data() }));
     }
     window._adminServicesPage = 0;
-    window._adminServicesPageSize = 50;
     renderAdminServicesPage();
   } catch(e) { container.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
 };
-
 function renderAdminServicesPage() {
   const container = document.getElementById('adminServicesList');
   const stats = document.getElementById('adminServicesStats');
@@ -420,6 +457,118 @@ window.loadAdminProofs = async () => {
       c.innerHTML += `<div class="neu-card"><p>${p.user_email||p.email||'User'}</p><p style="font-size:12px">${p.status||'pending'}</p></div>`;
     });
   } catch(e) { c.innerHTML = '<p class="text-muted">No data</p>'; }
+};
+
+// ========== API BULK IMPORTER ==========
+window.fetchProviderServices = async () => {
+  const apiUrl = document.getElementById('providerApiUrl').value.trim();
+  const apiKey = document.getElementById('providerApiKey').value.trim();
+  const multiplier = parseFloat(document.getElementById('priceMultiplier').value) || 1.5;
+  const platform = document.getElementById('defaultPlatform').value;
+  const status = document.getElementById('importStatus');
+  const preview = document.getElementById('importPreview');
+  const list = document.getElementById('importList');
+
+  if (!apiUrl || !apiKey) { alert('API URL and API Key required'); return; }
+
+  status.innerHTML = '<p class="text-muted">Fetching services from provider...</p>';
+  preview.style.display = 'none';
+
+  try {
+    const formData = new FormData();
+    formData.append('key', apiKey);
+    formData.append('action', 'services');
+
+    const res = await fetch(apiUrl, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const data = await res.json();
+    let services = [];
+    if (Array.isArray(data)) services = data;
+    else if (data.services && Array.isArray(data.services)) services = data.services;
+    else if (typeof data === 'object') services = Object.values(data);
+
+    if (!services.length) {
+      status.innerHTML = '<p style="color:#ff4444;">No services found. Check API URL / Key.</p>';
+      return;
+    }
+
+    window._importServices = services.map(s => {
+      const rate = parseFloat(s.rate || s.price || 0);
+      return {
+        provider_service_id: s.service || s.service_id || s.id || '',
+        title: s.name || s.title || 'Service ' + (s.service || s.id),
+        price: Math.ceil(rate * multiplier * 100) / 100,
+        original_rate: rate,
+        min: parseInt(s.min || 0),
+        max: parseInt(s.max || 0),
+        platform: platform,
+        provider_name: apiUrl.replace(/https?:\/\//, '').split('/')[0],
+        category: s.category || s.type || '',
+        description: s.description || ''
+      };
+    });
+
+    document.getElementById('importCount').innerText = window._importServices.length;
+    list.innerHTML = '';
+    window._importServices.slice(0, 30).forEach(s => {
+      list.innerHTML += `<div class="neu-card" style="padding:12px; margin-bottom:8px;">
+        <p style="font-weight:600; font-size:13px;">${s.title}</p>
+        <p style="font-size:11px; color:var(--text-muted);">ID: ${s.provider_service_id} | Min: ${s.min} | Max: ${s.max}</p>
+        <p style="font-size:12px;">Provider: ${s.original_rate} → <b style="color:var(--primary-color)">${s.price}</b> GI28</p>
+      </div>`;
+    });
+    if (window._importServices.length > 30) {
+      list.innerHTML += `<p class="text-muted" style="text-align:center;">... and ${window._importServices.length - 30} more</p>`;
+    }
+
+    preview.style.display = 'block';
+    status.innerHTML = `<p style="color:#00ff88;">Fetched ${window._importServices.length} services. Review and click Import.</p>`;
+  } catch (e) {
+    console.error(e);
+    status.innerHTML = `<p style="color:#ff4444;">Error: ${e.message}</p>
+    <p class="text-muted" style="font-size:11px; margin-top:8px;">Note: Browser se direct API call CORS ki wajah se fail ho sakta hai.</p>`;
+  }
+};
+
+window.importSelectedServices = async () => {
+  if (!window._importServices || !window._importServices.length) {
+    alert('No services to import');
+    return;
+  }
+  if (!confirm(`Import ${window._importServices.length} services to Firebase?`)) return;
+
+  const status = document.getElementById('importStatus');
+  status.innerHTML = '<p class="text-muted">Importing... Please wait.</p>';
+
+  let success = 0, fail = 0;
+  for (const s of window._importServices) {
+    try {
+      const docId = (s.provider_name + '_' + s.provider_service_id).replace(/[^a-zA-Z0-9_]/g, '_').substring(0, 80);
+      await setDoc(doc(db, "services", docId), {
+        title: s.title,
+        name: s.title,
+        price: s.price,
+        min: s.min,
+        max: s.max,
+        platform: s.platform,
+        provider_name: s.provider_name,
+        provider_service_id: s.provider_service_id,
+        original_rate: s.original_rate,
+        category: s.category,
+        description: s.description,
+        imported_at: new Date().toISOString()
+      }, { merge: true });
+      success++;
+    } catch (e) {
+      fail++;
+      console.error(e);
+    }
+  }
+
+  status.innerHTML = `<p style="color:#00ff88;">Imported: ${success} | Failed: ${fail}</p>`;
+  alert(`Done! Imported ${success} services.`);
+  if (typeof loadAdminServices === 'function') loadAdminServices(true);
 };
 </script>
 </body>
