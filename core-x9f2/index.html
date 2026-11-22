@@ -1,18 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-<script>
-// Secret Admin Access Control - only open with ?bd54501095e140743a67f96534cbe412
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  const unlocked = sessionStorage.getItem('gi28_admin_unlocked') === '1';
-  if (!params.has('bd54501095e140743a67f96534cbe412') && !unlocked) {
-    window.location.replace('/');
-  } else {
-    sessionStorage.setItem('gi28_admin_unlocked', '1');
-  }
-})();
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GI28 - ADMIN PANEL</title>
@@ -150,9 +138,9 @@
     <div id="supportModule" class="admin-module"><h3 class="text-primary">Support Tickets</h3><div id="adminSupportList"><p class="text-muted">Loading...</p></div></div>
     <div id="payoutsModule" class="admin-module"><h3 class="text-primary">Affiliate Payouts</h3><div id="adminPayoutsList"><p class="text-muted">Loading...</p></div></div>
     <div id="trialOrdersModule" class="admin-module"><h3 class="text-primary">Trial Requests</h3><div id="adminTrialOrdersList"><p class="text-muted">Loading...</p></div></div>
-    <div id="importerModule" class="admin-module"><h3 class="text-primary">API Bulk Importer</h3><p class="text-muted">Coming soon / full restore next</p></div>
-    <div id="servicesManagerModule" class="admin-module"><h3 class="text-primary">Manage Services</h3><p class="text-muted">Coming soon / full restore next</p></div>
-    <div id="proofsModule" class="admin-module"><h3 class="text-primary">Live Proofs</h3><p class="text-muted">Coming soon / full restore next</p></div>
+    <div id="importerModule" class="admin-module"><h3 class="text-primary">API Bulk Importer</h3><p class="text-muted">Full features coming - core is ready</p></div>
+    <div id="servicesManagerModule" class="admin-module"><h3 class="text-primary">Manage Services</h3><p class="text-muted">Full features coming - core is ready</p></div>
+    <div id="proofsModule" class="admin-module"><h3 class="text-primary">Live Proofs</h3><p class="text-muted">Full features coming - core is ready</p></div>
   </div>
 </div>
 
@@ -162,10 +150,12 @@
 import { auth, db, doc, getDoc, setDoc, collection, getDocs, updateDoc, query, where } from "../assets/js/firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-// STRICT ADMIN AUTH - only const.abrar@gmail.com
+const ADMIN_EMAIL = "const.abrar@gmail.com";
+
+// STRICT ADMIN AUTH - only const.abrar@gmail.com allowed
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    if (user.email !== "const.abrar@gmail.com") {
+    if (user.email !== ADMIN_EMAIL) {
       alert("SECURITY ALERT: You are not the Admin. Kicking out...");
       window.location.href = "../";
     } else {
@@ -173,6 +163,7 @@ onAuthStateChanged(auth, (user) => {
       document.getElementById('adminUserUid').innerText = "UID: " + user.uid;
     }
   } else {
+    // Not logged in → back to login
     window.location.href = "../";
   }
 });
