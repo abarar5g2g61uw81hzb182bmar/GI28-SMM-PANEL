@@ -38,6 +38,7 @@
 }
 #sidebarOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 998; opacity: 0; visibility: hidden; transition: 0.3s; }
 #sidebarOverlay.active { opacity: 1; visibility: visible; }
+.neu-card { border-radius: 16px; padding: 20px; background: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); margin-bottom: 15px; }
 </style>
 </head>
 <body>
@@ -102,13 +103,11 @@
           <span class="text-primary" id="totalTokensStat" style="font-size: 24px; font-weight: 700;">0</span>
         </div>
       </div>
-
       <div id="adminProfileCard" style="margin-bottom: 15px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid var(--border-color);">
         <p style="font-size: 10px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px;">LOGGED IN AS BOSS</p>
         <p id="adminUserEmail" style="font-size: 12px; font-weight: 700; color: var(--primary-color); word-break: break-all;">Verifying...</p>
         <p id="adminUserUid" style="font-size: 9px; color: var(--text-muted); margin-top: 5px; word-break: break-all;">UID: ...</p>
       </div>
-      
       <div class="neu-card" style="padding: 25px;">
         <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Global Settings</h3>
         <div class="input-group" style="margin-bottom: 15px;">
@@ -119,7 +118,6 @@
           </div>
         </div>
       </div>
-
       <div class="neu-card" style="padding: 25px; margin-top: 20px;">
         <h3 class="text-primary" style="margin-bottom: 20px; font-size: 18px;">Security Settings</h3>
         <div class="input-group">
@@ -132,27 +130,64 @@
       </div>
     </div>
 
-    <div id="usersModule" class="admin-module"><h3 class="text-primary">Registered Users</h3><div id="adminUsersList"><p class="text-muted">Loading...</p></div></div>
-    <div id="walletsModule" class="admin-module"><h3 class="text-primary">Pending UTR Requests</h3><div id="adminUtrList"><p class="text-muted">Loading...</p></div></div>
-    <div id="ordersModule" class="admin-module"><h3 class="text-primary">All Orders</h3><div id="adminOrdersList"><p class="text-muted">Loading...</p></div></div>
-    <div id="supportModule" class="admin-module"><h3 class="text-primary">Support Tickets</h3><div id="adminSupportList"><p class="text-muted">Loading...</p></div></div>
-    <div id="payoutsModule" class="admin-module"><h3 class="text-primary">Affiliate Payouts</h3><div id="adminPayoutsList"><p class="text-muted">Loading...</p></div></div>
-    <div id="trialOrdersModule" class="admin-module"><h3 class="text-primary">Trial Requests</h3><div id="adminTrialOrdersList"><p class="text-muted">Loading...</p></div></div>
-    <div id="importerModule" class="admin-module"><h3 class="text-primary">API Bulk Importer</h3><p class="text-muted">Full features coming - core is ready</p></div>
-    <div id="servicesManagerModule" class="admin-module"><h3 class="text-primary">Manage Services</h3><p class="text-muted">Full features coming - core is ready</p></div>
-    <div id="proofsModule" class="admin-module"><h3 class="text-primary">Live Proofs</h3><p class="text-muted">Full features coming - core is ready</p></div>
+    <div id="usersModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">Registered Users</h3>
+      <div id="adminUsersList"><p class="text-muted">Loading users...</p></div>
+    </div>
+
+    <div id="walletsModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">Pending UTR Requests</h3>
+      <div id="adminUtrList"><p class="text-muted">Loading...</p></div>
+    </div>
+
+    <div id="ordersModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">All Orders</h3>
+      <div id="adminOrdersList"><p class="text-muted">Loading...</p></div>
+    </div>
+
+    <div id="supportModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">Support Tickets</h3>
+      <div id="adminSupportList"><p class="text-muted">Loading...</p></div>
+    </div>
+
+    <div id="payoutsModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">Affiliate Payouts</h3>
+      <div id="adminPayoutsList"><p class="text-muted">Loading...</p></div>
+    </div>
+
+    <div id="trialOrdersModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">Trial Requests (₹1)</h3>
+      <div id="adminTrialOrdersList"><p class="text-muted">Loading...</p></div>
+    </div>
+
+    <div id="importerModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">API Bulk Importer</h3>
+      <div class="neu-card">
+        <p class="text-muted" style="margin-bottom:15px;">Yahan se provider services bulk import kar sakte ho.</p>
+        <p style="font-size:13px;">Currently core ready. Full importer UI next update mein aayega. Abhi services Manage Services se dekh sakte ho.</p>
+      </div>
+    </div>
+
+    <div id="servicesManagerModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">Manage Services</h3>
+      <div id="adminServicesList"><p class="text-muted">Loading services...</p></div>
+    </div>
+
+    <div id="proofsModule" class="admin-module">
+      <h3 class="text-primary" style="margin-bottom:15px;">Live Proofs Approvals</h3>
+      <div id="adminProofsList"><p class="text-muted">Loading proofs...</p></div>
+    </div>
   </div>
 </div>
 
 <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <script type="module">
-import { auth, db, doc, getDoc, setDoc, collection, getDocs, updateDoc, query, where } from "../assets/js/firebase-config.js";
+import { auth, db, doc, getDoc, setDoc, collection, getDocs, updateDoc, query, where, orderBy, limit } from "../assets/js/firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 const ADMIN_EMAIL = "const.abrar@gmail.com";
 
-// STRICT ADMIN AUTH - only const.abrar@gmail.com allowed
 onAuthStateChanged(auth, (user) => {
   if (user) {
     if (user.email !== ADMIN_EMAIL) {
@@ -163,7 +198,6 @@ onAuthStateChanged(auth, (user) => {
       document.getElementById('adminUserUid').innerText = "UID: " + user.uid;
     }
   } else {
-    // Not logged in → back to login
     window.location.href = "../";
   }
 });
@@ -224,17 +258,26 @@ window.lockAdmin = () => {
     clearPin();
   }, 500);
 };
+
 window.switchAdminTab = (moduleId, element) => {
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   element.classList.add('active');
   document.getElementById('activeModuleName').innerText = element.innerText;
   document.querySelectorAll('.admin-module').forEach(m => m.classList.remove('active'));
   document.getElementById(moduleId).classList.add('active');
+
+  // Load data for the selected module
   if (moduleId === 'dashModule') loadAdminDashboard();
   if (moduleId === 'usersModule') loadAdminUsers();
   if (moduleId === 'walletsModule') loadAdminWallets();
   if (moduleId === 'ordersModule') loadAdminOrders();
+  if (moduleId === 'supportModule') loadAdminSupport();
+  if (moduleId === 'payoutsModule') loadAdminPayouts();
+  if (moduleId === 'trialOrdersModule') loadAdminTrialOrders();
+  if (moduleId === 'servicesManagerModule') loadAdminServices();
+  if (moduleId === 'proofsModule') loadAdminProofs();
 };
+
 window.toggleSidebar = () => {
   document.querySelector('.admin-sidebar').classList.toggle('active');
   document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -243,6 +286,9 @@ window.toggleAdminTheme = () => {
   const html = document.documentElement;
   html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 };
+
+// ===================== LOADERS =====================
+
 window.loadAdminDashboard = async () => {
   try {
     const usersSnap = await getDocs(collection(db, "users"));
@@ -256,6 +302,7 @@ window.loadAdminDashboard = async () => {
     }
   } catch (e) { console.error(e); }
 };
+
 window.updateTokenRate = async () => {
   const rate = document.getElementById('tokenRateInput').value;
   if (!rate) return;
@@ -264,6 +311,7 @@ window.updateTokenRate = async () => {
     alert("Token Rate Updated to ₹" + rate);
   } catch (e) { alert(e.message); }
 };
+
 window.changeMasterPin = async () => {
   const newPin = document.getElementById('newAdminPin').value;
   if (newPin.length !== 10) return alert("PIN must be exactly 10 digits!");
@@ -274,6 +322,7 @@ window.changeMasterPin = async () => {
     document.getElementById('newAdminPin').value = '';
   } catch (e) { alert(e.message); }
 };
+
 window.loadAdminUsers = async () => {
   const container = document.getElementById('adminUsersList');
   container.innerHTML = '<p class="text-muted">Loading users...</p>';
@@ -283,7 +332,7 @@ window.loadAdminUsers = async () => {
     if (snap.empty) { container.innerHTML = '<p class="text-muted">No users found</p>'; return; }
     snap.forEach(d => {
       const u = d.data();
-      container.innerHTML += `<div class="neu-card" style="margin-bottom:12px;padding:15px;">
+      container.innerHTML += `<div class="neu-card">
         <p style="font-weight:600;">${u.username || 'No Name'} | ${u.email || ''}</p>
         <p style="font-size:12px;color:var(--text-muted);">Balance: ${parseFloat(u.wallet_balance||0).toFixed(2)} GI28 | Role: ${u.role||'user'}</p>
         <p style="font-size:10px;color:var(--text-muted);">UID: ${d.id}</p>
@@ -291,6 +340,7 @@ window.loadAdminUsers = async () => {
     });
   } catch (e) { container.innerHTML = '<p style="color:#ff4444;">Error: '+e.message+'</p>'; }
 };
+
 window.loadAdminWallets = async () => {
   const container = document.getElementById('adminUtrList');
   container.innerHTML = '<p class="text-muted">Loading UTR requests...</p>';
@@ -301,7 +351,7 @@ window.loadAdminWallets = async () => {
     if (snap.empty) { container.innerHTML = '<p class="text-muted">No pending UTR requests</p>'; return; }
     snap.forEach(d => {
       const r = d.data();
-      container.innerHTML += `<div class="neu-card" style="margin-bottom:12px;padding:15px;">
+      container.innerHTML += `<div class="neu-card">
         <p>${r.user_email || ''} | UTR: ${r.utr_number || ''}</p>
         <p style="font-weight:700;color:#00ff88;">+${r.tokens_requested || 0} GI28</p>
         <button class="neu-btn" style="margin-top:8px;padding:6px 12px;color:#00ff00;" onclick="approveUtr('${d.id}','${r.user_uid}',${r.tokens_requested||0})">Approve</button>
@@ -310,6 +360,7 @@ window.loadAdminWallets = async () => {
     });
   } catch (e) { container.innerHTML = '<p style="color:#ff4444;">Error: '+e.message+'</p>'; }
 };
+
 window.approveUtr = async (id, uid, tokens) => {
   if (!confirm('Approve and add '+tokens+' tokens?')) return;
   try {
@@ -322,6 +373,7 @@ window.approveUtr = async (id, uid, tokens) => {
     loadAdminWallets();
   } catch (e) { alert(e.message); }
 };
+
 window.rejectUtr = async (id) => {
   if (!confirm('Reject this request?')) return;
   try {
@@ -329,22 +381,141 @@ window.rejectUtr = async (id) => {
     loadAdminWallets();
   } catch (e) { alert(e.message); }
 };
+
 window.loadAdminOrders = async () => {
   const container = document.getElementById('adminOrdersList');
   container.innerHTML = '<p class="text-muted">Loading orders...</p>';
   try {
-    const snap = await getDocs(query(collection(db, "orders"), where("status", "in", ["pending","processing"])));
+    const snap = await getDocs(collection(db, "orders"));
     container.innerHTML = '';
-    if (snap.empty) { container.innerHTML = '<p class="text-muted">No active orders</p>'; return; }
+    if (snap.empty) { container.innerHTML = '<p class="text-muted">No orders found</p>'; return; }
+    let count = 0;
     snap.forEach(d => {
+      if (count > 50) return; // limit
       const o = d.data();
-      container.innerHTML += `<div class="neu-card" style="margin-bottom:12px;padding:15px;">
+      container.innerHTML += `<div class="neu-card">
         <p style="font-weight:600;">${o.service_name || o.service || 'Service'} | Qty: ${o.quantity || 0}</p>
-        <p style="font-size:12px;">Status: ${o.status} | Tokens: ${o.price_tokens || 0}</p>
-        <p style="font-size:11px;color:var(--text-muted);">Link: ${(o.link||'').substring(0,40)}...</p>
+        <p style="font-size:12px;">Status: <b>${o.status || 'N/A'}</b> | Tokens: ${o.price_tokens || 0}</p>
+        <p style="font-size:11px;color:var(--text-muted);">Link: ${(o.link||'').substring(0,50)}...</p>
       </div>`;
+      count++;
     });
   } catch (e) { container.innerHTML = '<p style="color:#ff4444;">Error: '+e.message+'</p>'; }
+};
+
+window.loadAdminSupport = async () => {
+  const container = document.getElementById('adminSupportList');
+  container.innerHTML = '<p class="text-muted">Loading support tickets...</p>';
+  try {
+    const snap = await getDocs(collection(db, "messages"));
+    container.innerHTML = '';
+    if (snap.empty) { container.innerHTML = '<p class="text-muted">No support messages</p>'; return; }
+    snap.forEach(d => {
+      const m = d.data();
+      container.innerHTML += `<div class="neu-card">
+        <p style="font-weight:600;">${m.user_email || m.email || 'User'}</p>
+        <p style="font-size:13px;margin-top:5px;">${m.message || m.text || 'No message'}</p>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:5px;">${m.created_at ? new Date(m.created_at.seconds*1000).toLocaleString() : ''}</p>
+      </div>`;
+    });
+  } catch (e) { 
+    // try alternate collection
+    try {
+      const snap2 = await getDocs(collection(db, "support"));
+      container.innerHTML = '';
+      if (snap2.empty) container.innerHTML = '<p class="text-muted">No support tickets found</p>';
+      else snap2.forEach(d => {
+        const m = d.data();
+        container.innerHTML += `<div class="neu-card"><p>${JSON.stringify(m).substring(0,200)}</p></div>`;
+      });
+    } catch(e2) {
+      container.innerHTML = '<p class="text-muted">No support data or permission issue</p>';
+    }
+  }
+};
+
+window.loadAdminPayouts = async () => {
+  const container = document.getElementById('adminPayoutsList');
+  container.innerHTML = '<p class="text-muted">Loading payouts...</p>';
+  try {
+    const q = query(collection(db, "payouts"), where("status", "==", "pending"));
+    const snap = await getDocs(q);
+    container.innerHTML = '';
+    if (snap.empty) { container.innerHTML = '<p class="text-muted">No pending payouts</p>'; return; }
+    snap.forEach(d => {
+      const p = d.data();
+      container.innerHTML += `<div class="neu-card">
+        <p style="font-weight:600;">₹${p.amount_inr || p.amount || 0}</p>
+        <p style="font-size:12px;">Tokens: ${p.amount_tokens || 0} | User: ${p.user_email || p.uid || ''}</p>
+        <button class="neu-btn" style="margin-top:8px;padding:6px 12px;color:#00ff00;" onclick="markPayoutPaid('${d.id}')">Mark Paid</button>
+      </div>`;
+    });
+  } catch (e) { container.innerHTML = '<p class="text-muted">No payouts data or empty</p>'; }
+};
+
+window.markPayoutPaid = async (id) => {
+  if (!confirm('Mark this payout as paid?')) return;
+  try {
+    await updateDoc(doc(db, "payouts", id), { status: "paid" });
+    loadAdminPayouts();
+  } catch(e) { alert(e.message); }
+};
+
+window.loadAdminTrialOrders = async () => {
+  const container = document.getElementById('adminTrialOrdersList');
+  container.innerHTML = '<p class="text-muted">Loading trial requests...</p>';
+  try {
+    const snap = await getDocs(collection(db, "trial_orders"));
+    container.innerHTML = '';
+    if (snap.empty) { container.innerHTML = '<p class="text-muted">No trial requests</p>'; return; }
+    snap.forEach(d => {
+      const t = d.data();
+      container.innerHTML += `<div class="neu-card">
+        <p style="font-weight:600;">${t.user_email || t.email || 'User'}</p>
+        <p style="font-size:12px;">Service: ${t.service || t.service_name || 'N/A'} | Status: ${t.status || 'pending'}</p>
+      </div>`;
+    });
+  } catch (e) { container.innerHTML = '<p class="text-muted">No trial data found</p>'; }
+};
+
+window.loadAdminServices = async () => {
+  const container = document.getElementById('adminServicesList');
+  container.innerHTML = '<p class="text-muted">Loading services...</p>';
+  try {
+    const snap = await getDocs(collection(db, "services"));
+    container.innerHTML = '';
+    if (snap.empty) { container.innerHTML = '<p class="text-muted">No services found in database</p>'; return; }
+    let count = 0;
+    snap.forEach(d => {
+      if (count > 40) return;
+      const s = d.data();
+      container.innerHTML += `<div class="neu-card">
+        <p style="font-weight:600;">${s.title || s.name || s.id || 'Service'}</p>
+        <p style="font-size:12px;">Price: ${s.price || 0} | Min: ${s.min || 0} | Max: ${s.max || 0}</p>
+        <p style="font-size:11px;color:var(--text-muted);">Platform: ${s.platform || 'N/A'} | Provider: ${s.provider_name || 'N/A'}</p>
+      </div>`;
+      count++;
+    });
+    if (snap.size > 40) container.innerHTML += `<p class="text-muted">Showing first 40 of ${snap.size} services</p>`;
+  } catch (e) { container.innerHTML = '<p style="color:#ff4444;">Error loading services: '+e.message+'</p>'; }
+};
+
+window.loadAdminProofs = async () => {
+  const container = document.getElementById('adminProofsList');
+  container.innerHTML = '<p class="text-muted">Loading proofs...</p>';
+  try {
+    const snap = await getDocs(collection(db, "proofs"));
+    container.innerHTML = '';
+    if (snap.empty) { container.innerHTML = '<p class="text-muted">No proofs found</p>'; return; }
+    snap.forEach(d => {
+      const p = d.data();
+      container.innerHTML += `<div class="neu-card">
+        <p style="font-weight:600;">${p.user_email || p.email || 'User'}</p>
+        <p style="font-size:12px;">Status: ${p.status || 'pending'}</p>
+        <p style="font-size:11px;color:var(--text-muted);">${p.link || p.url || ''}</p>
+      </div>`;
+    });
+  } catch (e) { container.innerHTML = '<p class="text-muted">No proofs data found</p>'; }
 };
 </script>
 </body>
